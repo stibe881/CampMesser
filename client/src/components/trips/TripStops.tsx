@@ -24,6 +24,7 @@ import {
   Star,
   Tent,
   Trash2,
+  Wand2,
   X,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -37,7 +38,8 @@ import { useI18n } from "@/i18n";
 import { fmtShort } from "@/lib/dateFormat";
 import { useTodayIso } from "@/lib/useTodayIso";
 import { searchPlaces, type PlaceResult } from "@/lib/placeSearch";
-import { routeOrEstimate } from "@/lib/routing";
+import { fetchDistanceMatrix, routeOrEstimate } from "@/lib/routing";
+import { optimizeStopOrder } from "@shared/routing";
 import TripStagesOfflinePack from "@/components/trips/TripStagesOfflinePack";
 import WeatherIcon from "@/components/weather/WeatherIcon";
 import { shiftIsoDay } from "@shared/localDate";
@@ -267,6 +269,57 @@ export default function TripStops({
     } catch {
       toast.error(t.common.saveFailed);
     } finally {
+      void invalidate();
+    }
+  };
+
+  /**
+   * Kürzeste Runde (#627): OSRM-Distanzmatrix über alle Etappen mit
+   * Koordinaten, dann Nearest-Neighbour + 2-opt (shared/routing.ts). Die
+   * ERSTE Etappe bleibt der Start. Die neue Reihenfolge wird über die
+   * Daten verkettet: jede Etappe behält ihre Nächtezahl und beginnt, wo
+   * die vorherige endet – so sortiert die Liste (nach Datum) automatisch.
+   */
+  const [optimizing, setOptimizing] = useState(false);
+  const optimizeOrder = async () => {
+    setOptimizing(true);
+    try {
+      const matrix = await fetchDistanceMatrix(
+        mapStops.map(stop => ({ lat: stop.latitude, lon: stop.longitude })),
+        "car"
+      );
+      if (matrix.every(row => row.every(cell => cell == null))) {
+        toast.error(ts.optimizeFailed);
+        return;
+      }
+      const order = optimizeStopOrder(matrix);
+      if (order.every((stopIndex, position) => stopIndex === position)) {
+        toast.success(ts.optimizeAlready);
+        return;
+      }
+      const preview = order
+        .map(stopIndex => mapStops[stopIndex].name)
+        .join(" → ");
+      if (!(await ask({ title: ts.optimizeConfirm, description: preview }))) {
+        return;
+      }
+      let cursor = mapStops[0].endDate;
+      for (let position = 1; position < order.length; position++) {
+        const stop = mapStops[order[position]];
+        const nights = Math.max(0, isoDayDiff(stop.startDate, stop.endDate));
+        const endDate = shiftIsoDay(cursor, nights);
+        await utils.client.trips.stops.update.mutate({
+          id: stop.id,
+          startDate: cursor,
+          endDate,
+        });
+        cursor = endDate;
+      }
+      toast.success(ts.optimizeDone);
+    } catch {
+      toast.error(ts.optimizeFailed);
+    } finally {
+      setOptimizing(false);
       void invalidate();
     }
   };
@@ -663,17 +716,33 @@ export default function TripStops({
               )}
 
               {editing === null ? (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={startNew}
-                  disabled={stops.length >= MAX_TRIP_STOPS}
-                >
-                  <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
-                  {stops.length >= MAX_TRIP_STOPS
-                    ? ts.maxReached(MAX_TRIP_STOPS)
-                    : ts.addButton}
-                </Button>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={startNew}
+                    disabled={stops.length >= MAX_TRIP_STOPS}
+                  >
+                    <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                    {stops.length >= MAX_TRIP_STOPS
+                      ? ts.maxReached(MAX_TRIP_STOPS)
+                      : ts.addButton}
+                  </Button>
+                  {/* Kürzeste Runde (#627): nur wenn ALLE Etappen
+                      Koordinaten haben – sonst würde ein Teil der Reise
+                      unsortiert zurückbleiben. */}
+                  {mapStops.length >= 3 && mapStops.length === stops.length && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={optimizing}
+                      onClick={() => void optimizeOrder()}
+                    >
+                      <Wand2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                      {optimizing ? t.common.loading : ts.optimizeButton}
+                    </Button>
+                  )}
+                </div>
               ) : (
                 <div className="space-y-2 rounded-lg border border-border p-3">
                   <p className="text-sm font-semibold">

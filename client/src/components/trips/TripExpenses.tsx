@@ -95,8 +95,12 @@ import { csvFileName, expensesToCsv } from "@shared/expensesCsv";
 import {
   DEFAULT_CONSUMPTION_L100,
   DEFAULT_FUEL_PRICE_RAPPEN,
+  TOLL_COUNTRIES,
   fuelCost,
+  tollCost,
+  tollRateFor,
 } from "@shared/fuelCost";
+import { findCountryRules } from "@/data/roadRules";
 import { parseKwhInput, powerMeterCost } from "@shared/powerMeter";
 import { averageConsumptionL100 } from "@shared/fuelLog";
 import {
@@ -217,6 +221,8 @@ export default function TripExpenses({
     rappenToInput(DEFAULT_FUEL_PRICE_RAPPEN)
   );
   const [fuelRoundTrip, setFuelRoundTrip] = useState(true);
+  /** Streckenmaut-Land (#638); "" = keine Maut rechnen. */
+  const [fuelTollCountry, setFuelTollCountry] = useState("");
   /** Stromzähler (#442): Stand Ankunft/Abreise + Preis pro kWh. */
   const [powerOpen, setPowerOpen] = useState(false);
   const [power, setPower] = useState(() => {
@@ -587,6 +593,19 @@ export default function TripExpenses({
     pricePerLiterRappen: parseChfInput(fuelPrice) ?? 0,
     roundTrip: fuelRoundTrip,
   });
+  /**
+   * Streckenmaut-Schätzung (#638): grober Durchschnitts-Satz pro
+   * Autobahn-km über die ganze Strecke – Grössenordnung, kein Beleg.
+   */
+  const fuelTollRate = fuelTollCountry ? tollRateFor(fuelTollCountry) : null;
+  const fuelTollRappen =
+    fuelTollRate !== null
+      ? tollCost({
+          tollKm: Number(fuelKm.replace(",", ".")) || 0,
+          ratePerKmRappen: fuelTollRate,
+          roundTrip: fuelRoundTrip,
+        })
+      : 0;
 
   /**
    * Ergebnis in die Reisekasse übernehmen: Das Formular wird VORAUSGEFÜLLT
@@ -599,12 +618,14 @@ export default function TripExpenses({
       return;
     }
     setEditing("neu");
-    setAmount(rappenToInput(fuelResult.rappen));
+    // Maut-Schätzung (#638) kommt mit in den Betrag, wenn ein Land gewählt ist
+    setAmount(rappenToInput(fuelResult.rappen + fuelTollRappen));
     // Der Fahrtkosten-Rechner rechnet in CHF – die Formular-Währung passt sich an
     setCurrency("CHF");
     setCategory("sprit");
     setDescription(
-      t.tripExpenses.fuelDescription(Math.round(fuelResult.totalKm))
+      t.tripExpenses.fuelDescription(Math.round(fuelResult.totalKm)) +
+        (fuelTollRappen > 0 ? ` ${t.tripExpenses.fuelTollSuffix}` : "")
     );
     setDay(defaultDay);
     setPaidBy(
@@ -1235,11 +1256,51 @@ export default function TripExpenses({
                           />
                           {t.tripExpenses.fuelRoundTrip}
                         </label>
+                        {/* Streckenmaut (#638): Länder mit km-Maut –
+                            Vignetten-Länder stehen im Länder-Nachschlage-
+                            werk (#228) und fehlen hier bewusst. */}
+                        <div className="flex flex-wrap items-center gap-2">
+                          <label
+                            className="text-xs text-muted-foreground"
+                            htmlFor={`fuel-toll-${tripId}`}
+                          >
+                            {t.tripExpenses.fuelTollLabel}
+                          </label>
+                          <select
+                            id={`fuel-toll-${tripId}`}
+                            className="h-8 rounded-md border border-input bg-background px-2 text-sm"
+                            value={fuelTollCountry}
+                            onChange={e => setFuelTollCountry(e.target.value)}
+                          >
+                            <option value="">
+                              {t.tripExpenses.fuelTollNone}
+                            </option>
+                            {TOLL_COUNTRIES.map(entry => {
+                              const info = findCountryRules(entry.code);
+                              return (
+                                <option key={entry.code} value={entry.code}>
+                                  {info
+                                    ? `${info.flag} ${pick(info.name, lang)}`
+                                    : entry.code}
+                                </option>
+                              );
+                            })}
+                          </select>
+                        </div>
                         <p className="text-sm">
                           {t.tripExpenses.fuelResult(
                             Math.round(fuelResult.totalKm),
                             fuelResult.liters.toFixed(1),
                             money(fuelResult.rappen)
+                          )}
+                          {fuelTollRappen > 0 && (
+                            <>
+                              {" "}
+                              {t.tripExpenses.fuelTollLine(
+                                money(fuelTollRappen),
+                                money(fuelResult.rappen + fuelTollRappen)
+                              )}
+                            </>
                           )}
                         </p>
                         <Button

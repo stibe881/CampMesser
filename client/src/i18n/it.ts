@@ -958,6 +958,7 @@ export const it: Translation = {
     gearDialogDescription:
       "Riprendi un suggerimento oppure crea un'attività personalizzata con intervallo.",
     gearSuggestionsLabel: "Suggerimenti",
+    vehicleSuggestionsLabel: "Veicolo e roulotte",
     gearSuggestionAria: (title: string) =>
       `Riprendi il suggerimento «${title}»`,
     gearTitleLabel: "Attività",
@@ -1208,6 +1209,16 @@ export const it: Translation = {
     rowComfort: "Igiene personale confortevole",
     rowReserve: "Riserva di sicurezza (20 %)",
     rowTotal: "Totale consigliato",
+    tanksTitle: "Tracker acqua chiara e grigia",
+    tanksHint:
+      "Inserisci capienze e livelli dei serbatoi \u2013 il fabbisogno giornaliero qui sopra dice quanto durano. Salvato su questo dispositivo.",
+    tanksFresh: "Acqua chiara",
+    tanksGrey: "Acque grigie",
+    tanksSizeAria: (tank: string) => `Capienza serbatoio ${tank} in litri`,
+    tanksLevelAria: (tank: string) => `Livello ${tank}`,
+    tanksLevel: (pct: number, liters: number) => `${pct} % \u2248 ${liters} l`,
+    tanksForecast: (daily: string, freshDays: string, greyDays: string) =>
+      `Con \u2248 ${daily} l al giorno l\u2019acqua chiara dura ancora \u2248 ${freshDays} giorni; il serbatoio delle acque grigie sar\u00e0 pieno tra \u2248 ${greyDays} giorni.`,
     footnote:
       "Nota: valori indicativi per un clima temperato. In caso di ondate di caldo, altitudine o lavoro fisico pianifica con più margine. Il valore per i cani vale per cani di taglia media (ca. 20 kg). Usa l'acqua dei ruscelli solo filtrata o bollita.",
   },
@@ -1589,6 +1600,16 @@ export const it: Translation = {
     sourceSpot: (name: string) => `piazzola «${name}»`,
     sourceLocation: "la tua posizione",
     rangeSelfSufficient: "Illimitata – il solare copre il consumo",
+    ampereTitle: "Aiuto ampere alla piazzola",
+    ampereHint:
+      "Regger\u00e0 il fusibile della colonnina? Tocca gli apparecchi \u2013 calcolato a 230 V con potenze tipiche.",
+    ampereFuse: "Fusibile della colonnina",
+    ampereDevices: "Cosa funziona in contemporanea?",
+    ampereResult: (w: number, a: number, limitW: number, fuse: number) =>
+      `${w} W (\u2248 ${a} A) su ${limitW} W a ${fuse} A.`,
+    ampereOk: (margin: number) => `Riserva: ${margin} W.`,
+    ampereOver: (over: number) =>
+      `${over} W di troppo \u2013 il fusibile salta.`,
     rangeOverMax: (d: number) => `> ${d} giorni`,
     rangeDays: (d: number) => `${d} giorni`,
     rangeHours: (h: number) => `${h} h`,
@@ -2056,6 +2077,14 @@ export const it: Translation = {
     stageAdded: (trip: string) =>
       `Tappa aggiunta \u2013 in \u00ab${trip}\u00bb`,
     savedPlacesListTitle: "I tuoi luoghi salvati",
+    searchPlaceholder: "Cerca un luogo \u2013 ad es. Bellinzona",
+    searchAria: "Cerca un luogo sulla mappa",
+    importButton: "Importa GPX/KML",
+    importHint: "I punti del file diventano luoghi salvati.",
+    importDone: (n: number) =>
+      n === 1 ? "1 luogo importato." : `${n} luoghi importati.`,
+    importNone: "Nessun punto trovato nel file.",
+    importFailed: "Importazione non riuscita.",
     savedPlacesListAria: (name: string) =>
       `Mostra il luogo ${name} sulla mappa`,
     savedPlacesDistance: (km: string) => `${km} da casa`,
@@ -2875,6 +2904,9 @@ export const it: Translation = {
     hubCreateFailed: "Impossibile creare il link",
     hubLinkCreated: "Link dell'hub creato",
     hubStopShare: "Termina la condivisione",
+    reportLinkHint:
+      "Link del rapporto (stesso token): diario, foto e tappe come pagina ricordo – da inviare ai parenti.",
+    reportLinkCopy: "Copia il link del rapporto",
     hubStopped: "Condivisione terminata – il link non è più valido",
     hubStopFailed: "Terminazione non riuscita",
     hubQrAlt: name => `Codice QR del link dell'hub per ${name}`,
@@ -2916,7 +2948,17 @@ export const it: Translation = {
     duplicateSubmit: "Duplica",
     duplicated: "Viaggio duplicato – lo trovi tra i soggiorni pianificati",
     duplicateFailed: "Duplicazione non riuscita",
+    saveTemplateConfirm: "Salvare questo viaggio come modello personale?",
+    saveTemplateAria: (name: string) => `Salva il viaggio ${name} come modello`,
+    templateSaved:
+      "Salvato come modello \u2013 lo trovi sotto \u00abDa modello\u00bb.",
     journalTitle: "Diario di viaggio",
+    timelineTitle: "Cronologia",
+    timelineToggleAria: (name: string) =>
+      `Apri o chiudi la cronologia di ${name}`,
+    timelineEmpty:
+      "Ancora niente da raccontare – diario, foto e spese appariranno qui appena ci saranno.",
+    timelineArrival: (name: string) => `Arrivo a ${name}`,
     journalToggleAria: (name: string) =>
       `Apri o chiudi il diario di viaggio di ${name}`,
     journalHint:
@@ -2983,6 +3025,11 @@ export const it: Translation = {
     fuelConsumptionLabel: "Consumo (l/100 km)",
     fuelPriceLabel: "Prezzo (CHF/l)",
     fuelRoundTrip: "Andata e ritorno",
+    fuelTollLabel: "Pedaggio",
+    fuelTollNone: "Nessun pedaggio",
+    fuelTollLine: (toll: string, total: string) =>
+      `Pedaggio \u2248 ${toll} \u2013 in totale ${total}.`,
+    fuelTollSuffix: "stima pedaggio inclusa",
     fuelResult: (km: number, liters: string, amount: string) =>
       `${km} km · ${liters} l · ${amount}`,
     fuelApply: "Riprendere nella cassa",
@@ -3139,6 +3186,11 @@ export const it: Translation = {
     legEstimated: "stima in linea d\u2019aria",
     legTotal: (km: string, duration: string) =>
       `Intero giro: \u2248 ${km} \u00b7 ${duration}`,
+    optimizeButton: "Giro pi\u00f9 corto",
+    optimizeConfirm: "Riordinare le tappe lungo il percorso pi\u00f9 corto?",
+    optimizeAlready: "L\u2019ordine \u00e8 gi\u00e0 il pi\u00f9 corto.",
+    optimizeDone: "Tappe riordinate \u2013 ognuna mantiene le sue notti.",
+    optimizeFailed: "Riordino non riuscito \u2013 riprova pi\u00f9 tardi.",
     offlineDownloadAria: (trip: string) =>
       `Scarica la mappa offline del giro ${trip}`,
     offlineDeleteAria: (trip: string) =>
@@ -3181,6 +3233,19 @@ export const it: Translation = {
     contactParcel: "Piazzola",
     packListNotShared:
       "Questa lista bagagli al momento non è condivisa separatamente – solo visualizzazione, non si può spuntare.",
+    footer:
+      "Condiviso con ReiseKompass – la tua bussola per vacanze, campeggio e gite.",
+  },
+  sharedReport: {
+    kicker: "ReiseKompass · Rapporto di viaggio",
+    notFoundTitle: "Questo rapporto non esiste più.",
+    notFoundText:
+      "Il link è stato terminato o è scaduto. Chiedi un nuovo link a chi lo ha condiviso.",
+    coverAlt: (name: string) => `Immagine di copertina del viaggio ${name}`,
+    ratingAria: (n: number) => `Valutazione: ${n} stelle su 5`,
+    journalPhotoAlt: (day: string) => `Foto del giorno del ${day}`,
+    photosTitle: "Foto",
+    photoAlt: (n: number, name: string) => `Foto ${n} del viaggio ${name}`,
     footer:
       "Condiviso con ReiseKompass – la tua bussola per vacanze, campeggio e gite.",
   },
@@ -4501,6 +4566,13 @@ export const it: Translation = {
     withMenu: "Precompilare il menu",
     menuNote:
       "Vengono precompilate le cene di ogni notte e la colazione dal secondo giorno. I pranzi restano liberi – in viaggio a mezzogiorno si mangia quello che capita.",
+    ownSection: "I tuoi modelli",
+    ownStages: (n: number) => (n === 1 ? "1 tappa" : `${n} tappe`),
+    ownApply: "Applica",
+    ownCreated: "Viaggio creato dal tuo modello.",
+    ownDeleteAria: (name: string) => `Elimina il modello ${name}`,
+    ownDeleteConfirm: (name: string) =>
+      `Eliminare il modello \u00ab${name}\u00bb?`,
     create: "Crea il viaggio",
     created: (end: string, meals: number, list: boolean) =>
       `Viaggio creato fino al ${end}${list ? ", lista bagagli creata" : ""}${
@@ -5696,6 +5768,12 @@ export const it: Translation = {
     ingredientsTitle: "Ingredienti",
     stepsTitle: "Preparazione",
     tipTitle: "Consiglio",
+    notesTitle: "Le mie note di cucina",
+    notesPlaceholder:
+      "ad es. doppio curry, ai bambini \u00e8 piaciuto \u2013 visibile solo a te",
+    notesAria: (name: string) => `Nota di cucina per ${name}`,
+    lastCooked: (date: string) => `Cucinato l\u2019ultima volta: ${date}`,
+    cookedToday: "Cucinato oggi",
     deleteConfirm: (name: string) => `Eliminare davvero la ricetta «${name}»?`,
     favoritesFilter: "Preferiti",
     favoriteAria: (name: string) => `Salva ${name} tra i preferiti`,
@@ -5889,6 +5967,12 @@ export const it: Translation = {
     addPlaceholderCooled: "ad es. pomodori, formaggio, fagioli …",
     addPlaceholderDry: "ad es. scatola di ravioli, spaghetti, caffè …",
     addNameAria: "Aggiungi alimento",
+    scanAria: "Scansiona il codice a barre",
+    scanNoCode:
+      "Nessun codice riconosciuto \u2013 foto pi\u00f9 vicina e nitida.",
+    scanUnknown: (code: string) =>
+      `Prodotto ${code} non trovato su OpenFoodFacts.`,
+    scanFailed: "Scansione non riuscita.",
     expiryAria: "Termine minimo di conservazione (facoltativo)",
     submitAria: "Salva alimento",
     addFailed: "La voce non è stata salvata",
@@ -6311,6 +6395,10 @@ export const it: Translation = {
     lexiconQuizBadge: "dal lessico",
     lexiconQuizHint:
       "Viene ricomposto dal lessico della natura a ogni avvio – giocabile anche in duello.",
+    countryQuizTitle: "Quiz dei paesi",
+    countryQuizAgeHint: "da circa 6 anni",
+    countryQuizHint:
+      "Bandiere dal prontuario dei paesi \u2013 rimescolate a ogni partita.",
     startQuizAria: (title: string) => `Avvia il quiz ${title}`,
     questionCount: (n: number) => `${n} domande`,
     progressAria: (done: number, total: number) =>
@@ -6869,10 +6957,18 @@ export const it: Translation = {
   },
   stats: {
     countriesTitle: "Paesi visitati",
+    visitedMapTitle: "Dove siamo gi\u00e0 stati",
+    visitedMapLink: "Alla mappa",
+    visitedMapAria: "Mappa dei luoghi visitati",
+    visitedMapCount: (n: number) =>
+      n === 1 ? "1 luogo visitato" : `${n} luoghi visitati`,
     countriesUnassigned: (n: number) =>
       n === 1
         ? "1 viaggio senza paese riconoscibile (il luogo non ne indica)."
         : `${n} viaggi senza paese riconoscibile (il luogo non ne indica).`,
+    countryCostsTitle: "Costi di viaggio per paese",
+    countryCostsUnassigned: (amount: string) =>
+      `${amount} senza paese riconoscibile.`,
     inventoryValueTitle: "Valore dell'inventario",
     inventoryLink: "All'inventario",
     inventoryValueHint: (n: number) =>

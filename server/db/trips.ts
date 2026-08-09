@@ -34,6 +34,8 @@ import {
   tripExpenses,
   tripStops,
   InsertTripStop,
+  tripTemplatesCustom,
+  InsertTripTemplateCustom,
   tripGuestbook,
   tripInvites,
   tripJournal,
@@ -1296,4 +1298,48 @@ export async function deleteTripStop(id: number) {
 export async function deleteAllTripStopsForTrip(tripId: number) {
   const db = requireDb(await getDb());
   await db.delete(tripStops).where(eq(tripStops.tripId, tripId));
+}
+
+/**
+ * Eigene Reise-Vorlagen (#628): Dauer, Art und Etappen einer gelungenen
+ * Reise als wiederverwendbare Vorlage – gleiche Idee wie die eigenen
+ * Packvorlagen (#78).
+ */
+export async function getTripTemplatesCustom(userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(tripTemplatesCustom)
+    .where(eq(tripTemplatesCustom.userId, userId))
+    .orderBy(asc(tripTemplatesCustom.name));
+}
+export async function getTripTemplateCustom(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(tripTemplatesCustom)
+    .where(
+      and(
+        eq(tripTemplatesCustom.id, id),
+        eq(tripTemplatesCustom.userId, userId)
+      )
+    )
+    .limit(1);
+  return rows[0] ?? null;
+}
+export async function addTripTemplateCustom(data: InsertTripTemplateCustom) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(tripTemplatesCustom).values(data);
+  return result.insertId;
+}
+export async function deleteTripTemplateCustom(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(tripTemplatesCustom)
+    .where(
+      and(
+        eq(tripTemplatesCustom.id, id),
+        eq(tripTemplatesCustom.userId, userId)
+      )
+    );
 }

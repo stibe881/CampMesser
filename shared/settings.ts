@@ -73,6 +73,8 @@ export const SYNCED_SETTING_KEYS = [
   "savedPlaceColorNames",
   /** Schriftgrösse der App (#611): "s" | "m" | "l" */
   "fontScale",
+  /** Koch-Notizen & «zuletzt gekocht» pro Rezept (#635) */
+  "recipeNotes",
 ] as const;
 
 export type SyncedSettingKey = (typeof SYNCED_SETTING_KEYS)[number];

@@ -650,30 +650,70 @@ function stageMoveAlertText(name: string, lang: Language) {
   return texts[lang] ?? texts.de;
 }
 
+/** Wetter am nächsten Etappenort (#630) für die Zusatz-Zeile im Push. */
+export interface StageMoveWeather {
+  tMaxC: number;
+  precipitationMm: number;
+}
+
+/** Wetter-Zeile des Etappen-Hinweises (#630) in vier Sprachen. */
+export function stageMoveWeatherLine(
+  weather: StageMoveWeather,
+  lang: Language
+): string {
+  const t = Math.round(weather.tMaxC);
+  const mm = Math.round(weather.precipitationMm);
+  const rainy = weather.precipitationMm >= 1;
+  const texts: Record<Language, string> = {
+    de: `Wetter am Ziel: ${t} °C${rainy ? `, ${mm} mm Regen` : ", trocken"}.`,
+    fr: `Météo à destination : ${t} °C${rainy ? `, ${mm} mm de pluie` : ", au sec"}.`,
+    it: `Meteo a destinazione: ${t} °C${rainy ? `, ${mm} mm di pioggia` : ", asciutto"}.`,
+    en: `Weather at the destination: ${t} °C${rainy ? `, ${mm} mm of rain` : ", dry"}.`,
+  };
+  return texts[lang] ?? texts.de;
+}
+
+/**
+ * Die MORGEN beginnende Etappe einer laufenden Reise – bei mehreren
+ * Wechseln gewinnt die kleinste Reise-Id. Herausgelöst (#630), damit der
+ * Cron an die Koordinaten der Ziel-Etappe kommt, bevor er den Text baut.
+ */
+export function nextStageMove<
+  T extends { tripId: number; name: string; startDate: string },
+>(stops: readonly T[], activeTripIds: ReadonlySet<number>, today: string) {
+  const tomorrow = shiftIsoDay(today, 1);
+  return (
+    stops
+      .filter(
+        stop => activeTripIds.has(stop.tripId) && stop.startDate === tomorrow
+      )
+      .sort((a, b) => a.tripId - b.tripId)[0] ?? null
+  );
+}
+
 /**
  * Etappen-Vorabend-Hinweis (#579): Beginnt MORGEN eine Etappe einer
  * laufenden Reise, erinnert der Abend-Push ans Zusammenpacken – gleiche
  * Abend-Logik wie der Vorabend-Check, gleicher Kanal (der Pack-Check
- * hat Vorrang, wer beides hätte, bekommt den Pack-Check). Reine
- * Funktion für Tests; bei mehreren Wechseln gewinnt die kleinste
- * Reise-Id.
+ * hat Vorrang, wer beides hätte, bekommt den Pack-Check). Mit Wetter am
+ * Ziel (#630), wenn der Aufrufer eine Prognose mitgibt. Reine Funktion
+ * für Tests; bei mehreren Wechseln gewinnt die kleinste Reise-Id.
  */
 export function buildStageMoveAlert(
   stops: readonly { tripId: number; name: string; startDate: string }[],
   activeTripIds: ReadonlySet<number>,
   today: string,
-  lang: Language = "de"
+  lang: Language = "de",
+  weather: StageMoveWeather | null = null
 ): EvePackAlert | null {
-  const tomorrow = shiftIsoDay(today, 1);
-  const next = stops
-    .filter(
-      stop => activeTripIds.has(stop.tripId) && stop.startDate === tomorrow
-    )
-    .sort((a, b) => a.tripId - b.tripId)[0];
+  const next = nextStageMove(stops, activeTripIds, today);
   if (!next) return null;
   const text = stageMoveAlertText(next.name, lang);
   return {
     ...text,
+    body: weather
+      ? `${text.body} ${stageMoveWeatherLine(weather, lang)}`
+      : text.body,
     key: `stagemove:${next.tripId}:${next.startDate}`,
     url: "/heute",
   };
@@ -1662,14 +1702,50 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
         set.add(trip.id);
         activeByUser.set(trip.userId, set);
       }
-      activeByUser.forEach((tripIds, userId) => {
+      // Wetter am Ziel (#630): eine Prognose je Ziel-Etappe, gecacht über
+      // die Koordinaten – ohne Netz bleibt der Hinweis schlicht ohne
+      // Wetter-Zeile.
+      const stageWeatherCache = new Map<string, StageMoveWeather | null>();
+      const stageWeatherFor = async (
+        stop: (typeof stops)[number]
+      ): Promise<StageMoveWeather | null> => {
+        if (stop.latitude == null || stop.longitude == null) return null;
+        const cacheKey = `${stop.latitude.toFixed(3)},${stop.longitude.toFixed(3)}`;
+        if (stageWeatherCache.has(cacheKey)) {
+          return stageWeatherCache.get(cacheKey) ?? null;
+        }
+        let weather: StageMoveWeather | null = null;
+        try {
+          const days = await dailyTurnFor(stop.latitude, stop.longitude);
+          const day = days.find(entry => entry.date === stop.startDate);
+          if (day && Number.isFinite(day.tempMaxC)) {
+            weather = {
+              tMaxC: day.tempMaxC,
+              precipitationMm: day.precipitationSumMm,
+            };
+          }
+        } catch {
+          weather = null;
+        }
+        stageWeatherCache.set(cacheKey, weather);
+        return weather;
+      };
+      for (const [userId, tripIds] of Array.from(activeByUser)) {
+        const nextStop = nextStageMove(stops, tripIds, today);
+        const weather = nextStop ? await stageWeatherFor(nextStop) : null;
         for (const lang of langsOf(userId)) {
           const mapKey = alertFor(userId, lang);
           if (evePackAlertByUser.has(mapKey)) continue;
-          const alert = buildStageMoveAlert(stops, tripIds, today, lang);
+          const alert = buildStageMoveAlert(
+            stops,
+            tripIds,
+            today,
+            lang,
+            weather
+          );
           if (alert) evePackAlertByUser.set(mapKey, alert);
         }
-      });
+      }
 
       // Feiertags-Vorwarnung (#606): Morgen Feiertag im Reiseland? Land
       // aus Titel/Ort/Platz/Etappen geraten (shared/countryGuess), Feier-

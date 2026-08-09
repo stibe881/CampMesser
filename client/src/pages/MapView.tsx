@@ -8,13 +8,25 @@
 import { useMemo, useRef, useState } from "react";
 import { fmtLong } from "@/lib/dateFormat";
 import { Link, useSearch } from "wouter";
-import { Camera, Loader2, MapPin, Star, Trash2, X } from "lucide-react";
+import {
+  Camera,
+  Loader2,
+  MapPin,
+  Search,
+  Star,
+  Trash2,
+  Upload,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 import { resizeImageForUpload } from "@/lib/imageResize";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { searchPlaces, type PlaceResult } from "@/lib/placeSearch";
+import { parsePlacesFile } from "@/lib/placeImport";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
@@ -183,6 +195,56 @@ export default function MapViewPage() {
     lon: number;
     nonce: number;
   } | null>(null);
+  // Ortssuche auf der grossen Karte (#631): gleiche Geocoding-Quelle wie
+  // das Reise-Formular (#465) – ein Tipp auf den Treffer fährt die Karte
+  // hin, von dort übernimmt der bestehende Karten-Klick («Platz anlegen»).
+  const [placeSearchTerm, setPlaceSearchTerm] = useState("");
+  const [placeSearchResults, setPlaceSearchResults] = useState<
+    PlaceResult[] | null
+  >(null);
+  const [placeSearching, setPlaceSearching] = useState(false);
+  const runPlaceSearch = async () => {
+    const term = placeSearchTerm.trim();
+    if (!term) return;
+    setPlaceSearching(true);
+    try {
+      setPlaceSearchResults(await searchPlaces(term, lang));
+    } catch {
+      toast.error(t.trips.locationSearchFailed);
+    } finally {
+      setPlaceSearching(false);
+    }
+  };
+  // GPX/KML-Import (#632): Wegpunkte aus der Datei werden zu Merkorten –
+  // ein Aufruf je Punkt über dieselbe add-Mutation wie der Karten-Klick.
+  const importInputRef = useRef<HTMLInputElement | null>(null);
+  const [importing, setImporting] = useState(false);
+  const handleImportFile = async (files: FileList | null) => {
+    const file = files?.[0];
+    if (importInputRef.current) importInputRef.current.value = "";
+    if (!file) return;
+    try {
+      const places = parsePlacesFile(await file.text());
+      if (places.length === 0) {
+        toast.error(t.mapView.importNone);
+        return;
+      }
+      setImporting(true);
+      for (const place of places) {
+        await utils.client.savedPlaces.add.mutate({
+          name: place.name,
+          latitude: place.latitude,
+          longitude: place.longitude,
+        });
+      }
+      await utils.savedPlaces.list.invalidate();
+      toast.success(t.mapView.importDone(places.length));
+    } catch {
+      toast.error(t.mapView.importFailed);
+    } finally {
+      setImporting(false);
+    }
+  };
   const utils = trpc.useUtils();
   const removePlaceMutation = trpc.savedPlaces.remove.useMutation({
     onSuccess: () => {
@@ -361,6 +423,66 @@ export default function MapViewPage() {
               </CardContent>
             </Card>
           )}
+          {/* Ortssuche (#631): Karte zu einem gesuchten Ort fahren */}
+          <form
+            className="mb-3 flex gap-2"
+            onSubmit={e => {
+              e.preventDefault();
+              void runPlaceSearch();
+            }}
+          >
+            <Input
+              value={placeSearchTerm}
+              onChange={e => setPlaceSearchTerm(e.target.value)}
+              placeholder={t.mapView.searchPlaceholder}
+              aria-label={t.mapView.searchAria}
+            />
+            <Button
+              type="submit"
+              variant="outline"
+              disabled={!placeSearchTerm.trim() || placeSearching}
+            >
+              {placeSearching ? (
+                <Loader2
+                  className="mr-1.5 h-4 w-4 animate-spin"
+                  aria-hidden="true"
+                />
+              ) : (
+                <Search className="mr-1.5 h-4 w-4" aria-hidden="true" />
+              )}
+              {t.trips.locationSearchButton}
+            </Button>
+          </form>
+          {placeSearchResults !== null &&
+            (placeSearchResults.length === 0 ? (
+              <p className="mb-3 text-sm text-muted-foreground">
+                {t.trips.locationSearchNoResults}
+              </p>
+            ) : (
+              <div className="mb-3 flex flex-wrap gap-1.5">
+                {placeSearchResults.map(place => (
+                  <button
+                    key={place.id}
+                    type="button"
+                    onClick={() => {
+                      setFocusPoint({
+                        lat: place.latitude,
+                        lon: place.longitude,
+                        nonce: Date.now(),
+                      });
+                      setPlaceSearchResults(null);
+                      setPlaceSearchTerm(place.name);
+                    }}
+                    className="rounded-full bg-muted px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    {place.name}
+                    {place.region && (
+                      <span className="text-xs"> · {place.region}</span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            ))}
           <SpotsMap
             spots={spotPins}
             targets={targets}
@@ -373,6 +495,38 @@ export default function MapViewPage() {
             stageRoutes={stageRoutes}
             focusPoint={focusPoint}
           />
+
+          {/* GPX/KML-Import (#632): Wegpunkte als Merkorte übernehmen */}
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <input
+              ref={importInputRef}
+              type="file"
+              accept=".gpx,.kml,application/gpx+xml,application/vnd.google-earth.kml+xml"
+              className="hidden"
+              aria-hidden="true"
+              tabIndex={-1}
+              onChange={e => void handleImportFile(e.target.files)}
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={importing}
+              onClick={() => importInputRef.current?.click()}
+            >
+              {importing ? (
+                <Loader2
+                  className="mr-1.5 h-4 w-4 animate-spin"
+                  aria-hidden="true"
+                />
+              ) : (
+                <Upload className="mr-1.5 h-4 w-4" aria-hidden="true" />
+              )}
+              {t.mapView.importButton}
+            </Button>
+            <span className="text-xs text-muted-foreground">
+              {t.mapView.importHint}
+            </span>
+          </div>
 
           {/* Merkorte-Verwaltungsliste (#563): Bei vielen Sternen skaliert
               die Karte allein nicht mehr – hier stehen alle mit Farbe,

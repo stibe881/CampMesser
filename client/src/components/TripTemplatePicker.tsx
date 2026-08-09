@@ -14,6 +14,7 @@
 import { useState } from "react";
 import {
   Backpack,
+  Bookmark,
   Building2,
   CalendarDays,
   CalendarRange,
@@ -21,11 +22,13 @@ import {
   LayoutTemplate,
   Route,
   Sun,
+  Trash2,
   Umbrella,
   type LucideIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { useConfirm } from "@/components/ConfirmDialog";
 import {
   Dialog,
   DialogContent,
@@ -74,6 +77,7 @@ export default function TripTemplatePicker({
   const { lang, t } = useI18n();
   const tt = t.tripTemplates;
   const utils = trpc.useUtils();
+  const ask = useConfirm();
 
   const [open, setOpen] = useState(false);
   const [templateId, setTemplateId] = useState(tripTemplates[0].id);
@@ -86,6 +90,25 @@ export default function TripTemplatePicker({
   const template =
     tripTemplates.find(x => x.id === templateId) ?? tripTemplates[0];
   const endDate = templateEndDate(startDate, template.nights);
+
+  // Eigene Vorlagen (#628): gespeicherte Reisen als Ein-Klick-Vorlage –
+  // angewendet mit dem oben gewählten Anreisetag.
+  const ownQuery = trpc.trips.ownTemplates.list.useQuery(undefined, {
+    enabled: open,
+    staleTime: 60_000,
+  });
+  const ownCreateMutation = trpc.trips.ownTemplates.createTrip.useMutation({
+    onSuccess: () => {
+      void utils.trips.list.invalidate();
+      setOpen(false);
+      toast.success(tt.ownCreated);
+    },
+    onError: error => toast.error(error.message || tt.createFailed),
+  });
+  const ownRemoveMutation = trpc.trips.ownTemplates.remove.useMutation({
+    onSuccess: () => void utils.trips.ownTemplates.list.invalidate(),
+    onError: () => toast.error(t.common.actionFailed),
+  });
 
   const createMutation = trpc.trips.createFromTemplate.useMutation({
     onSuccess: result => {
@@ -194,6 +217,66 @@ export default function TripTemplatePicker({
                 );
               })}
             </div>
+
+            {/* Eigene Vorlagen (#628): gespeicherte Reisen – «Anwenden»
+                nutzt den unten gewählten Anreisetag. */}
+            {(ownQuery.data ?? []).length > 0 && (
+              <div>
+                <p className="mb-1.5 text-sm font-semibold">{tt.ownSection}</p>
+                <ul className="space-y-1.5">
+                  {(ownQuery.data ?? []).map(own => (
+                    <li
+                      key={own.id}
+                      className="flex items-center gap-2 rounded-xl border border-border bg-card p-3"
+                    >
+                      <Bookmark
+                        className="h-4 w-4 shrink-0 text-primary"
+                        aria-hidden="true"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold">
+                          {own.name}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {tt.nights(own.nights)}
+                          {own.stages.length > 0 &&
+                            ` · ${tt.ownStages(own.stages.length)}`}
+                        </p>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={ownCreateMutation.isPending}
+                        onClick={() =>
+                          ownCreateMutation.mutate({
+                            templateId: own.id,
+                            startDate,
+                          })
+                        }
+                      >
+                        {tt.ownApply}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 shrink-0 text-muted-foreground/60 hover:text-destructive"
+                        disabled={ownRemoveMutation.isPending}
+                        onClick={async () => {
+                          if (
+                            await ask({ title: tt.ownDeleteConfirm(own.name) })
+                          ) {
+                            ownRemoveMutation.mutate({ id: own.id });
+                          }
+                        }}
+                        aria-label={tt.ownDeleteAria(own.name)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             <div>
               <Label htmlFor="template-start">{tt.startLabel}</Label>

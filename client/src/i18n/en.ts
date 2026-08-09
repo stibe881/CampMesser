@@ -938,6 +938,7 @@ export const en: Translation = {
     gearDialogDescription:
       "Pick a suggestion or enter your own task with an interval.",
     gearSuggestionsLabel: "Suggestions",
+    vehicleSuggestionsLabel: "Vehicle & caravan",
     gearSuggestionAria: (title: string) => `Use suggestion “${title}”`,
     gearTitleLabel: "Task",
     gearTitlePlaceholder: "e.g. re-waterproof the tent",
@@ -1179,6 +1180,16 @@ export const en: Translation = {
     rowComfort: "Comfortable personal hygiene",
     rowReserve: "Safety reserve (20 %)",
     rowTotal: "Recommended total",
+    tanksTitle: "Fresh & grey water tracker",
+    tanksHint:
+      "Enter tank sizes and levels \u2013 the daily need above tells you how long they last. Stored on this device.",
+    tanksFresh: "Fresh water",
+    tanksGrey: "Grey water",
+    tanksSizeAria: (tank: string) => `${tank} tank size in litres`,
+    tanksLevelAria: (tank: string) => `${tank} level`,
+    tanksLevel: (pct: number, liters: number) => `${pct} % \u2248 ${liters} l`,
+    tanksForecast: (daily: string, freshDays: string, greyDays: string) =>
+      `At \u2248 ${daily} l per day the fresh water lasts \u2248 ${freshDays} more days; the grey tank is full in \u2248 ${greyDays} days.`,
     footnote:
       "Note: these are guide values for a temperate climate. Plan more generously for heat waves, high altitude or physical work. The dog value applies to medium-sized dogs (approx. 20 kg). Only use stream water filtered or boiled.",
   },
@@ -1558,6 +1569,15 @@ export const en: Translation = {
     sourceSpot: (name: string) => `pitch “${name}”`,
     sourceLocation: "your location",
     rangeSelfSufficient: "Unlimited – solar covers the consumption",
+    ampereTitle: "Pitch ampere helper",
+    ampereHint:
+      "Will the bollard fuse hold? Tap the appliances \u2013 calculated at 230 V with typical rated powers.",
+    ampereFuse: "Bollard fuse",
+    ampereDevices: "What runs at the same time?",
+    ampereResult: (w: number, a: number, limitW: number, fuse: number) =>
+      `${w} W (\u2248 ${a} A) of ${limitW} W at ${fuse} A.`,
+    ampereOk: (margin: number) => `Headroom: ${margin} W.`,
+    ampereOver: (over: number) => `${over} W too much \u2013 the fuse trips.`,
     rangeOverMax: (d: number) => `> ${d} days`,
     rangeDays: (d: number) => `${d} days`,
     rangeHours: (h: number) => `${h} h`,
@@ -2017,6 +2037,14 @@ export const en: Translation = {
     stageDialogEmpty: "No planned or running trip \u2013 create one first.",
     stageAdded: (trip: string) => `Stage added \u2013 in \u201c${trip}\u201d`,
     savedPlacesListTitle: "Your saved places",
+    searchPlaceholder: "Search a place \u2013 e.g. Bellinzona",
+    searchAria: "Search a place on the map",
+    importButton: "Import GPX/KML",
+    importHint: "Waypoints from the file become saved places.",
+    importDone: (n: number) =>
+      n === 1 ? "1 place imported." : `${n} places imported.`,
+    importNone: "No waypoints found in the file.",
+    importFailed: "Import failed.",
     savedPlacesListAria: (name: string) => `Show place ${name} on the map`,
     savedPlacesDistance: (km: string) => `${km} from home`,
     placePhotoAdd: (name: string) => `Add a photo to ${name}`,
@@ -2805,6 +2833,9 @@ export const en: Translation = {
     hubCreateFailed: "The link could not be created",
     hubLinkCreated: "Hub link created",
     hubStopShare: "Stop sharing",
+    reportLinkHint:
+      "Report link (same token): journal, photos and stages as a memory page – to send to family.",
+    reportLinkCopy: "Copy report link",
     hubStopped: "Sharing stopped – the link is no longer valid",
     hubStopFailed: "Stopping failed",
     hubQrAlt: name => `QR code of the trip hub link for ${name}`,
@@ -2845,7 +2876,17 @@ export const en: Translation = {
     duplicateSubmit: "Duplicate",
     duplicated: "Trip duplicated – you'll find it under planned stays",
     duplicateFailed: "Duplicating failed",
+    saveTemplateConfirm: "Save this trip as your own template?",
+    saveTemplateAria: (name: string) => `Save trip ${name} as a template`,
+    templateSaved:
+      "Saved as a template \u2013 find it under \u201cFrom template\u201d.",
     journalTitle: "Trip journal",
+    timelineTitle: "Timeline",
+    timelineToggleAria: (name: string) =>
+      `Expand or collapse the timeline of ${name}`,
+    timelineEmpty:
+      "Nothing to tell yet – journal, photos and expenses will appear here once they exist.",
+    timelineArrival: (name: string) => `Arrival in ${name}`,
     journalToggleAria: (name: string) =>
       `Expand or collapse the trip journal of ${name}`,
     journalHint:
@@ -2911,6 +2952,11 @@ export const en: Translation = {
     fuelConsumptionLabel: "Consumption (l/100 km)",
     fuelPriceLabel: "Price (CHF/l)",
     fuelRoundTrip: "There and back",
+    fuelTollLabel: "Road toll",
+    fuelTollNone: "No toll",
+    fuelTollLine: (toll: string, total: string) =>
+      `Toll \u2248 ${toll} \u2013 ${total} in total.`,
+    fuelTollSuffix: "incl. toll estimate",
     fuelResult: (km: number, liters: string, amount: string) =>
       `${km} km · ${liters} l · ${amount}`,
     fuelApply: "Add to the kitty",
@@ -3063,6 +3109,11 @@ export const en: Translation = {
     legEstimated: "estimated as the crow flies",
     legTotal: (km: string, duration: string) =>
       `Whole loop: \u2248 ${km} \u00b7 ${duration}`,
+    optimizeButton: "Shortest loop",
+    optimizeConfirm: "Reorder stages along the shortest route?",
+    optimizeAlready: "The order is already the shortest.",
+    optimizeDone: "Stages reordered \u2013 each keeps its nights.",
+    optimizeFailed: "Could not reorder \u2013 try again later.",
     offlineDownloadAria: (trip: string) =>
       `Download offline map for loop ${trip}`,
     offlineDeleteAria: (trip: string) => `Delete offline map for loop ${trip}`,
@@ -3105,6 +3156,19 @@ export const en: Translation = {
       "This packing list is currently not shared separately – view only, ticking off is not possible.",
     footer:
       "Shared with ReiseKompass – your compass for holidays, camping and day trips.",
+  },
+  sharedReport: {
+    kicker: "ReiseKompass · Trip report",
+    notFoundTitle: "This report no longer exists.",
+    notFoundText:
+      "The link was stopped or has expired. Ask the person who shared it for a new one.",
+    coverAlt: (name: string) => `Cover photo of the trip ${name}`,
+    ratingAria: (n: number) => `Rating: ${n} out of 5 stars`,
+    journalPhotoAlt: (day: string) => `Photo of the day, ${day}`,
+    photosTitle: "Photos",
+    photoAlt: (n: number, name: string) => `Photo ${n} of the trip ${name}`,
+    footer:
+      "Shared with ReiseKompass – your compass for holidays, camping and outings.",
   },
   tripPrint: {
     docTitle: name => `${name} – Trip report for printing`,
@@ -4407,6 +4471,12 @@ export const en: Translation = {
     withMenu: "Pre-fill menu plan",
     menuNote:
       "Pre-filled are dinners for every night and breakfast from the second day on. Lunches stay empty – on the road you eat whatever the day offers.",
+    ownSection: "Your templates",
+    ownStages: (n: number) => (n === 1 ? "1 stage" : `${n} stages`),
+    ownApply: "Apply",
+    ownCreated: "Trip created from your template.",
+    ownDeleteAria: (name: string) => `Delete template ${name}`,
+    ownDeleteConfirm: (name: string) => `Delete template \u201c${name}\u201d?`,
     create: "Create trip",
     created: (end: string, meals: number, list: boolean) =>
       `Trip created through ${end}${list ? ", packing list created" : ""}${
@@ -5573,6 +5643,12 @@ export const en: Translation = {
     ingredientsTitle: "Ingredients",
     stepsTitle: "Preparation",
     tipTitle: "Tip",
+    notesTitle: "My cooking notes",
+    notesPlaceholder:
+      "e.g. use double the curry, the kids loved it \u2013 visible only to you",
+    notesAria: (name: string) => `Cooking note for ${name}`,
+    lastCooked: (date: string) => `Last cooked: ${date}`,
+    cookedToday: "Cooked today",
     deleteConfirm: (name: string) => `Really delete the recipe “${name}”?`,
     favoritesFilter: "Favourites",
     favoriteAria: (name: string) => `Save ${name} as a favourite`,
@@ -5765,6 +5841,11 @@ export const en: Translation = {
     addPlaceholderCooled: "e.g. tomatoes, cheese, beans …",
     addPlaceholderDry: "e.g. tin of ravioli, spaghetti, coffee …",
     addNameAria: "Add food item",
+    scanAria: "Scan barcode",
+    scanNoCode: "No barcode detected \u2013 take a closer, sharper photo.",
+    scanUnknown: (code: string) =>
+      `Product ${code} not found on OpenFoodFacts.`,
+    scanFailed: "Scan failed.",
     expiryAria: "Best-before date (optional)",
     submitAria: "Save food item",
     addFailed: "The entry could not be saved",
@@ -6179,6 +6260,10 @@ export const en: Translation = {
     lexiconQuizBadge: "from the guide",
     lexiconQuizHint:
       "Put together afresh from the nature guide every time you start it – also playable as a duel.",
+    countryQuizTitle: "Country quiz",
+    countryQuizAgeHint: "from about 6 years",
+    countryQuizHint:
+      "Flags from the country reference \u2013 shuffled fresh every time.",
     startQuizAria: (title: string) => `Start quiz ${title}`,
     questionCount: (n: number) => `${n} questions`,
     progressAria: (done: number, total: number) =>
@@ -6724,10 +6809,18 @@ export const en: Translation = {
   },
   stats: {
     countriesTitle: "Countries visited",
+    visitedMapTitle: "Where we have been",
+    visitedMapLink: "Open map",
+    visitedMapAria: "Map of visited places",
+    visitedMapCount: (n: number) =>
+      n === 1 ? "1 visited place" : `${n} visited places`,
     countriesUnassigned: (n: number) =>
       n === 1
         ? "1 trip without a recognisable country (the place names none)."
         : `${n} trips without a recognisable country (the place names none).`,
+    countryCostsTitle: "Travel costs by country",
+    countryCostsUnassigned: (amount: string) =>
+      `${amount} without a recognisable country.`,
     inventoryValueTitle: "Inventory value",
     inventoryLink: "To the inventory",
     inventoryValueHint: (n: number) =>

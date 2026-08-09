@@ -1154,6 +1154,37 @@ export type TripStop = typeof tripStops.$inferSelect;
 export type InsertTripStop = typeof tripStops.$inferInsert;
 
 /**
+ * Eigene Reise-Vorlagen (#628): eine gelungene Reise als wiederverwendbare
+ * Vorlage – Dauer, Art und die Etappen mit relativer Nächtezahl. Gleiche
+ * Idee wie packTemplatesCustom (#78): die Etappen liegen als JSON-Array
+ * von {name, latitude, longitude, nights} im Textfeld, konkrete Daten
+ * entstehen erst beim Anwenden aus dem gewählten Anreisetag.
+ */
+export const tripTemplatesCustom = mysqlTable(
+  "tripTemplatesCustom",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    name: varchar("name", { length: 140 }).notNull(),
+    /** Reise-Art (#460): camping, ferienwohnung, … */
+    kind: varchar("kind", { length: 30 }).notNull().default("camping"),
+    /** Gesamtdauer in Nächten */
+    nights: int("nights").notNull(),
+    /** Freitext-Ort der Ursprungsreise (ohne Zeltplatz-Verknüpfung) */
+    location: varchar("location", { length: 140 }),
+    latitude: double("latitude"),
+    longitude: double("longitude"),
+    /** Etappen als JSON-Array von {name, latitude, longitude, nights} */
+    stagesJson: text("stagesJson").notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [index("tripTemplatesCustom_userId").on(table.userId)]
+);
+
+export type TripTemplateCustom = typeof tripTemplatesCustom.$inferSelect;
+export type InsertTripTemplateCustom = typeof tripTemplatesCustom.$inferInsert;
+
+/**
  * Pinnwand einer Reise (#245): kurze Zurufe an die Mitreisenden
  * («Bringe noch Holzkohle mit») und einfache Aufgaben zum Abhaken
  * («Brot holen»). Wie Journal und Reisekasse gehört ein Zettel zur REISE –

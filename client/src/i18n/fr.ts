@@ -979,6 +979,7 @@ export const fr: Translation = {
     gearDialogDescription:
       "Reprends une suggestion ou saisis ta propre tâche avec un intervalle.",
     gearSuggestionsLabel: "Suggestions",
+    vehicleSuggestionsLabel: "V\u00e9hicule et caravane",
     gearSuggestionAria: (title: string) => `Reprendre la suggestion «${title}»`,
     gearTitleLabel: "Tâche",
     gearTitlePlaceholder: "p. ex. imperméabiliser la tente",
@@ -1230,6 +1231,17 @@ export const fr: Translation = {
     rowComfort: "Toilette confortable",
     rowReserve: "Réserve de sécurité (20 %)",
     rowTotal: "Total recommandé",
+    tanksTitle: "Suivi eau propre & eaux grises",
+    tanksHint:
+      "Saisis tailles et niveaux des r\u00e9servoirs \u2013 le besoin quotidien ci-dessus dit combien de temps \u00e7a tient. M\u00e9moris\u00e9 sur cet appareil.",
+    tanksFresh: "Eau propre",
+    tanksGrey: "Eaux grises",
+    tanksSizeAria: (tank: string) =>
+      `Taille du r\u00e9servoir ${tank} en litres`,
+    tanksLevelAria: (tank: string) => `Niveau ${tank}`,
+    tanksLevel: (pct: number, liters: number) => `${pct} % \u2248 ${liters} l`,
+    tanksForecast: (daily: string, freshDays: string, greyDays: string) =>
+      `\u00c0 \u2248 ${daily} l par jour, l\u2019eau propre tient encore \u2248 ${freshDays} jours\u00a0; le r\u00e9servoir d\u2019eaux grises sera plein dans \u2248 ${greyDays} jours.`,
     footnote:
       "Remarque : valeurs indicatives pour un climat tempéré. En cas de canicule, d'altitude ou de travail physique, prévois plus large. La valeur pour les chiens vaut pour un chien de taille moyenne (env. 20 kg). N'utilise l'eau des ruisseaux que filtrée ou bouillie.",
   },
@@ -1612,6 +1624,15 @@ export const fr: Translation = {
     sourceSpot: (name: string) => `emplacement «${name}»`,
     sourceLocation: "ta position",
     rangeSelfSufficient: "Illimitée – le solaire couvre la consommation",
+    ampereTitle: "Aide amp\u00e8res \u00e0 l\u2019emplacement",
+    ampereHint:
+      "Le fusible de la borne tiendra-t-il\u00a0? Touche les appareils \u2013 calcul\u00e9 \u00e0 230 V avec des puissances typiques.",
+    ampereFuse: "Fusible de la borne",
+    ampereDevices: "Qu\u2019est-ce qui tourne en m\u00eame temps\u00a0?",
+    ampereResult: (w: number, a: number, limitW: number, fuse: number) =>
+      `${w} W (\u2248 ${a} A) sur ${limitW} W \u00e0 ${fuse} A.`,
+    ampereOk: (margin: number) => `Marge\u00a0: ${margin} W.`,
+    ampereOver: (over: number) => `${over} W de trop \u2013 le fusible saute.`,
     rangeOverMax: (d: number) => `> ${d} jours`,
     rangeDays: (d: number) => `${d} jours`,
     rangeHours: (h: number) => `${h} h`,
@@ -2084,6 +2105,14 @@ export const fr: Translation = {
     stageAdded: (trip: string) =>
       `\u00c9tape ajout\u00e9e \u2013 dans \u00ab\u00a0${trip}\u00a0\u00bb`,
     savedPlacesListTitle: "Tes lieux \u00e0 retenir",
+    searchPlaceholder: "Chercher un lieu \u2013 p. ex. Bellinzone",
+    searchAria: "Chercher un lieu sur la carte",
+    importButton: "Importer GPX/KML",
+    importHint: "Les points du fichier deviennent des lieux \u00e0 retenir.",
+    importDone: (n: number) =>
+      n === 1 ? "1 lieu import\u00e9." : `${n} lieux import\u00e9s.`,
+    importNone: "Aucun point trouv\u00e9 dans le fichier.",
+    importFailed: "\u00c9chec de l\u2019import.",
     savedPlacesListAria: (name: string) =>
       `Afficher le lieu ${name} sur la carte`,
     savedPlacesDistance: (km: string) => `${km} de chez toi`,
@@ -2901,6 +2930,9 @@ export const fr: Translation = {
     hubCreateFailed: "Le lien n'a pas pu être créé",
     hubLinkCreated: "Lien du hub créé",
     hubStopShare: "Arrêter le partage",
+    reportLinkHint:
+      "Lien du rapport (même jeton) : journal, photos et étapes comme page souvenir – à envoyer à la famille.",
+    reportLinkCopy: "Copier le lien du rapport",
     hubStopped: "Partage arrêté – le lien n'est plus valable",
     hubStopFailed: "Échec de l'arrêt",
     hubQrAlt: (name: string) => `Code QR du lien du hub pour ${name}`,
@@ -2944,7 +2976,19 @@ export const fr: Translation = {
     duplicateSubmit: "Dupliquer",
     duplicated: "Voyage dupliqué – il figure dans les séjours planifiés",
     duplicateFailed: "Échec de la duplication",
+    saveTemplateConfirm:
+      "Enregistrer ce voyage comme mod\u00e8le personnel\u00a0?",
+    saveTemplateAria: (name: string) =>
+      `Enregistrer le voyage ${name} comme mod\u00e8le`,
+    templateSaved:
+      "Enregistr\u00e9 comme mod\u00e8le \u2013 \u00e0 retrouver sous \u00ab\u00a0Depuis un mod\u00e8le\u00a0\u00bb.",
     journalTitle: "Journal de voyage",
+    timelineTitle: "Chronologie",
+    timelineToggleAria: (name: string) =>
+      `Déplier ou replier la chronologie de ${name}`,
+    timelineEmpty:
+      "Rien à raconter pour l'instant – journal, photos et dépenses apparaîtront ici dès qu'ils existeront.",
+    timelineArrival: (name: string) => `Arrivée à ${name}`,
     journalToggleAria: (name: string) =>
       `Ouvrir ou fermer le journal de voyage de ${name}`,
     journalHint:
@@ -3014,6 +3058,11 @@ export const fr: Translation = {
     fuelConsumptionLabel: "Consommation (l/100 km)",
     fuelPriceLabel: "Prix (CHF/l)",
     fuelRoundTrip: "Aller et retour",
+    fuelTollLabel: "P\u00e9age",
+    fuelTollNone: "Pas de p\u00e9age",
+    fuelTollLine: (toll: string, total: string) =>
+      `P\u00e9age \u2248 ${toll} \u2013 ${total} au total.`,
+    fuelTollSuffix: "estimation p\u00e9age incluse",
     fuelResult: (km: number, liters: string, amount: string) =>
       `${km} km · ${liters} l · ${amount}`,
     fuelApply: "Reprendre dans la caisse",
@@ -3178,6 +3227,14 @@ export const fr: Translation = {
     legEstimated: "estim\u00e9 \u00e0 vol d\u2019oiseau",
     legTotal: (km: string, duration: string) =>
       `Tout le circuit\u00a0: \u2248 ${km} \u00b7 ${duration}`,
+    optimizeButton: "Circuit le plus court",
+    optimizeConfirm:
+      "R\u00e9ordonner les \u00e9tapes selon le trajet le plus court\u00a0?",
+    optimizeAlready: "L\u2019ordre est d\u00e9j\u00e0 le plus court.",
+    optimizeDone:
+      "\u00c9tapes r\u00e9ordonn\u00e9es \u2013 chacune garde ses nuits.",
+    optimizeFailed:
+      "R\u00e9organisation impossible \u2013 r\u00e9essayez plus tard.",
     offlineDownloadAria: (trip: string) =>
       `Charger la carte hors ligne du circuit ${trip}`,
     offlineDeleteAria: (trip: string) =>
@@ -3219,6 +3276,19 @@ export const fr: Translation = {
     contactParcel: "Parcelle",
     packListNotShared:
       "Cette liste de bagages n'est pas partagée séparément pour le moment – consultation seule, impossible de cocher.",
+    footer:
+      "Partagé avec ReiseKompass – ta boussole pour les vacances, le camping et les excursions.",
+  },
+  sharedReport: {
+    kicker: "ReiseKompass · Rapport de voyage",
+    notFoundTitle: "Ce rapport n'existe plus.",
+    notFoundText:
+      "Le lien a été arrêté ou a expiré. Demande un nouveau lien à la personne qui l'a partagé.",
+    coverAlt: (name: string) => `Photo de couverture du voyage ${name}`,
+    ratingAria: (n: number) => `Évaluation : ${n} étoiles sur 5`,
+    journalPhotoAlt: (day: string) => `Photo du jour du ${day}`,
+    photosTitle: "Photos",
+    photoAlt: (n: number, name: string) => `Photo ${n} du voyage ${name}`,
     footer:
       "Partagé avec ReiseKompass – ta boussole pour les vacances, le camping et les excursions.",
   },
@@ -4542,6 +4612,13 @@ export const fr: Translation = {
     withMenu: "Préremplir le menu",
     menuNote:
       "Sont préremplis les repas du soir de chaque nuit et le petit-déjeuner dès le deuxième jour. Les repas de midi restent libres – en voyage, on mange à midi ce que la journée offre.",
+    ownSection: "Vos mod\u00e8les",
+    ownStages: (n: number) => (n === 1 ? "1 \u00e9tape" : `${n} \u00e9tapes`),
+    ownApply: "Appliquer",
+    ownCreated: "Voyage cr\u00e9\u00e9 depuis votre mod\u00e8le.",
+    ownDeleteAria: (name: string) => `Supprimer le mod\u00e8le ${name}`,
+    ownDeleteConfirm: (name: string) =>
+      `Supprimer le mod\u00e8le \u00ab\u00a0${name}\u00a0\u00bb\u00a0?`,
     create: "Créer le voyage",
     created: (end: string, meals: number, list: boolean) =>
       `Voyage créé jusqu'au ${end}${list ? ", liste de bagages créée" : ""}${
@@ -5739,6 +5816,13 @@ export const fr: Translation = {
     ingredientsTitle: "Ingrédients",
     stepsTitle: "Préparation",
     tipTitle: "Astuce",
+    notesTitle: "Mes notes de cuisine",
+    notesPlaceholder:
+      "p. ex. doubler le curry, les enfants ont ador\u00e9 \u2013 visible uniquement par toi",
+    notesAria: (name: string) => `Note de cuisine pour ${name}`,
+    lastCooked: (date: string) =>
+      `Cuisin\u00e9 la derni\u00e8re fois\u00a0: ${date}`,
+    cookedToday: "Cuisin\u00e9 aujourd\u2019hui",
     deleteConfirm: (name: string) =>
       `Supprimer vraiment la recette « ${name} » ?`,
     favoritesFilter: "Favoris",
@@ -5934,6 +6018,12 @@ export const fr: Translation = {
     addPlaceholderCooled: "p. ex. tomates, fromage, haricots …",
     addPlaceholderDry: "p. ex. boîte de raviolis, spaghettis, café …",
     addNameAria: "Ajouter un aliment",
+    scanAria: "Scanner le code-barres",
+    scanNoCode:
+      "Aucun code-barres d\u00e9tect\u00e9 \u2013 photo plus proche et nette.",
+    scanUnknown: (code: string) =>
+      `Produit ${code} introuvable sur OpenFoodFacts.`,
+    scanFailed: "\u00c9chec du scan.",
     expiryAria: "Date limite de consommation (facultatif)",
     submitAria: "Enregistrer l'aliment",
     addFailed: "L'entrée n'a pas pu être enregistrée",
@@ -6364,6 +6454,10 @@ export const fr: Translation = {
     lexiconQuizBadge: "issu du lexique",
     lexiconQuizHint:
       "Recomposé à partir du lexique nature à chaque démarrage – jouable aussi en duel.",
+    countryQuizTitle: "Quiz des pays",
+    countryQuizAgeHint: "d\u00e8s 6 ans environ",
+    countryQuizHint:
+      "Des drapeaux tir\u00e9s du guide des pays \u2013 m\u00e9lang\u00e9s \u00e0 chaque partie.",
     startQuizAria: (title: string) => `Démarrer le quiz ${title}`,
     questionCount: (n: number) => `${n} questions`,
     progressAria: (done: number, total: number) =>
@@ -6925,10 +7019,18 @@ export const fr: Translation = {
   },
   stats: {
     countriesTitle: "Pays visités",
+    visitedMapTitle: "O\u00f9 sommes-nous d\u00e9j\u00e0 all\u00e9s",
+    visitedMapLink: "Vers la carte",
+    visitedMapAria: "Carte des lieux visit\u00e9s",
+    visitedMapCount: (n: number) =>
+      n === 1 ? "1 lieu visit\u00e9" : `${n} lieux visit\u00e9s`,
     countriesUnassigned: (n: number) =>
       n === 1
         ? "1 voyage sans pays reconnaissable (le lieu n'en nomme aucun)."
         : `${n} voyages sans pays reconnaissable (le lieu n'en nomme aucun).`,
+    countryCostsTitle: "Frais de voyage par pays",
+    countryCostsUnassigned: (amount: string) =>
+      `${amount} sans pays identifiable.`,
     inventoryValueTitle: "Valeur de l'inventaire",
     inventoryLink: "Vers l'inventaire",
     inventoryValueHint: (n: number) =>

@@ -66,9 +66,59 @@ function Counter({
   );
 }
 
+/** Frisch-/Grauwasser-Tracker (#640): Stand pro Gerät gemerkt. */
+const WATER_TANKS_KEY = "campmesser.waterTanks";
+
+interface WaterTanks {
+  freshLiters: number;
+  greyLiters: number;
+  freshPercent: number;
+  greyPercent: number;
+}
+
+function loadWaterTanks(): WaterTanks {
+  const fallback: WaterTanks = {
+    freshLiters: 100,
+    greyLiters: 100,
+    freshPercent: 100,
+    greyPercent: 0,
+  };
+  if (typeof localStorage === "undefined") return fallback;
+  try {
+    const raw = localStorage.getItem(WATER_TANKS_KEY);
+    if (!raw) return fallback;
+    const parsed = JSON.parse(raw) as Partial<WaterTanks>;
+    const clamp = (value: unknown, max: number, def: number) =>
+      typeof value === "number" && Number.isFinite(value)
+        ? Math.min(max, Math.max(0, value))
+        : def;
+    return {
+      freshLiters: clamp(parsed.freshLiters, 1000, fallback.freshLiters),
+      greyLiters: clamp(parsed.greyLiters, 1000, fallback.greyLiters),
+      freshPercent: clamp(parsed.freshPercent, 100, fallback.freshPercent),
+      greyPercent: clamp(parsed.greyPercent, 100, fallback.greyPercent),
+    };
+  } catch {
+    return fallback;
+  }
+}
+
 export default function WaterPage() {
   const t = useT();
   const [adults, setAdults] = useState(2);
+  // Frisch-/Grauwasser-Tracker (#640)
+  const [tanks, setTanks] = useState<WaterTanks>(() => loadWaterTanks());
+  const updateTanks = (patch: Partial<WaterTanks>) => {
+    setTanks(prev => {
+      const next = { ...prev, ...patch };
+      try {
+        localStorage.setItem(WATER_TANKS_KEY, JSON.stringify(next));
+      } catch {
+        /* Sitzung reicht */
+      }
+      return next;
+    });
+  };
   const [children, setChildren] = useState(2);
   const [dogs, setDogs] = useState(0);
   const [days, setDays] = useState(3);
@@ -418,6 +468,105 @@ export default function WaterPage() {
       <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
         {t.water.footnote}
       </p>
+
+      {/* Frisch-/Grauwasser-Tracker (#640): Tankgrössen und Füllstände –
+          der Tagesbedarf von oben sagt, wie lange es noch reicht bzw.
+          wann der Grauwassertank voll ist. */}
+      <Card className="mt-6">
+        <CardContent className="pt-6">
+          <h2 className="mb-1 font-serif text-lg font-semibold">
+            {t.water.tanksTitle}
+          </h2>
+          <p className="mb-3 text-xs text-muted-foreground">
+            {t.water.tanksHint}
+          </p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {(
+              [
+                {
+                  key: "fresh" as const,
+                  label: t.water.tanksFresh,
+                  liters: tanks.freshLiters,
+                  percent: tanks.freshPercent,
+                  onLiters: (value: number) =>
+                    updateTanks({ freshLiters: value }),
+                  onPercent: (value: number) =>
+                    updateTanks({ freshPercent: value }),
+                },
+                {
+                  key: "grey" as const,
+                  label: t.water.tanksGrey,
+                  liters: tanks.greyLiters,
+                  percent: tanks.greyPercent,
+                  onLiters: (value: number) =>
+                    updateTanks({ greyLiters: value }),
+                  onPercent: (value: number) =>
+                    updateTanks({ greyPercent: value }),
+                },
+              ] as const
+            ).map(tank => (
+              <div
+                key={tank.key}
+                className="rounded-lg border border-border p-3"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm font-semibold">{tank.label}</p>
+                  <label className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <input
+                      type="number"
+                      min={0}
+                      max={1000}
+                      value={tank.liters}
+                      onChange={e =>
+                        tank.onLiters(
+                          Math.min(1000, Math.max(0, Number(e.target.value)))
+                        )
+                      }
+                      className="h-8 w-20 rounded-md border border-input bg-background px-2 text-right text-sm"
+                      aria-label={t.water.tanksSizeAria(tank.label)}
+                    />
+                    l
+                  </label>
+                </div>
+                <div className="mt-3">
+                  <Slider
+                    value={[tank.percent]}
+                    min={0}
+                    max={100}
+                    step={5}
+                    onValueChange={([value]) => tank.onPercent(value)}
+                    aria-label={t.water.tanksLevelAria(tank.label)}
+                  />
+                  <p className="mt-1.5 text-sm tabular-nums text-muted-foreground">
+                    {t.water.tanksLevel(
+                      tank.percent,
+                      Math.round((tank.liters * tank.percent) / 100)
+                    )}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+          {(() => {
+            const dailyLiters = days > 0 ? result.totalLiters / days : 0;
+            if (dailyLiters <= 0) return null;
+            const freshLeft = (tanks.freshLiters * tanks.freshPercent) / 100;
+            const greyFree =
+              (tanks.greyLiters * (100 - tanks.greyPercent)) / 100;
+            const freshDays = freshLeft / dailyLiters;
+            const greyDays = greyFree / dailyLiters;
+            return (
+              <p className="mt-3 text-sm">
+                {t.water.tanksForecast(
+                  dailyLiters.toFixed(1),
+                  freshDays.toFixed(1),
+                  greyDays.toFixed(1)
+                )}
+              </p>
+            );
+          })()}
+        </CardContent>
+      </Card>
     </div>
   );
 }

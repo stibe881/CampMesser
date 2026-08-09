@@ -5,7 +5,9 @@ import {
   osrmChainTableUrl,
   osrmTableUrl,
   parseOsrmChain,
+  parseOsrmMatrix,
   parseOsrmTable,
+  optimizeStopOrder,
   estimateRoadDistanceM,
   offsetOnRoute,
   osrmRouteUrl,
@@ -287,5 +289,88 @@ describe("Etappen-Kette über die Strasse (Nutzerwunsch 09.08.2026)", () => {
     expect(parseOsrmChain({ code: "NoTable" }, 3)).toEqual([null, null]);
     expect(parseOsrmChain(null, 2)).toEqual([null]);
     expect(parseOsrmChain(null, 1)).toEqual([]);
+  });
+});
+
+describe("Etappen-Reihenfolge optimieren (#627)", () => {
+  it("liest die volle Distanzmatrix aus der OSRM-Antwort", () => {
+    expect(
+      parseOsrmMatrix(
+        {
+          code: "Ok",
+          distances: [
+            [0, 10, 20],
+            [10, 0, 5],
+            [20, 5, 0],
+          ],
+        },
+        3
+      )
+    ).toEqual([
+      [0, 10, 20],
+      [10, 0, 5],
+      [20, 5, 0],
+    ]);
+  });
+
+  it("macht aus Fehlern und Lücken null-Zellen", () => {
+    expect(parseOsrmMatrix({ code: "NoTable" }, 2)).toEqual([
+      [null, null],
+      [null, null],
+    ]);
+    expect(
+      parseOsrmMatrix(
+        {
+          code: "Ok",
+          distances: [
+            [0, null],
+            [-3, 0],
+          ],
+        },
+        2
+      )
+    ).toEqual([
+      [0, null],
+      [null, 0],
+    ]);
+  });
+
+  it("findet die kürzeste Reihenfolge ab der ersten Etappe", () => {
+    // Punkte auf einer Linie: 0 – 2 – 1 – 3 wäre falsch sortiert
+    // eingegeben, richtig ist die Reihenfolge entlang der Linie.
+    const matrix = [
+      [0, 20, 10, 30],
+      [20, 0, 10, 10],
+      [10, 10, 0, 20],
+      [30, 10, 20, 0],
+    ];
+    expect(optimizeStopOrder(matrix)).toEqual([0, 2, 1, 3]);
+  });
+
+  it("lässt kurze und schon optimale Wege unangetastet", () => {
+    expect(optimizeStopOrder([])).toEqual([]);
+    expect(
+      optimizeStopOrder([
+        [0, 1],
+        [1, 0],
+      ])
+    ).toEqual([0, 1]);
+    expect(
+      optimizeStopOrder([
+        [0, 1, 2],
+        [1, 0, 1],
+        [2, 1, 0],
+      ])
+    ).toEqual([0, 1, 2]);
+  });
+
+  it("schiebt Ziele ohne Route ans Ende", () => {
+    // Von 0 aus ist 2 unerreichbar (null) – 1 muss zuerst kommen.
+    const matrix = [
+      [0, 5, null],
+      [5, 0, 8],
+      [null, 8, 0],
+    ];
+    expect(optimizeStopOrder(matrix)).toEqual([0, 1, 2]);
   });
 });

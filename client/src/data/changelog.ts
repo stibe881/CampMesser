@@ -28,6 +28,48 @@ export type { ChangelogBlock };
 
 export const changelog: ChangelogBlock[] = [
   {
+    id: "2026-08-09.8",
+    date: "2026-08-09",
+    entries: [
+      l4(
+        "Deine Reise als Geschichte: Die neue Zeitachse mischt Journal, Tages-Fotos, Ausgaben und Etappen-Ank\u00fcnfte chronologisch \u2013 und ein zweiter Teil-Link zeigt Verwandten die Reise als Bericht mit Titelbild, Journal und Foto-Galerie.",
+        "Ton voyage comme une histoire\u00a0: la nouvelle chronologie m\u00e9lange journal, photos du jour, d\u00e9penses et arriv\u00e9es d\u2019\u00e9tape dans l\u2019ordre \u2013 et un deuxi\u00e8me lien de partage montre le voyage \u00e0 la famille comme un r\u00e9cit avec photo de titre, journal et galerie.",
+        "Il tuo viaggio come una storia: la nuova cronologia mescola diario, foto del giorno, spese e arrivi di tappa in ordine \u2013 e un secondo link di condivisione mostra il viaggio ai parenti come racconto con foto di copertina, diario e galleria.",
+        "Your trip as a story: the new timeline mixes journal, daily photos, expenses and stage arrivals in order \u2013 and a second share link shows relatives the trip as a report with cover photo, journal and photo gallery."
+      ),
+      l4(
+        "Rundreisen leichter geplant: \u00abK\u00fcrzeste Runde\u00bb sortiert die Etappen entlang der k\u00fcrzesten Strecke, eine gelungene Reise speicherst du als eigene Vorlage \u2013 und der Weiterreise-Hinweis am Vorabend nennt neu das Wetter am Ziel.",
+        "Les circuits se planifient plus facilement\u00a0: \u00ab\u00a0Boucle la plus courte\u00a0\u00bb trie les \u00e9tapes le long du trajet le plus court, tu enregistres un voyage r\u00e9ussi comme mod\u00e8le personnel \u2013 et le rappel de d\u00e9part de la veille annonce d\u00e9sormais la m\u00e9t\u00e9o \u00e0 destination.",
+        "I giri si pianificano pi\u00f9 facilmente: \u00abGiro pi\u00f9 corto\u00bb ordina le tappe lungo il percorso pi\u00f9 breve, salvi un viaggio riuscito come modello personale \u2013 e il promemoria della partenza della sera prima ora indica il meteo a destinazione.",
+        "Round trips are easier to plan: \u201cShortest loop\u201d sorts the stages along the shortest route, you save a successful trip as your own template \u2013 and the evening move-on reminder now names the weather at the destination."
+      ),
+      l4(
+        "Die grosse Karte kann suchen und importieren: Die Ortssuche f\u00e4hrt die Karte hin, GPX- und KML-Dateien bringen Wegpunkte als Merkorte mit \u2013 und die Statistik zeigt auf einer Mini-Karte, wo ihr \u00fcberall wart, samt Reisekosten nach Land.",
+        "La grande carte sait chercher et importer\u00a0: la recherche de lieu y conduit la carte, les fichiers GPX et KML apportent leurs points comme lieux retenus \u2013 et les statistiques montrent sur une mini-carte o\u00f9 vous \u00eates all\u00e9s, avec les frais de voyage par pays.",
+        "La grande mappa sa cercare e importare: la ricerca dei luoghi porta la mappa sul posto, i file GPX e KML aggiungono i loro punti come luoghi salvati \u2013 e le statistiche mostrano su una mini-mappa dove siete stati, con i costi di viaggio per paese.",
+        "The big map can search and import: the place search flies the map there, GPX and KML files bring their waypoints in as saved places \u2013 and the statistics show on a mini map where you have been, including travel costs by country."
+      ),
+      l4(
+        "In der K\u00fcche: Der Barcode-Scan holt Produktnamen f\u00fcr K\u00fchlbox und Vorrat aus der freien Lebensmittel-Datenbank, und jedes Rezept tr\u00e4gt neu deine Koch-Notiz samt \u00abzuletzt gekocht\u00bb.",
+        "En cuisine\u00a0: le scan du code-barres r\u00e9cup\u00e8re les noms de produits pour la glaci\u00e8re et la r\u00e9serve depuis la base alimentaire libre, et chaque recette porte d\u00e9sormais ta note de cuisine avec \u00ab\u00a0cuisin\u00e9 la derni\u00e8re fois\u00a0\u00bb.",
+        "In cucina: la scansione del codice a barre recupera i nomi dei prodotti per frigo e dispensa dalla banca dati alimentare libera, e ogni ricetta porta ora la tua nota di cucina con \u00abcucinato l\u2019ultima volta\u00bb.",
+        "In the kitchen: the barcode scan fetches product names for cool box and pantry from the free food database, and every recipe now carries your cooking note plus \u201clast cooked\u201d."
+      ),
+      l4(
+        "Am Platz und unterwegs: Der Ampere-Helfer sagt vor dem Einstecken, ob die S\u00e4ulen-Sicherung h\u00e4lt, der Wasser-Tracker rechnet Frisch- und Grauwassertank in Tage um, der Fahrtkosten-Rechner sch\u00e4tzt neu die Streckenmaut \u2013 und die Ausr\u00fcstungs-Pflege kennt Service-Merker f\u00fcr Fahrzeug und Wohnwagen.",
+        "\u00c0 l\u2019emplacement et en route\u00a0: l\u2019aide amp\u00e8res dit avant de brancher si le fusible de la borne tiendra, le suivi de l\u2019eau convertit r\u00e9servoirs d\u2019eau propre et d\u2019eaux grises en jours, le calculateur de trajet estime d\u00e9sormais le p\u00e9age \u2013 et l\u2019entretien du mat\u00e9riel conna\u00eet des rappels de service pour v\u00e9hicule et caravane.",
+        "In piazzola e in viaggio: l\u2019aiuto ampere dice prima di collegare se il fusibile della colonnina regge, il tracker dell\u2019acqua converte i serbatoi in giorni, il calcolatore dei costi di viaggio ora stima il pedaggio \u2013 e la cura dell\u2019attrezzatura conosce promemoria di servizio per veicolo e roulotte.",
+        "At the pitch and on the road: the ampere helper tells you before plugging in whether the bollard fuse will hold, the water tracker turns fresh and grey tanks into days, the trip cost calculator now estimates road tolls \u2013 and gear care knows service reminders for vehicle and caravan."
+      ),
+      l4(
+        "F\u00fcr die Familie gibt es ein L\u00e4nder-Quiz mit Flaggen aus dem L\u00e4nder-Nachschlagewerk \u2013 und das Reise-Offline-Paket nimmt neu auch Etappen, Journal und Merkorte mit ins Funkloch.",
+        "Pour la famille, un quiz des pays avec les drapeaux du guide des pays \u2013 et le pack hors ligne du voyage emporte d\u00e9sormais aussi \u00e9tapes, journal et lieux retenus dans la zone blanche.",
+        "Per la famiglia c\u2019\u00e8 un quiz dei paesi con le bandiere del prontuario \u2013 e il pacchetto offline del viaggio ora porta con s\u00e9 anche tappe, diario e luoghi salvati dove non c\u2019\u00e8 campo.",
+        "For the family there is a country quiz with flags from the country reference \u2013 and the trip offline pack now takes stages, journal and saved places into the dead zone too."
+      ),
+    ],
+  },
+  {
     id: "2026-08-09.7",
     date: "2026-08-09",
     entries: [
@@ -120,54 +162,6 @@ export const changelog: ChangelogBlock[] = [
         "Autour de la météo : le cockpit du voyage montre un feu météo sur tes jours de voyage, la vue Aujourd’hui indique la limite pluie-neige et l’air pollué, la saisie rapide calcule le budget du jour – et sur iPhone, les champs de date trop larges sont réparés.",
         "Intorno al meteo: il cockpit del viaggio mostra un semaforo meteo sui tuoi giorni di viaggio, la vista Oggi indica il limite delle nevicate e l’aria pesante, la spesa rapida calcola il budget del giorno – e su iPhone i campi data troppo larghi sono riparati.",
         "Around the weather: the trip cockpit shows a weather light across your trip days, the Today view names the snow line and heavy air, the quick expense shows the day budget – and on iPhone the too-wide date fields are fixed."
-      ),
-    ],
-  },
-  {
-    id: "2026-08-09.5",
-    date: "2026-08-09",
-    entries: [
-      l4(
-        "Neue Reiseart Motorradurlaub: Packliste, Schnellzugriffe (Länderregeln, Tankbuch, Reparatur) und Formular passen sich an – wie bei allen Reisearten. Und die Velotour darf neu auch ans Lagerfeuer.",
-        "Nouveau type de voyage « moto » : liste de bagages, accès rapides (règles des pays, carnet d’essence, réparation) et formulaire s’adaptent – comme pour chaque type de voyage. Et le tour à vélo a désormais droit au feu de camp.",
-        "Nuovo tipo di viaggio «moto»: lista bagagli, accessi rapidi (regole dei paesi, libretto carburante, riparazione) e modulo si adattano – come per ogni tipo di viaggio. E il giro in bici ora può stare anche al falò.",
-        "New trip type motorbike tour: packing list, quick links (country rules, fuel log, repair) and the form adapt – as with every trip type. And the bike tour is now allowed at the campfire too."
-      ),
-      l4(
-        "Drucken klappt jetzt auch aus der installierten App: Die Druckseiten melden dich im Browser-Tab über ein kurzlebiges Ticket selbst an – kein «Anmeldung erforderlich» mehr beim Reisepass und den anderen Druckansichten.",
-        "L’impression fonctionne désormais aussi depuis l’app installée : les pages d’impression te connectent elles-mêmes dans l’onglet du navigateur via un ticket éphémère – fini le « connexion requise » pour le passeport et les autres vues d’impression.",
-        "La stampa ora funziona anche dall’app installata: le pagine di stampa ti collegano da sole nella scheda del browser tramite un ticket a breve durata – niente più «accesso richiesto» per il passaporto e le altre viste di stampa.",
-        "Printing now works from the installed app too: the print pages sign you in inside the browser tab via a short-lived ticket – no more “sign-in required” for the passport and the other print views."
-      ),
-      l4(
-        "Der Rückblick nach der Reise ist einen Klick nah: Der Hinweis auf der Startseite springt direkt hin. Und er kennt jetzt Personen – wie die Packliste: filtern nach Person, und was gefehlt hat, gehört gleich jemandem.",
-        "La rétrospective après le voyage est à un clic : l’indication sur la page d’accueil y mène directement. Et elle connaît désormais les personnes – comme la liste de bagages : filtrer par personne, et ce qui a manqué appartient tout de suite à quelqu’un.",
-        "La retrospettiva dopo il viaggio è a un clic: l’avviso sulla pagina iniziale porta direttamente lì. E ora conosce le persone – come la lista bagagli: filtri per persona, e ciò che è mancato appartiene subito a qualcuno.",
-        "The post-trip review is one tap away: the note on the home page jumps straight to it. And it now knows people – like the packing list: filter by person, and whatever was missing belongs to someone right away."
-      ),
-      l4(
-        "Etappen überall: Druckbericht und Kalender-Export führen die Stationen auf, der Kalender zeigt Etappen-Tage, das Tages-Journal weiss, wo du warst. Dazu Fahrzeit und Distanz zwischen den Etappen, Wetter je Etappe, ein Weiterreise-Hinweis am Vorabend, eine Offline-Karte der ganzen Rundreise – und der Unwetter-Push warnt am Ort der aktuellen Etappe.",
-        "Les étapes partout : le rapport imprimé et l’export calendrier listent les stations, le calendrier montre les jours d’étape, le journal sait où tu étais. S’y ajoutent temps de route et distance entre les étapes, la météo par étape, un rappel de départ la veille, une carte hors ligne de tout le circuit – et l’alerte intempéries surveille l’étape actuelle.",
-        "Tappe ovunque: il rapporto stampato e l’esportazione calendario elencano le stazioni, il calendario mostra i giorni di tappa, il diario sa dove eri. In più tempo di guida e distanza tra le tappe, meteo per tappa, un promemoria della partenza la sera prima, una mappa offline dell’intero giro – e l’avviso maltempo sorveglia la tappa attuale.",
-        "Stages everywhere: the printed report and the calendar export list the stops, the calendar shows stage days, the journal knows where you were. Plus driving time and distance between stages, weather per stage, a move-on reminder the evening before, an offline map of the whole round trip – and the storm push watches your current stage."
-      ),
-      l4(
-        "Merkorte werden nützlicher: Vom Stern auf der Karte machst du direkt eine Etappe oder planst eine Reise, unter der Karte steht die Liste aller Merkorte mit Notiz und Distanz von zuhause – und die globale Suche findet sie.",
-        "Les lieux retenus deviennent plus utiles : depuis l’étoile sur la carte, tu crées directement une étape ou planifies un voyage, sous la carte figure la liste de tous les lieux avec note et distance de chez toi – et la recherche globale les trouve.",
-        "I luoghi salvati diventano più utili: dalla stella sulla mappa crei direttamente una tappa o pianifichi un viaggio, sotto la mappa c’è l’elenco di tutti i luoghi con nota e distanza da casa – e la ricerca globale li trova.",
-        "Saved places get more useful: from the star on the map you create a stage or plan a trip directly, below the map sits the list of all saved places with note and distance from home – and the global search finds them."
-      ),
-      l4(
-        "Die Reisekasse denkt mit: Mitten in der Reise sagt sie dein Tagesbudget bis zur Abreise, die Beleg-Galerie zeigt alle Quittungen einer Reise beisammen, und beim Planen schätzt die App die Übernachtungskosten aus deinen bisherigen Reisen gleicher Art.",
-        "La caisse de voyage réfléchit avec toi : en plein voyage, elle indique ton budget quotidien jusqu’au départ, la galerie des justificatifs montre tous les tickets d’un voyage ensemble, et à la planification l’app estime les coûts de nuitée d’après tes voyages passés du même type.",
-        "La cassa di viaggio pensa con te: durante il viaggio indica il tuo budget giornaliero fino alla partenza, la galleria degli scontrini mostra tutte le ricevute di un viaggio insieme, e in fase di pianificazione l’app stima i costi di pernottamento dai tuoi viaggi passati dello stesso tipo.",
-        "The trip wallet thinks along: mid-trip it tells you your daily budget until departure, the receipt gallery shows all of a trip’s receipts together, and while planning the app estimates the nightly costs from your past trips of the same kind."
-      ),
-      l4(
-        "Unterwegs besser informiert: Die Wetterseite zeigt die Luftqualität als Ampel (auch im Morgen-Briefing, wenn sie schlecht ist), die Heute-Ansicht warnt vor Feiertagen des Reiselands – Läden zu, Einkauf vorher. Die Länder-Seite kennt neu Schweden, Norwegen und Belgien, und die Sprachhilfe hilft bei Panne und Werkstatt in vier Sprachen.",
-        "Mieux informé en route : la page météo montre la qualité de l’air en feu tricolore (aussi dans le briefing du matin quand elle est mauvaise), la vue Aujourd’hui avertit des jours fériés du pays de voyage – magasins fermés, courses avant. La page des pays connaît désormais la Suède, la Norvège et la Belgique, et l’aide linguistique t’assiste en cas de panne et au garage en quatre langues.",
-        "Meglio informati in viaggio: la pagina meteo mostra la qualità dell’aria come semaforo (anche nel briefing del mattino quando è cattiva), la vista Oggi avvisa dei giorni festivi del paese di viaggio – negozi chiusi, spesa prima. La pagina dei paesi ora conosce Svezia, Norvegia e Belgio, e l’aiuto linguistico ti assiste con guasti e officina in quattro lingue.",
-        "Better informed on the road: the weather page shows air quality as a traffic light (also in the morning briefing when it is bad), the Today view warns about your destination’s public holidays – shops closed, shop beforehand. The countries page now covers Sweden, Norway and Belgium, and the phrasebook helps with breakdowns and the garage in four languages."
       ),
     ],
   },

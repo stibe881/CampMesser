@@ -180,6 +180,8 @@ import {
 } from "@shared/routePlan";
 import { MAX_ROUTE_PATH_POINTS, routeLengthM } from "@shared/routing";
 import {
+  MAX_CUSTOM_TRIP_TEMPLATES,
+  parseCustomTemplateStages,
   TEMPLATE_STAGE_LABEL,
   templateEndDate,
   templateListName,
@@ -663,6 +665,8 @@ export {
   sortNotes,
   sortTripBoardEntries,
   systemRouter,
+  MAX_CUSTOM_TRIP_TEMPLATES,
+  parseCustomTemplateStages,
   TEMPLATE_STAGE_LABEL,
   templateEndDate,
   templateListName,

@@ -66,6 +66,8 @@ import {
   shareExpiryFor,
   shareExpiryInput,
   sortTripBoardEntries,
+  MAX_CUSTOM_TRIP_TEMPLATES,
+  parseCustomTemplateStages,
   TEMPLATE_STAGE_LABEL,
   templateEndDate,
   templateListName,
@@ -963,6 +965,141 @@ export const tripsRouters = {
         }),
     }),
     /**
+     * Eigene Reise-Vorlagen (#628, Muster der Packvorlagen #78): eine
+     * gelungene Reise wird zur Vorlage – gespeichert werden Dauer, Art,
+     * Ort und die Etappen mit RELATIVER Nächtezahl. Beim Anwenden
+     * entstehen aus dem gewählten Anreisetag konkrete Daten; die Etappen
+     * werden verkettet wie beim Umsortieren (#627).
+     */
+    ownTemplates: router({
+      list: protectedProcedure.query(async ({ ctx }) => {
+        const rows = await db.getTripTemplatesCustom(ctx.user.id);
+        return rows.map(row => ({
+          id: row.id,
+          name: row.name,
+          kind: normalizeTripKind(row.kind),
+          nights: row.nights,
+          location: row.location,
+          stages: parseCustomTemplateStages(row.stagesJson),
+        }));
+      }),
+      saveFromTrip: protectedProcedure
+        .input(
+          z.object({
+            tripId: z.number().int().positive(),
+            name: z.string().min(1).max(140),
+          })
+        )
+        .mutation(async ({ ctx, input }) => {
+          // Nur die EIGENE Reise wird zur Vorlage – Vorlagen sind privat.
+          const trip = await db.getTripLog(input.tripId, ctx.user.id);
+          if (!trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Aufenthalt nicht gefunden.",
+            });
+          }
+          const existing = await db.getTripTemplatesCustom(ctx.user.id);
+          if (existing.length >= MAX_CUSTOM_TRIP_TEMPLATES) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: `Höchstens ${MAX_CUSTOM_TRIP_TEMPLATES} eigene Vorlagen – bitte zuerst eine löschen.`,
+            });
+          }
+          const nightsOf = (start: string, end: string) =>
+            Math.max(
+              0,
+              Math.round(
+                (Date.parse(`${end}T00:00:00Z`) -
+                  Date.parse(`${start}T00:00:00Z`)) /
+                  86_400_000
+              )
+            );
+          const stops = await db.getTripStops(input.tripId);
+          const stages = stops.map(stop => ({
+            name: stop.name,
+            latitude: stop.latitude,
+            longitude: stop.longitude,
+            nights: nightsOf(stop.startDate, stop.endDate),
+          }));
+          // Ort der Reise: Freitext oder Name des verknüpften Platzes
+          let location = trip.location;
+          if (!location && trip.spotId != null) {
+            const spot = await db.getCampSpot(trip.spotId, ctx.user.id);
+            location = spot?.name ?? null;
+          }
+          const id = await db.addTripTemplateCustom({
+            userId: ctx.user.id,
+            name: input.name.trim().slice(0, 140),
+            kind: normalizeTripKind(trip.kind),
+            nights: nightsOf(trip.startDate, trip.endDate),
+            location,
+            latitude: trip.latitude,
+            longitude: trip.longitude,
+            stagesJson: JSON.stringify(stages),
+          });
+          return { id, stages: stages.length } as const;
+        }),
+      remove: protectedProcedure
+        .input(z.object({ id: z.number().int().positive() }))
+        .mutation(async ({ ctx, input }) => {
+          await db.deleteTripTemplateCustom(input.id, ctx.user.id);
+          return { success: true } as const;
+        }),
+      createTrip: protectedProcedure
+        .input(
+          z.object({
+            templateId: z.number().int().positive(),
+            startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+          })
+        )
+        .mutation(async ({ ctx, input }) => {
+          const template = await db.getTripTemplateCustom(
+            input.templateId,
+            ctx.user.id
+          );
+          if (!template) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Vorlage nicht gefunden.",
+            });
+          }
+          const nights = Math.max(0, template.nights);
+          const endDate = templateEndDate(input.startDate, nights);
+          const tripId = await db.addTripLog({
+            userId: ctx.user.id,
+            spotId: null,
+            packListId: null,
+            location: template.location || template.name,
+            latitude: template.latitude,
+            longitude: template.longitude,
+            kind: normalizeTripKind(template.kind),
+            title: template.name,
+            notes: null,
+            startDate: input.startDate,
+            endDate,
+            rating: null,
+          });
+          // Etappen verketten: jede behält ihre Nächtezahl, beginnt, wo
+          // die vorherige endet – Überhang wird am Reiseende gekappt.
+          const stages = parseCustomTemplateStages(template.stagesJson);
+          let cursor = input.startDate;
+          for (const stage of stages) {
+            const stageEnd = templateEndDate(cursor, stage.nights);
+            await db.addTripStop({
+              tripId,
+              name: stage.name,
+              latitude: stage.latitude,
+              longitude: stage.longitude,
+              startDate: cursor > endDate ? endDate : cursor,
+              endDate: stageEnd > endDate ? endDate : stageEnd,
+            });
+            cursor = stageEnd;
+          }
+          return { id: tripId, endDate } as const;
+        }),
+    }),
+    /**
      * Etappen (#536): Eine Rundreise besteht aus mehreren Orten mit je
      * eigenem Von/Bis. Wie Journal und Reisekasse gehören sie zur REISE –
      * Mitreisende dürfen mitplanen (canAccessTrip). Koordinaten kommen
@@ -1166,14 +1303,34 @@ export const tripsRouters = {
           },
           { converted: [] }
         );
-        return expenseStats(
-          trips.map(trip => ({
-            id: trip.id,
-            startDate: trip.startDate,
-            endDate: trip.endDate,
+        // Reisekosten nach Land (#643): CHF-Summe je Reise mitliefern –
+        // das Land rät der Client mit derselben Logik wie die
+        // Länder-Statistik (#510/#606, shared/countryGuess).
+        const perTripMap = new Map<number, number>();
+        converted.forEach(expense => {
+          const amount =
+            Number.isFinite(expense.amountRappen) && expense.amountRappen > 0
+              ? Math.round(expense.amountRappen)
+              : 0;
+          perTripMap.set(
+            expense.tripId,
+            (perTripMap.get(expense.tripId) ?? 0) + amount
+          );
+        });
+        return {
+          ...expenseStats(
+            trips.map(trip => ({
+              id: trip.id,
+              startDate: trip.startDate,
+              endDate: trip.endDate,
+            })),
+            converted
+          ),
+          perTrip: Array.from(perTripMap, ([tripId, rappen]) => ({
+            tripId,
+            rappen,
           })),
-          converted
-        );
+        };
       }),
       /**
        * Nur die Summe je Reise (#345) – für das Zeichen am ZUGEKLAPPTEN
@@ -2451,6 +2608,56 @@ export const tripsRouters = {
             message: entry.message,
             fromMember: entry.userId != null,
             createdAt: entry.createdAt,
+          })),
+        };
+      }),
+    /**
+     * Geteilter Reise-BERICHT (#629): Journal, Fotos und Etappen als
+     * schreibgeschützte Seite für Verwandte – über denselben Teil-Token
+     * wie der Hub (ein Link-Leben, ein Ablaufdatum, ein «Teilen beenden»).
+     * Anders als der Hub (bewusst ohne Fotos, #128) ist der Bericht die
+     * ERINNERUNGS-Ansicht: Die Fotos laufen über eigene Token-Routen
+     * (/api/bericht/…), nie über die privaten Foto-Pfade.
+     */
+    sharedReport: publicProcedure
+      .input(z.object({ token: z.string().min(8).max(64) }))
+      .query(async ({ input }) => {
+        const trip = await db.getTripLogByShareToken(input.token);
+        if (!trip) return null;
+        const spot =
+          trip.spotId != null
+            ? await db.getCampSpot(trip.spotId, trip.userId)
+            : undefined;
+        const journal = await db.getTripJournal(trip.id);
+        const photos = await db.getTripPhotosForTrip(trip.id);
+        const stops = await db.getTripStops(trip.id);
+        return {
+          trip: {
+            title: trip.title,
+            location: trip.location,
+            startDate: trip.startDate,
+            endDate: trip.endDate,
+            notes: trip.notes,
+            rating: trip.rating,
+            weatherJson: trip.weatherJson,
+            coverPhotoId: trip.coverPhotoId,
+          },
+          spotName: spot?.name ?? null,
+          // Journal ohne Konto-Bezug (Muster Gästebuch): Text und Tag
+          // reichen – wer geschrieben hat, geht Aussenstehende nichts an.
+          journal: journal.map(entry => ({
+            day: entry.day,
+            text: entry.text,
+            photoFileName: entry.photoFileName,
+          })),
+          photos: photos.map(photo => ({
+            id: photo.id,
+            fileName: photo.fileName,
+          })),
+          stops: stops.map(stop => ({
+            name: stop.name,
+            startDate: stop.startDate,
+            endDate: stop.endDate,
           })),
         };
       }),

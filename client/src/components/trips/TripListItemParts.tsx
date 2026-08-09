@@ -16,6 +16,7 @@ import { Suspense, lazy } from "react";
 import { Link } from "wouter";
 import {
   Archive,
+  BookmarkPlus,
   CalendarDays,
   CalendarPlus,
   Clock,
@@ -29,8 +30,10 @@ import {
   Trash2,
   Users,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useConfirm } from "@/components/ConfirmDialog";
+import { trpc } from "@/lib/trpc";
 import { useT } from "@/i18n";
 import LazySection from "@/components/LazySection";
 import TripJournal from "@/components/trips/TripJournal";
@@ -47,6 +50,7 @@ import TripReview from "@/components/trips/TripReview";
 import TripStops from "@/components/trips/TripStops";
 
 const TripExpenses = lazy(() => import("@/components/trips/TripExpenses"));
+const TripTimeline = lazy(() => import("@/components/trips/TripTimeline"));
 const TripCollage = lazy(() => import("@/components/trips/TripCollage"));
 
 /** Was die Bausteine von einer Reise wissen müssen – strukturell, kein DB-Typ. */
@@ -171,6 +175,18 @@ export function TripActionColumn({
 }) {
   const t = useT();
   const ask = useConfirm();
+  // Eigene Reise-Vorlage (#628): Dauer, Art und Etappen dieser Reise
+  // wiederverwendbar machen – zu finden im «Aus Vorlage»-Dialog.
+  const utils = trpc.useUtils();
+  const saveTemplateMutation = trpc.trips.ownTemplates.saveFromTrip.useMutation(
+    {
+      onSuccess: () => {
+        void utils.trips.ownTemplates.list.invalidate();
+        toast.success(t.trips.templateSaved);
+      },
+      onError: e => toast.error(e.message || t.common.saveFailed),
+    }
+  );
   return (
     <div className="flex shrink-0 flex-col gap-1">
       <Button
@@ -182,6 +198,28 @@ export function TripActionColumn({
       >
         <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
       </Button>
+      {trip.role === "owner" && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 text-muted-foreground/60 hover:text-foreground"
+          disabled={saveTemplateMutation.isPending}
+          onClick={async () => {
+            if (
+              await ask({
+                title: t.trips.saveTemplateConfirm,
+                description: name,
+              })
+            ) {
+              saveTemplateMutation.mutate({ tripId: trip.id, name });
+            }
+          }}
+          aria-label={t.trips.saveTemplateAria(name)}
+          title={t.trips.saveTemplateConfirm}
+        >
+          <BookmarkPlus className="h-3.5 w-3.5" aria-hidden="true" />
+        </Button>
+      )}
       {phase === "past" && (
         <>
           <Button
@@ -337,6 +375,11 @@ export function TripDetailSections({
             shared={shared}
             weatherJson={trip.weatherJson ?? null}
           />
+        )}
+        {/* Zeitachse (#626): die Reise als Geschichte – erst ab dem
+            ersten Reisetag, vorher gibt es nichts zu erzählen */}
+        {(phase === "past" || trip.startDate <= today) && (
+          <TripTimeline tripId={trip.id} tripName={name} />
         )}
         {/* Reisekasse (#219): auch schon vor der Anreise – Platzmiete
             und Sprit fallen oft vorher an */}

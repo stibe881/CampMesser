@@ -374,6 +374,93 @@ export function parseOsrmChain(
 }
 
 /**
+ * Volle Distanz-Matrix aus einer Ketten-Antwort lesen (#627): NxN Meter,
+ * `null` je Zelle heisst «keine Route». Dieselbe Anfrage-URL wie
+ * `osrmChainTableUrl` – der Optimierer braucht nur ALLE Paare statt bloss
+ * der aufeinanderfolgenden.
+ */
+export function parseOsrmMatrix(
+  json: unknown,
+  pointCount: number
+): (number | null)[][] {
+  const empty = Array.from({ length: pointCount }, () =>
+    new Array<number | null>(pointCount).fill(null)
+  );
+  if (!json || typeof json !== "object") return empty;
+  const body = json as { code?: unknown; distances?: unknown };
+  if (body.code !== "Ok" || !Array.isArray(body.distances)) return empty;
+  return empty.map((row, i) => {
+    const source = (body.distances as unknown[])[i];
+    if (!Array.isArray(source)) return row;
+    return row.map((_, j) => {
+      const value = source[j];
+      return typeof value === "number" && Number.isFinite(value) && value >= 0
+        ? value
+        : null;
+    });
+  });
+}
+
+/**
+ * Etappen-Reihenfolge optimieren (#627): kürzester WEG ab der ERSTEN
+ * Etappe (sie bleibt der Start – dort beginnt die Reise), ohne Rückkehr.
+ * Nearest-Neighbour als Startlösung, danach 2-opt, bis nichts mehr
+ * besser wird. Fehlende Routen (`null`) zählen als sehr teuer, damit sie
+ * ans Ende rutschen statt den Optimierer zu täuschen. Ergebnis: die
+ * Index-Reihenfolge (beginnt immer mit 0).
+ */
+export function optimizeStopOrder(matrix: (number | null)[][]): number[] {
+  const n = matrix.length;
+  const identity = Array.from({ length: n }, (_, i) => i);
+  if (n <= 2) return identity;
+  const finite = matrix
+    .flat()
+    .filter((v): v is number => v != null && Number.isFinite(v));
+  const penalty = (finite.length > 0 ? Math.max(...finite) : 1) * 10 + 1;
+  const cost = (a: number, b: number) => matrix[a]?.[b] ?? penalty;
+
+  // Nearest-Neighbour ab Index 0
+  const remaining = new Set(identity.slice(1));
+  const order = [0];
+  while (remaining.size > 0) {
+    const last = order[order.length - 1];
+    let best: number | null = null;
+    for (const candidate of Array.from(remaining)) {
+      if (best === null || cost(last, candidate) < cost(last, best)) {
+        best = candidate;
+      }
+    }
+    order.push(best as number);
+    remaining.delete(best as number);
+  }
+
+  // 2-opt auf dem offenen Weg (Start bleibt fest)
+  const pathCost = (path: number[]) => {
+    let sum = 0;
+    for (let i = 1; i < path.length; i++) sum += cost(path[i - 1], path[i]);
+    return sum;
+  };
+  let improved = true;
+  while (improved) {
+    improved = false;
+    for (let i = 1; i < order.length - 1; i++) {
+      for (let j = i + 1; j < order.length; j++) {
+        const candidate = [
+          ...order.slice(0, i),
+          ...order.slice(i, j + 1).reverse(),
+          ...order.slice(j + 1),
+        ];
+        if (pathCost(candidate) < pathCost(order)) {
+          order.splice(0, order.length, ...candidate);
+          improved = true;
+        }
+      }
+    }
+  }
+  return order;
+}
+
+/**
  * Antwort des Tabellen-Diensts lesen: Wegstrecke in Metern je Ziel, in der
  * Reihenfolge der Anfrage. `null` steht für «nicht erreichbar» – eine
  * Hütte ohne Weganschluss bekommt keine erfundene Zahl.

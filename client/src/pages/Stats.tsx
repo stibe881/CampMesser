@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
 import {
   ArrowRight,
@@ -34,6 +34,7 @@ import { estimateRoadDistanceM } from "@shared/routing";
 import { tripKindRows } from "@shared/tripKindStats";
 import { tripKindLabel } from "@shared/tripKind";
 import { visitedCountryRows } from "@/lib/tripCountries";
+import { findCountryRules, guessCountryCode } from "@/data/roadRules";
 import { inventoryValue } from "@shared/inventoryValue";
 import { estimatedTotalRappen, spotCostComparison } from "@shared/spotCosts";
 import { EXPENSE_CATEGORY_LABELS } from "@shared/expenses";
@@ -57,6 +58,10 @@ import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import { useTodayIso } from "@/lib/useTodayIso";
+
+// «Wo waren wir schon»-Karte (#633): Karten-Engine nur laden, wenn es
+// wirklich Punkte gibt – die Statistik bleibt sonst kartenfrei.
+const VisitedMap = lazy(() => import("@/components/stats/VisitedMap"));
 
 /**
  * Statistik-Dashboard: bündelt die bereits vorhandenen Auswertungen der App
@@ -301,6 +306,97 @@ export default function Stats() {
     enabled: isAuthenticated,
     staleTime: 5 * 60_000,
   });
+  /**
+   * «Wo waren wir schon» (#633): alle BESUCHTEN Orte mit Koordinaten –
+   * angetretene Reisen (#465), deren Zeltplätze und Etappen. Nahe
+   * Duplikate (gleiche 3 Nachkommastellen) fallen zusammen.
+   */
+  const visitedPoints = useMemo(() => {
+    const points: { lat: number; lng: number; name: string }[] = [];
+    const seen = new Set<string>();
+    const push = (
+      lat: number | null | undefined,
+      lng: number | null | undefined,
+      name: string
+    ) => {
+      if (lat == null || lng == null) return;
+      const key = `${lat.toFixed(3)},${lng.toFixed(3)}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      points.push({ lat, lng, name });
+    };
+    const startedTripIds = new Set<number>();
+    for (const trip of trips) {
+      if (trip.startDate > today) continue;
+      startedTripIds.add(trip.id);
+      const name =
+        trip.title ||
+        (trip.spotId != null
+          ? (spots.find(s => s.id === trip.spotId)?.name ?? trip.spotName)
+          : null) ||
+        trip.location ||
+        "";
+      if (trip.latitude != null && trip.longitude != null) {
+        push(trip.latitude, trip.longitude, name);
+      } else if (trip.spotId != null) {
+        const spot = spots.find(s => s.id === trip.spotId);
+        if (spot) push(spot.latitude, spot.longitude, spot.name);
+      }
+    }
+    for (const stop of allStopsQuery.data ?? []) {
+      if (!startedTripIds.has(stop.tripId) || stop.startDate > today) continue;
+      push(stop.latitude, stop.longitude, stop.name);
+    }
+    return points;
+  }, [trips, spots, allStopsQuery.data, today]);
+
+  /**
+   * Reisekosten nach Land (#643): CHF-Summe je Reise (vom Server) auf
+   * das geratene Reiseland verteilt – gleiche Länder-Logik wie die
+   * Länder-Statistik (#510/#606). Ohne erkanntes Land landet der Betrag
+   * ehrlich unter «ohne Angabe» statt im falschen Topf.
+   */
+  const countryCosts = useMemo(() => {
+    const perTrip = expenseStatsQuery.data?.perTrip ?? [];
+    if (perTrip.length === 0) {
+      return { rows: [] as { code: string; rappen: number }[], unassigned: 0 };
+    }
+    const spotNames = new Map(
+      (spotsQuery.data ?? []).map(spot => [spot.id, spot.name])
+    );
+    const stopNamesByTrip = new Map<number, string>();
+    for (const stop of allStopsQuery.data ?? []) {
+      stopNamesByTrip.set(
+        stop.tripId,
+        `${stopNamesByTrip.get(stop.tripId) ?? ""} ${stop.name}`
+      );
+    }
+    const byCode = new Map<string, number>();
+    let unassigned = 0;
+    for (const entry of perTrip) {
+      if (entry.rappen <= 0) continue;
+      const trip = trips.find(t => t.id === entry.tripId);
+      const spotName =
+        trip?.spotId != null ? (spotNames.get(trip.spotId) ?? "") : "";
+      const code = trip
+        ? guessCountryCode(
+            `${trip.title ?? ""} ${trip.location ?? ""} ${spotName} ${
+              stopNamesByTrip.get(trip.id) ?? ""
+            }`
+          )
+        : null;
+      if (!code) {
+        unassigned += entry.rappen;
+        continue;
+      }
+      byCode.set(code, (byCode.get(code) ?? 0) + entry.rappen);
+    }
+    const rows = Array.from(byCode, ([code, rappen]) => ({ code, rappen }))
+      .filter(row => findCountryRules(row.code) !== null)
+      .sort((a, b) => b.rappen - a.rappen);
+    return { rows, unassigned };
+  }, [expenseStatsQuery.data, trips, spotsQuery.data, allStopsQuery.data]);
+
   const countryStats = useMemo(() => {
     const spotNames = new Map(
       (spotsQuery.data ?? []).map(spot => [spot.id, spot.name])
@@ -953,6 +1049,32 @@ export default function Stats() {
         </Card>
       )}
 
+      {/* «Wo waren wir schon» (#633): alle besuchten Orte auf einer
+          Mini-Karte – Reisen, Zeltplätze und Etappen mit Koordinaten. */}
+      {visitedPoints.length > 0 && (
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <SectionHeader
+              icon={Globe2}
+              title={ts.visitedMapTitle}
+              href="/karte"
+              linkLabel={ts.visitedMapLink}
+            />
+            <Suspense
+              fallback={<div className="h-64 w-full rounded-lg bg-muted/40" />}
+            >
+              <VisitedMap
+                points={visitedPoints}
+                ariaLabel={ts.visitedMapAria}
+              />
+            </Suspense>
+            <p className="mt-2 text-xs text-muted-foreground">
+              {ts.visitedMapCount(visitedPoints.length)}
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Länder-Statistik (#510): nur erkannte Länder – ein Ort wie
           «Thun» nennt kein Land und wird ehrlich als «ohne Angabe»
           gezählt statt geraten. */}
@@ -984,6 +1106,39 @@ export default function Stats() {
               <p className="mt-2 text-xs text-muted-foreground">
                 {ts.countriesUnassigned(countryStats.unassigned)}
               </p>
+            )}
+            {/* Reisekosten nach Land (#643): CHF-Summen aus der
+                Reisekasse, dem geratenen Reiseland zugeordnet. */}
+            {countryCosts.rows.length > 0 && (
+              <div className="mt-4 border-t border-border/60 pt-3">
+                <p className="mb-2 text-sm font-semibold">
+                  {ts.countryCostsTitle}
+                </p>
+                <ul className="space-y-2">
+                  {countryCosts.rows.map(row => {
+                    const country = findCountryRules(row.code);
+                    if (!country) return null;
+                    return (
+                      <li
+                        key={row.code}
+                        className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 border-b border-border/60 pb-2 last:border-0 last:pb-0"
+                      >
+                        <span className="text-sm">
+                          {country.flag} {pick(country.name, lang)}
+                        </span>
+                        <span className="text-sm tabular-nums text-muted-foreground">
+                          {fmtChf(row.rappen)}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+                {countryCosts.unassigned > 0 && (
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {ts.countryCostsUnassigned(fmtChf(countryCosts.unassigned))}
+                  </p>
+                )}
+              </div>
             )}
           </CardContent>
         </Card>

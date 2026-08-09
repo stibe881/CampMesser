@@ -150,6 +150,33 @@ describe("buildStageMoveAlert", () => {
     const alert = buildStageMoveAlert(stops, new Set([3]), TODAY, "fr");
     expect(alert?.title).toBe("Demain, direction Verona");
   });
+
+  // Wetter am Ziel (#630): die Zusatz-Zeile hängt an, wenn eine
+  // Prognose mitkommt – ohne bleibt der Text wie bisher.
+  it("hängt das Wetter am Ziel an, wenn eine Prognose mitkommt", async () => {
+    const { buildStageMoveAlert } = await import("./push");
+    const alert = buildStageMoveAlert(stops, new Set([3]), TODAY, "de", {
+      tMaxC: 23.6,
+      precipitationMm: 4.2,
+    });
+    expect(alert?.body).toContain("Wetter am Ziel: 24 °C, 4 mm Regen.");
+    const dry = buildStageMoveAlert(stops, new Set([3]), TODAY, "de", {
+      tMaxC: 18.2,
+      precipitationMm: 0.3,
+    });
+    expect(dry?.body).toContain("18 °C, trocken");
+    const plain = buildStageMoveAlert(stops, new Set([3]), TODAY);
+    expect(plain?.body).not.toContain("Wetter am Ziel");
+  });
+
+  it("findet die Ziel-Etappe samt Koordinaten (nextStageMove)", async () => {
+    const { nextStageMove } = await import("./push");
+    const withCoords = [
+      { tripId: 3, name: "Verona", startDate: TOMORROW, latitude: 45.4 },
+    ];
+    expect(nextStageMove(withCoords, new Set([3]), TODAY)?.latitude).toBe(45.4);
+    expect(nextStageMove(withCoords, new Set([9]), TODAY)).toBeNull();
+  });
 });
 
 /** Feiertags-Vorwarnung (#606): «Morgen ist Feiertag: …». */
