@@ -20,7 +20,7 @@
 - [x] #551 Drei neue Länder komplett: Portugal, Griechenland, Dänemark mit allen Feldern (Maut inkl. PT-Portal-Falle, Gespann-Tempi, Promille, Mitführpflichten wie GR-Feuerlöscher, Umweltzonen inkl. DK-miljøzoner-Registrierung, Steckdosen inkl. Typ K, Trinkgeld, Bargeld/Karte, Notruf, Camping-Regeln, Aliase). SOS-Katalog um PT und GR ergänzt (DK war schon drin)
 - [x] #552 Offline-Paket für geplante Routen: «Offline-Karte laden» pro gespeicherter Route lädt die Kacheln in einem 1-km-Korridor entlang der Strecke (tilesForCorridor in mapTiles.ts, 5 Tests) in denselben Cache wie die Platz-Pakete (#217) – der Service Worker bedient sie ohne Änderung. Fortschritt/Abbrechen/Löschen wie beim Platz; Löschen der Route räumt das Paket mit ab
 - [x] #553 Jahresziel Reisenächte in der Statistik (eigene Karte mit Fortschrittsbalken fürs laufende Jahr; Ziel 1–365 selbst gesteckt, am Konto gesynct über neuen Schlüssel nightsGoal, jederzeit entfernbar)
-- [ ] #554 Technik: TripsPage aufteilen
+- [x] #554 Technik: TripsPage aufteilen: Die zwei fast wortgleichen Reise-Karten (geplant/vergangen) teilten sich Meta-Zeile, Aktions-Spalte und den LazySection-Stapel der Detailseite als KOPIEN – jede Änderung musste zweimal getippt werden (zuletzt #536). Neu leben die drei Blöcke einmal in TripListItemParts.tsx (TripMetaLine, TripActionColumn, TripDetailSections mit phase «planned»/«past»); Trips.tsx schrumpft von 1951 auf 1431 Zeilen, Verhalten unverändert
 - [ ] #555 Technik: Druckseiten im Playwright-Smoke-Test
 
 ## Zwanzig Vorschläge (09.08.2026, Runde 53)
