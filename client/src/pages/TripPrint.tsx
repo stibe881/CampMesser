@@ -385,6 +385,18 @@ export default function TripPrintPage() {
                       : ""}
                   </p>
                   <p className="whitespace-pre-line text-sm">{entry.text}</p>
+                  {/* Tages-Foto (#598): das Bild des Tages gehört in den
+                      Bericht – klein neben den Text, nicht als Poster */}
+                  {entry.photoFileName && (
+                    <img
+                      src={`/api/trips/journal/photos/${entry.photoFileName}`}
+                      alt={t.tripPrint.journalPhotoAlt(
+                        fmtJournalDay(entry.day)
+                      )}
+                      loading="lazy"
+                      className="mt-1.5 max-h-40 rounded-lg object-cover"
+                    />
+                  )}
                 </li>
               ))}
             </ul>

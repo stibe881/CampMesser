@@ -79,3 +79,43 @@ export function averageConsumptionL100(
   );
   return Math.round((liters / km) * 100 * 10) / 10;
 }
+
+/** Eine Füllung mit Betrag – so, wie die Monatsauswertung sie braucht. */
+export interface FuelFillWithPrice {
+  /** ISO-Tag der Füllung (YYYY-MM-DD). */
+  day: string;
+  /** Bezahlter Gesamtbetrag in Rappen; null = nicht erfasst. */
+  priceRappen?: number | null;
+}
+
+export interface FuelMonthCost {
+  /** Monat als YYYY-MM. */
+  month: string;
+  totalRappen: number;
+  fills: number;
+}
+
+/**
+ * Tank-Kosten pro Monat (#610): Füllungen MIT Betrag nach Monat summiert,
+ * neuster Monat zuerst. Füllungen ohne Preis fallen ehrlich weg – ihr
+ * Monat erscheint dann gar nicht oder mit kleinerer Summe, statt dass
+ * geraten wird.
+ */
+export function fuelMonthlyCosts(
+  fills: readonly FuelFillWithPrice[],
+  limit = 12
+): FuelMonthCost[] {
+  const byMonth = new Map<string, { totalRappen: number; fills: number }>();
+  for (const fill of fills) {
+    if (fill.priceRappen == null || fill.priceRappen <= 0) continue;
+    if (!/^\d{4}-\d{2}/.test(fill.day)) continue;
+    const month = fill.day.slice(0, 7);
+    const entry = byMonth.get(month) ?? { totalRappen: 0, fills: 0 };
+    entry.totalRappen += fill.priceRappen;
+    entry.fills += 1;
+    byMonth.set(month, entry);
+  }
+  return Array.from(byMonth, ([month, entry]) => ({ month, ...entry }))
+    .sort((a, b) => b.month.localeCompare(a.month))
+    .slice(0, Math.max(1, limit));
+}

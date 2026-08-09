@@ -27,7 +27,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
-import { computeTripStats, nightsPerYear } from "@shared/trips";
+import { computeTripStats, nightsPerYear, tripNights } from "@shared/trips";
 import { trackYearRows } from "@shared/trackYears";
 import { distanceMeters } from "@shared/geo";
 import { estimateRoadDistanceM } from "@shared/routing";
@@ -334,17 +334,29 @@ export default function Stats() {
       list.push(stop);
       stopsByTrip.set(stop.tripId, list);
     }
-    const chains: { year: string; points: { lat: number; lon: number }[] }[] =
-      [];
+    const chains: {
+      year: string;
+      tripId: number;
+      name: string;
+      points: { lat: number; lon: number }[];
+    }[] = [];
     for (const trip of trips) {
       const stops = stopsByTrip.get(trip.id) ?? [];
       const year = trip.startDate.slice(0, 4);
+      const name =
+        trip.title ||
+        (trip.spotId != null
+          ? (spots.find(s => s.id === trip.spotId)?.name ?? trip.spotName)
+          : null) ||
+        trip.location ||
+        year;
       // Zusammenhängende Läufe mit Koordinaten: eine Etappe ohne
       // Koordinaten unterbricht die Kette (wie bisher: der Abschnitt
       // davor/danach zählt nicht).
       let run: { lat: number; lon: number }[] = [];
       const flush = () => {
-        if (run.length >= 2) chains.push({ year, points: run });
+        if (run.length >= 2)
+          chains.push({ year, tripId: trip.id, name, points: run });
         run = [];
       };
       for (const stop of stops) {
@@ -357,18 +369,25 @@ export default function Stats() {
       flush();
     }
     return chains;
-  }, [trips, allStopsQuery.data]);
+  }, [trips, spots, allStopsQuery.data]);
   const [stageKm, setStageKm] = useState<{
     rows: { year: string; meters: number }[];
     estimated: boolean;
   } | null>(null);
+  /** Rekord «weiteste Rundreise» (#612) – aus denselben Wegstrecken. */
+  const [furthestTrip, setFurthestTrip] = useState<{
+    name: string;
+    meters: number;
+  } | null>(null);
   useEffect(() => {
     setStageKm(null);
+    setFurthestTrip(null);
     if (stageChains.length === 0) return;
     let cancelled = false;
     void (async () => {
       const { fetchChainDistances } = await import("@/lib/routing");
       const metersByYear = new Map<string, number>();
+      const metersByTrip = new Map<number, { name: string; meters: number }>();
       let estimated = false;
       for (const chain of stageChains) {
         const routed = cancelled
@@ -396,16 +415,63 @@ export default function Stats() {
           chain.year,
           (metersByYear.get(chain.year) ?? 0) + meters
         );
+        const perTrip = metersByTrip.get(chain.tripId) ?? {
+          name: chain.name,
+          meters: 0,
+        };
+        perTrip.meters += meters;
+        metersByTrip.set(chain.tripId, perTrip);
       }
       const rows = Array.from(metersByYear.entries())
         .map(([year, meters]) => ({ year, meters }))
         .sort((a, b) => b.year.localeCompare(a.year));
-      if (!cancelled) setStageKm({ rows, estimated });
+      if (!cancelled) {
+        setStageKm({ rows, estimated });
+        let furthest: { name: string; meters: number } | null = null;
+        metersByTrip.forEach(entry => {
+          if (!furthest || entry.meters > furthest.meters) furthest = entry;
+        });
+        setFurthestTrip(furthest);
+      }
     })();
     return () => {
       cancelled = true;
     };
   }, [stageChains]);
+  /**
+   * Rekorde (#612): die Karte fürs Lagerfeuer – meiste Nächte am Stück,
+   * längste Etappe einer Rundreise; die weiteste Rundreise kommt aus den
+   * gerouteten Wegstrecken oben (furthestTrip).
+   */
+  const records = useMemo(() => {
+    let longestTrip: { name: string; nights: number } | null = null;
+    for (const trip of trips) {
+      const nights = tripNights(trip.startDate, trip.endDate);
+      if (nights <= 0) continue;
+      if (!longestTrip || nights > longestTrip.nights) {
+        longestTrip = {
+          name:
+            trip.title ||
+            (trip.spotId != null
+              ? (spots.find(s => s.id === trip.spotId)?.name ?? trip.spotName)
+              : null) ||
+            trip.location ||
+            trip.startDate.slice(0, 4),
+          nights,
+        };
+      }
+    }
+    let longestStage: { name: string; nights: number } | null = null;
+    for (const stop of allStopsQuery.data ?? []) {
+      const nights = tripNights(stop.startDate, stop.endDate);
+      if (nights <= 0) continue;
+      if (!longestStage || nights > longestStage.nights) {
+        longestStage = { name: stop.name, nights };
+      }
+    }
+    return { longestTrip, longestStage };
+  }, [trips, spots, allStopsQuery.data]);
+
   /** Inventar-Gesamtwert (#511) aus den erfassten Kaufpreisen. */
   const inventoryWorth = useMemo(
     () => inventoryValue(inventoryQuery.data ?? []),
@@ -793,6 +859,66 @@ export default function Stats() {
                 </p>
               </>
             )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Rekorde (#612): meiste Nächte am Stück, längste Etappe, weiteste
+          Rundreise – die Zahlen, mit denen man am Lagerfeuer angibt. */}
+      {(records.longestTrip || records.longestStage || furthestTrip) && (
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <SectionHeader
+              icon={Trophy}
+              title={ts.recordsTitle}
+              href="/tagebuch"
+              linkLabel={ts.tripsLink}
+            />
+            <ul className="space-y-2">
+              {records.longestTrip && (
+                <li className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 border-b border-border/60 pb-2 last:border-0 last:pb-0">
+                  <span className="text-sm">
+                    {ts.recordLongestTrip}
+                    <span className="ml-1.5 text-xs text-muted-foreground">
+                      {records.longestTrip.name}
+                    </span>
+                  </span>
+                  <span className="text-sm font-semibold tabular-nums">
+                    {t.trips.nightsCount(records.longestTrip.nights)}
+                  </span>
+                </li>
+              )}
+              {records.longestStage && (
+                <li className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 border-b border-border/60 pb-2 last:border-0 last:pb-0">
+                  <span className="text-sm">
+                    {ts.recordLongestStage}
+                    <span className="ml-1.5 text-xs text-muted-foreground">
+                      {records.longestStage.name}
+                    </span>
+                  </span>
+                  <span className="text-sm font-semibold tabular-nums">
+                    {t.trips.nightsCount(records.longestStage.nights)}
+                  </span>
+                </li>
+              )}
+              {furthestTrip && (
+                <li className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 border-b border-border/60 pb-2 last:border-0 last:pb-0">
+                  <span className="text-sm">
+                    {ts.recordFurthestTrip}
+                    <span className="ml-1.5 text-xs text-muted-foreground">
+                      {furthestTrip.name}
+                    </span>
+                  </span>
+                  <span className="text-sm font-semibold tabular-nums">
+                    {ts.stageKmLine(
+                      Math.round(furthestTrip.meters / 1000).toLocaleString(
+                        LOCALE_TAGS[lang]
+                      )
+                    )}
+                  </span>
+                </li>
+              )}
+            </ul>
           </CardContent>
         </Card>
       )}

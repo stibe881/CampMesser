@@ -3238,6 +3238,7 @@ export const de = {
     dayHeader: "Tag",
     photosTitle: "Fotos",
     photoAlt: (n: number, name: string) => `Foto ${n} vom Aufenthalt ${name}`,
+    journalPhotoAlt: (day: string) => `Tages-Foto vom ${day}`,
     footer:
       "Schöne Erinnerungen! · ReiseKompass – Dein Kompass für Ferien, Camping und Ausflüge",
   },
@@ -6885,6 +6886,10 @@ export const de = {
     subtitle: "Tankfüllungen mit Kilometerstand – daraus der echte Verbrauch.",
     loginFeature: "das Tankbuch",
     averageTitle: "Durchschnittsverbrauch",
+    monthlyTitle: "Tank-Kosten pro Monat",
+    monthlyFills: (n: number) => (n === 1 ? "1 Füllung" : `${n} Füllungen`),
+    monthlyHint:
+      "Nur Füllungen mit erfasstem Betrag – ohne Preis wird nichts geraten.",
     averageHint:
       "Gewichtet über alle plausiblen Abschnitte. Der Fahrtkosten-Rechner in der Reisekasse kann diesen Wert übernehmen.",
     addTitle: "Tankfüllung erfassen",
@@ -6945,6 +6950,10 @@ export const de = {
     avgRatingLabel: "Ø Bewertung",
     hikeYearsTitle: "Wander-Jahresbilanz",
     stageKmTitle: "Rundreise-Kilometer",
+    recordsTitle: "Rekorde",
+    recordLongestTrip: "Meiste Nächte am Stück",
+    recordLongestStage: "Längste Etappe",
+    recordFurthestTrip: "Weiteste Rundreise",
     stageKmLine: (km: string) => `\u2248 ${km} km`,
     stageKmHint: "Über die Strasse zwischen den Etappen (OSRM/OpenStreetMap).",
     stageKmHintEstimate:

@@ -67,3 +67,38 @@ describe("averageConsumptionL100", () => {
     expect(averageConsumptionL100([])).toBeNull();
   });
 });
+
+/** Tank-Kosten pro Monat (#610). */
+describe("fuelMonthlyCosts", () => {
+  it("summiert Füllungen mit Betrag pro Monat, neuster zuerst", async () => {
+    const { fuelMonthlyCosts } = await import("@shared/fuelLog");
+    const result = fuelMonthlyCosts([
+      { day: "2026-07-03", priceRappen: 8000 },
+      { day: "2026-07-21", priceRappen: 9500 },
+      { day: "2026-08-02", priceRappen: 7000 },
+      // Ohne Preis: fällt ehrlich weg
+      { day: "2026-08-05", priceRappen: null },
+    ]);
+    expect(result).toEqual([
+      { month: "2026-08", totalRappen: 7000, fills: 1 },
+      { month: "2026-07", totalRappen: 17_500, fills: 2 },
+    ]);
+  });
+
+  it("begrenzt auf die neusten Monate und bleibt bei leerer Liste leer", async () => {
+    const { fuelMonthlyCosts } = await import("@shared/fuelLog");
+    expect(fuelMonthlyCosts([])).toEqual([]);
+    const many = Array.from({ length: 15 }, (_, i) => ({
+      day: `2025-${String(i + 1).padStart(2, "0")}-10`.slice(0, 10),
+      priceRappen: 1000,
+    })).filter(f => /^\d{4}-\d{2}-\d{2}$/.test(f.day));
+    const limited = fuelMonthlyCosts(
+      many.map((f, i) => ({
+        day: `${2024 + Math.floor(i / 12)}-${String((i % 12) + 1).padStart(2, "0")}-10`,
+        priceRappen: 1000,
+      }))
+    );
+    expect(limited.length).toBeLessThanOrEqual(12);
+    expect(limited[0].month >= limited[limited.length - 1].month).toBe(true);
+  });
+});

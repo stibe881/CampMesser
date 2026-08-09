@@ -59,6 +59,7 @@ import {
   parseTripWeather,
   summarizeTripWeather,
   TRIP_WEATHER_ARCHIVE_MIN_AGE_DAYS,
+  tripWeatherDayList,
   weatherLuck,
 } from "@shared/tripWeather";
 
@@ -138,13 +139,24 @@ export default function TripWeatherArchive({
           .map((date, i) => ({ date, i }))
           .filter(d => d.date >= startDate && d.date <= endDate)
           .map(d => d.i);
-        const summary = summarizeTripWeather({
+        const rangeDaily = {
           temperature_2m_max: inRange.map(i => daily.temperature_2m_max?.[i]),
           temperature_2m_min: inRange.map(i => daily.temperature_2m_min?.[i]),
           precipitation_sum: inRange.map(i => daily.precipitation_sum?.[i]),
-        });
+        };
+        const summary = summarizeTripWeather(rangeDaily);
         // Noch lückenhaft (z. B. Archiv hinkt nach) → beim nächsten Besuch erneut
-        if (summary) mutateRef.current({ id: tripId, summary });
+        if (summary) {
+          // Tages-Wetter fürs Journal (#608) gleich mit archivieren
+          mutateRef.current({
+            id: tripId,
+            summary,
+            days: tripWeatherDayList(
+              inRange.map(i => daily.time[i]),
+              rangeDaily
+            ),
+          });
+        }
       })
       .catch(() => {
         // Wetterdienst nicht erreichbar – still bleiben, später erneut versuchen

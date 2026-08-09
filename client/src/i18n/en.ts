@@ -3120,6 +3120,7 @@ export const en: Translation = {
     dayHeader: "Day",
     photosTitle: "Photos",
     photoAlt: (n, name) => `Photo ${n} of the stay ${name}`,
+    journalPhotoAlt: (day: string) => `Photo of the day, ${day}`,
     footer:
       "Great memories! · ReiseKompass – your compass for holidays, camping and day trips",
   },
@@ -6693,6 +6694,10 @@ export const en: Translation = {
     subtitle: "Fill-ups with odometer reading – for your real consumption.",
     loginFeature: "the fuel log",
     averageTitle: "Average consumption",
+    monthlyTitle: "Fuel costs per month",
+    monthlyFills: (n: number) => (n === 1 ? "1 fill-up" : `${n} fill-ups`),
+    monthlyHint:
+      "Only fill-ups with a recorded amount – nothing is guessed without a price.",
     averageHint:
       "Weighted across all plausible segments. The trip cost calculator in the kitty can adopt this value.",
     addTitle: "Record a fill-up",
@@ -6753,6 +6758,10 @@ export const en: Translation = {
     avgRatingLabel: "Avg. rating",
     hikeYearsTitle: "Hiking year totals",
     stageKmTitle: "Round-trip kilometres",
+    recordsTitle: "Records",
+    recordLongestTrip: "Most nights in a row",
+    recordLongestStage: "Longest stage",
+    recordFurthestTrip: "Longest road trip",
     stageKmLine: (km: string) => `\u2248 ${km} km`,
     stageKmHint: "By road between the stages (OSRM/OpenStreetMap).",
     stageKmHintEstimate:

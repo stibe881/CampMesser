@@ -33,6 +33,23 @@ export const TRIP_WEATHER_MAX_PRECIP_MM = 20000;
  */
 export const TRIP_WEATHER_ARCHIVE_MIN_AGE_DAYS = 5;
 
+/** Höchstens so viele Tageszeilen wandern ins Archiv (längster Abruf). */
+export const TRIP_WEATHER_MAX_DAY_ENTRIES = 92;
+
+/**
+ * Archiviertes Tages-Wetter (#608): eine Zeile pro Reisetag, damit das
+ * Journal später neben «Regentag, Museum» auch die 9 Grad zeigen kann.
+ * Ältere Archive (nur Zusammenfassung) bleiben gültig – die Tagesliste
+ * ist ein optionaler Zusatz im selben JSON.
+ */
+export interface TripWeatherDay {
+  date: string;
+  tMax: number;
+  tMin: number;
+  /** Niederschlag des Tages in mm. */
+  precip: number;
+}
+
 /** Tageswerte, wie sie Archive- und Forecast-API unter `daily` liefern. */
 export interface TripWeatherDaily {
   temperature_2m_max: (number | null)[];
@@ -92,6 +109,80 @@ export function summarizeTripWeather(
     rainDays,
     totalPrecip: round1(Math.min(totalPrecip, TRIP_WEATHER_MAX_PRECIP_MM)),
   };
+}
+
+/**
+ * Tages-Wetterzeilen fürs Archiv bauen (#608): pro Datum ein Eintrag, Tage
+ * mit lückigen Temperaturen fallen still weg. Die Reihenfolge folgt den
+ * übergebenen Daten (chronologisch, wie Open-Meteo liefert).
+ */
+export function tripWeatherDayList(
+  dates: readonly string[],
+  daily: TripWeatherDaily
+): TripWeatherDay[] {
+  const days: TripWeatherDay[] = [];
+  for (let i = 0; i < dates.length; i++) {
+    if (days.length >= TRIP_WEATHER_MAX_DAY_ENTRIES) break;
+    const max = daily.temperature_2m_max?.[i];
+    const min = daily.temperature_2m_min?.[i];
+    if (!validTemp(max) || !validTemp(min) || min > max) continue;
+    const rawPrecip = daily.precipitation_sum?.[i];
+    const precip =
+      typeof rawPrecip === "number" && Number.isFinite(rawPrecip)
+        ? Math.max(0, rawPrecip)
+        : 0;
+    days.push({
+      date: dates[i],
+      tMax: round1(max),
+      tMin: round1(min),
+      precip: round1(Math.min(precip, TRIP_WEATHER_MAX_PRECIP_MM)),
+    });
+  }
+  return days;
+}
+
+/**
+ * Tagesliste aus dem gespeicherten Wetter-JSON lesen – Archive ohne (oder
+ * mit kaputter) Tagesliste ergeben []; die Zusammenfassung bleibt davon
+ * unberührt (parseTripWeather).
+ */
+export function parseTripWeatherDays(
+  json: string | null | undefined
+): TripWeatherDay[] {
+  if (!json) return [];
+  try {
+    const parsed = JSON.parse(json) as { days?: unknown };
+    if (!parsed || typeof parsed !== "object" || !Array.isArray(parsed.days)) {
+      return [];
+    }
+    const clean: TripWeatherDay[] = [];
+    for (const entry of parsed.days) {
+      if (clean.length >= TRIP_WEATHER_MAX_DAY_ENTRIES) break;
+      if (typeof entry !== "object" || entry === null) continue;
+      const e = entry as Partial<TripWeatherDay>;
+      if (
+        typeof e.date !== "string" ||
+        !/^\d{4}-\d{2}-\d{2}$/.test(e.date) ||
+        !validTemp(e.tMax) ||
+        !validTemp(e.tMin) ||
+        e.tMin > e.tMax ||
+        typeof e.precip !== "number" ||
+        !Number.isFinite(e.precip) ||
+        e.precip < 0 ||
+        e.precip > TRIP_WEATHER_MAX_PRECIP_MM
+      )
+        continue;
+      clean.push({
+        date: e.date,
+        tMax: e.tMax,
+        tMin: e.tMin,
+        precip: e.precip,
+      });
+    }
+    return clean;
+  } catch {
+    return [];
+  }
 }
 
 /**

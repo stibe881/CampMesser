@@ -28,6 +28,7 @@ import {
   TRIP_BOARD_KINDS,
   TRIP_BOARD_TEXT_MAX_LENGTH,
   TRIP_JOURNAL_MAX_LENGTH,
+  TRIP_WEATHER_MAX_DAY_ENTRIES,
   TRIP_WEATHER_MAX_PRECIP_MM,
   TRIP_WEATHER_MAX_RAIN_DAYS,
   TRIP_WEATHER_TEMP_MAX,
@@ -715,6 +716,29 @@ export const tripsRouters = {
             .refine(v => v.tMin <= v.tMax, {
               message: "Minimum darf nicht über dem Maximum liegen.",
             }),
+          // Tages-Wetter fürs Journal (#608) – optional, alte Clients
+          // schicken weiterhin nur die Zusammenfassung
+          days: z
+            .array(
+              z
+                .object({
+                  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+                  tMax: z
+                    .number()
+                    .min(TRIP_WEATHER_TEMP_MIN)
+                    .max(TRIP_WEATHER_TEMP_MAX),
+                  tMin: z
+                    .number()
+                    .min(TRIP_WEATHER_TEMP_MIN)
+                    .max(TRIP_WEATHER_TEMP_MAX),
+                  precip: z.number().min(0).max(TRIP_WEATHER_MAX_PRECIP_MM),
+                })
+                .refine(v => v.tMin <= v.tMax, {
+                  message: "Minimum darf nicht über dem Maximum liegen.",
+                })
+            )
+            .max(TRIP_WEATHER_MAX_DAY_ENTRIES)
+            .optional(),
         })
       )
       .mutation(async ({ ctx, input }) => {
@@ -728,7 +752,11 @@ export const tripsRouters = {
         await db.setTripLogWeather(
           input.id,
           trip.userId,
-          JSON.stringify(input.summary)
+          JSON.stringify(
+            input.days && input.days.length > 0
+              ? { ...input.summary, days: input.days }
+              : input.summary
+          )
         );
         return { success: true } as const;
       }),

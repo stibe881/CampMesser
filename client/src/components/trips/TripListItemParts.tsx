@@ -67,6 +67,8 @@ export interface TripListTrip {
   endDate: string;
   arrivalTime: string | null;
   departureTime: string | null;
+  /** Wetterarchiv (#102) – fürs Tages-Wetter im Journal (#608). */
+  weatherJson?: string | null;
 }
 
 /** Meta-Zeile: Mit-wem, Ort (als Dossier-Link), Zeitraum, Zeiten, Nächte. */
@@ -333,6 +335,7 @@ export function TripDetailSections({
             startDate={trip.startDate}
             endDate={trip.endDate}
             shared={shared}
+            weatherJson={trip.weatherJson ?? null}
           />
         )}
         {/* Reisekasse (#219): auch schon vor der Anreise – Platzmiete

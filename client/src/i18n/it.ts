@@ -3198,6 +3198,7 @@ export const it: Translation = {
     dayHeader: "Giorno",
     photosTitle: "Foto",
     photoAlt: (n, name) => `Foto ${n} del soggiorno ${name}`,
+    journalPhotoAlt: (day: string) => `Foto del giorno del ${day}`,
     footer:
       "Bei ricordi! · ReiseKompass – la tua bussola per vacanze, campeggio e gite",
   },
@@ -6838,6 +6839,10 @@ export const it: Translation = {
     subtitle: "I pieni con chilometraggio – per il consumo reale.",
     loginFeature: "il libretto carburante",
     averageTitle: "Consumo medio",
+    monthlyTitle: "Costi carburante al mese",
+    monthlyFills: (n: number) => (n === 1 ? "1 pieno" : `${n} pieni`),
+    monthlyHint:
+      "Solo i pieni con importo registrato – senza prezzo non si indovina nulla.",
     averageHint:
       "Ponderato su tutti i tratti plausibili. Il calcolatore dei costi di viaggio nella cassa può riprendere questo valore.",
     addTitle: "Registra un pieno",
@@ -6898,6 +6903,10 @@ export const it: Translation = {
     avgRatingLabel: "Valutazione media",
     hikeYearsTitle: "Bilancio annuale delle escursioni",
     stageKmTitle: "Chilometri dei giri",
+    recordsTitle: "Record",
+    recordLongestTrip: "Più notti di fila",
+    recordLongestStage: "Tappa più lunga",
+    recordFurthestTrip: "Tour più lungo",
     stageKmLine: (km: string) => `\u2248 ${km} km`,
     stageKmHint: "Su strada tra le tappe (OSRM/OpenStreetMap).",
     stageKmHintEstimate:
