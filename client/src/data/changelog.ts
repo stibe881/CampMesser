@@ -28,6 +28,48 @@ export type { ChangelogBlock };
 
 export const changelog: ChangelogBlock[] = [
   {
+    id: "2026-08-09.6",
+    date: "2026-08-09",
+    entries: [
+      l4(
+        "Vergangene Aufenthalte lassen sich jetzt archivieren: Sie verschwinden aus der Liste in einen eigenen Archiv-Abschnitt, bleiben aber in Statistik, Reisepass und Suche erhalten – und kommen per Klick zurück.",
+        "Les séjours passés peuvent désormais être archivés : ils quittent la liste pour une section d’archives dédiée, mais restent dans les statistiques, le passeport et la recherche – et reviennent d’un clic.",
+        "I soggiorni passati ora si possono archiviare: spariscono dalla lista in una sezione archivio dedicata, ma restano in statistiche, passaporto e ricerca – e tornano con un clic.",
+        "Past stays can now be archived: they leave the list for a dedicated archive section but remain in statistics, passport and search – and come back with one click."
+      ),
+      l4(
+        "Ein Bild sagt mehr: Jeder Merkort und jeder Tag im Reise-Journal kann jetzt EIN Foto tragen – die Bucht aus dem Prospekt am Stern auf der Karte, das Gipfelfoto am Tageseintrag.",
+        "Une image en dit plus : chaque lieu repéré et chaque jour du journal de voyage peut désormais porter UNE photo – la crique du prospectus sur l’étoile de la carte, la photo du sommet sur l’entrée du jour.",
+        "Un’immagine dice di più: ogni luogo salvato e ogni giorno del diario di viaggio ora può portare UNA foto – la baia del dépliant sulla stella della mappa, la foto della vetta sulla voce del giorno.",
+        "A picture says more: every saved place and every day in the trip journal can now carry ONE photo – the cove from the brochure on the map star, the summit photo on the day entry."
+      ),
+      l4(
+        "Orte aus anderen Karten-Apps landen per Teilen-Menü direkt als Merkort: Die App liest Koordinaten aus geo:-Links, Google Maps und OpenStreetMap und speichert den Punkt mit einem Klick.",
+        "Les lieux d’autres apps de cartes arrivent via le menu Partager directement comme lieu repéré : l’app lit les coordonnées des liens geo:, de Google Maps et d’OpenStreetMap et enregistre le point d’un clic.",
+        "I luoghi di altre app di mappe arrivano dal menu Condividi direttamente come luogo salvato: l’app legge le coordinate dai link geo:, da Google Maps e da OpenStreetMap e salva il punto con un clic.",
+        "Places from other map apps arrive via the share menu directly as a saved place: the app reads coordinates from geo: links, Google Maps and OpenStreetMap and saves the point with one click."
+      ),
+      l4(
+        "Die Etappen sind überall angekommen: Beim Erfassen schlagen Favoriten und Merkorte den Ort vor, verschobene Etappen nehmen auf Wunsch die folgenden mit, der Vorabend-Hinweis kennt den Weiterzug, die Suche findet Etappen, und die Statistik zählt Etappen-Kilometer und Länder-Nächte.",
+        "Les étapes sont partout : à la saisie, favoris et lieux repérés proposent le lieu, les étapes déplacées emmènent sur demande les suivantes, l’avis de la veille connaît le départ, la recherche trouve les étapes, et les statistiques comptent kilomètres d’étapes et nuits par pays.",
+        "Le tappe sono arrivate ovunque: nell’inserimento preferiti e luoghi salvati propongono il posto, le tappe spostate portano con sé su richiesta le successive, l’avviso serale conosce la partenza, la ricerca trova le tappe, e le statistiche contano chilometri di tappa e notti per paese.",
+        "Stages have arrived everywhere: when entering, favourites and saved places suggest the location, moved stages take the following ones along on request, the evening notice knows about moving on, search finds stages, and statistics count stage kilometres and country nights."
+      ),
+      l4(
+        "Drei neue Länder im Regel-Katalog – Tschechien, Polen und Ungarn mit E-Vignetten-Fallen und Camping-Hinweisen – plus eine neue Karte «Motorrad & Velo» für alle 18 Länder. Und die SOS-Seite kennt jetzt die Pannenhilfe.",
+        "Trois nouveaux pays dans le catalogue des règles – Tchéquie, Pologne et Hongrie avec pièges de la vignette électronique et conseils camping – plus une nouvelle carte « Moto & vélo » pour les 18 pays. Et la page SOS connaît désormais le dépannage.",
+        "Tre nuovi paesi nel catalogo delle regole – Cechia, Polonia e Ungheria con trappole della vignetta elettronica e consigli campeggio – più una nuova scheda «Moto e bici» per tutti i 18 paesi. E la pagina SOS ora conosce il soccorso stradale.",
+        "Three new countries in the rules catalogue – Czechia, Poland and Hungary with e-vignette traps and camping notes – plus a new “Motorbike & bike” card for all 18 countries. And the SOS page now knows roadside assistance."
+      ),
+      l4(
+        "Rund ums Wetter: Das Reise-Cockpit zeigt eine Wetterampel über deine Reisetage, die Heute-Ansicht nennt Schneefallgrenze und dicke Luft, die Schnell-Ausgabe rechnet das Tagesbudget vor – und auf dem iPhone sind die zu breiten Datumsfelder repariert.",
+        "Autour de la météo : le cockpit du voyage montre un feu météo sur tes jours de voyage, la vue Aujourd’hui indique la limite pluie-neige et l’air pollué, la saisie rapide calcule le budget du jour – et sur iPhone, les champs de date trop larges sont réparés.",
+        "Intorno al meteo: il cockpit del viaggio mostra un semaforo meteo sui tuoi giorni di viaggio, la vista Oggi indica il limite delle nevicate e l’aria pesante, la spesa rapida calcola il budget del giorno – e su iPhone i campi data troppo larghi sono riparati.",
+        "Around the weather: the trip cockpit shows a weather light across your trip days, the Today view names the snow line and heavy air, the quick expense shows the day budget – and on iPhone the too-wide date fields are fixed."
+      ),
+    ],
+  },
+  {
     id: "2026-08-09.5",
     date: "2026-08-09",
     entries: [
@@ -120,48 +162,6 @@ export const changelog: ChangelogBlock[] = [
         "Plein de petits assistants : copier la liste de bagages ou de courses comme texte, des cases \u00e0 cocher dans les notes, tes propres phrases dans l\u2019aide linguistique, une \u00e9criture plus grande dans le profil, un objectif annuel de nuit\u00e9es dans les statistiques \u2013 et la phrase d\u2019urgence indique en Suisse les coordonn\u00e9es utilis\u00e9es par la centrale d\u2019engagement.",
         "Tanti piccoli aiuti: copiare la lista bagagli o della spesa come testo, caselle da spuntare nelle note, frasi personali nell\u2019aiuto linguistico, caratteri pi\u00f9 grandi nel profilo, un obiettivo annuale di notti in viaggio nelle statistiche \u2013 e la frase d\u2019emergenza in Svizzera ora indica le coordinate usate dalla centrale operativa.",
         "Lots of small helpers: copy packing and shopping lists as text, tickable boxes in notes, your own phrases in the phrasebook, larger text in the profile, a yearly goal for travel nights in the statistics \u2013 and in Switzerland the emergency phrase now includes the coordinates the dispatch centre works with."
-      ),
-    ],
-  },
-  {
-    id: "2026-08-09.3",
-    date: "2026-08-09",
-    entries: [
-      l4(
-        "Die Druck-Knöpfe (Packliste, Reisepass, Reise-Bericht und weitere) funktionieren jetzt auch in der installierten App auf dem iPhone: Sie öffnen die Seite im Browser, wo sich der Druck-Dialog zuverlässig zeigt.",
-        "Les boutons d'impression (liste de bagages, passeport, rapport de voyage et autres) fonctionnent désormais aussi dans l'app installée sur iPhone : ils ouvrent la page dans le navigateur, où la boîte d'impression s'affiche de façon fiable.",
-        "I pulsanti di stampa (lista bagagli, passaporto, rapporto di viaggio e altri) ora funzionano anche nell'app installata su iPhone: aprono la pagina nel browser, dove la finestra di stampa appare in modo affidabile.",
-        "The print buttons (packing list, passport, trip report and more) now also work in the installed app on iPhone: they open the page in the browser, where the print dialog shows up reliably."
-      ),
-      l4(
-        "Die Packliste kennt neu eine Limite pro Person – zum Beispiel 23 kg Fluggepäck. Die Traglast-Zeile färbt ein, wer darüber liegt. Dazu gibt es neue Vorlagen für Hotelferien und Velotouren, und beim Anlegen einer Reise schlägt die App gleich die passende Packliste vor.",
-        "La liste de bagages connaît désormais une limite par personne – par exemple 23 kg de bagages en avion. La ligne de charge met en évidence qui la dépasse. S'y ajoutent de nouveaux modèles pour les vacances à l'hôtel et les tours à vélo, et en créant un voyage, l'app propose directement la liste adaptée.",
-        "La lista bagagli ora conosce un limite per persona – per esempio 23 kg di bagaglio aereo. La riga del carico evidenzia chi lo supera. In più ci sono nuovi modelli per le vacanze in hotel e i giri in bici, e creando un viaggio l'app propone subito la lista adatta.",
-        "The packing list now knows a limit per person – for example 23 kg of flight luggage. The load line highlights who is over it. There are also new templates for hotel holidays and bike tours, and when creating a trip the app suggests the matching list right away."
-      ),
-      l4(
-        "Die Reisekasse holt den Euro-Kurs jetzt bei der EZB: Der Referenzkurs steht mit Datum im Kurs-Kasten und lässt sich mit einem Klick übernehmen – offline bleibt der letzte bekannte Kurs.",
-        "La caisse de voyage va désormais chercher le cours de l'euro à la BCE : le cours de référence figure avec sa date dans l'encadré et se reprend d'un clic – hors ligne, le dernier cours connu reste disponible.",
-        "La cassa di viaggio ora prende il cambio dell'euro dalla BCE: il tasso di riferimento sta con la sua data nel riquadro e si applica con un clic – offline resta l'ultimo cambio noto.",
-        "The trip wallet now fetches the euro rate from the ECB: the reference rate sits in the rate box with its date and can be applied with one click – offline, the last known rate remains."
-      ),
-      l4(
-        "Mehr Wissen fürs Reiseland: Die Länder-Seite zeigt neu Steckdosen samt Adapter-Tipp und den Trinkgeld-Knigge. Bei einer laufenden Auslandsreise stellt die SOS-Seite die Notrufnummern deines Reiselands zuoberst, und das Reise-Cockpit verweist vor der Abreise auf die Regeln des Ziellands.",
-        "Plus de repères pour le pays de voyage : la page des pays montre désormais les prises avec conseil d'adaptateur et les usages du pourboire. Pendant un voyage à l'étranger, la page SOS place les numéros d'urgence de ton pays de voyage en tête, et le cockpit du voyage renvoie avant le départ aux règles du pays de destination.",
-        "Più riferimenti per il paese di viaggio: la pagina dei paesi ora mostra le prese con consiglio sull'adattatore e il galateo della mancia. Durante un viaggio all'estero la pagina SOS mette in cima i numeri di emergenza del tuo paese di viaggio, e il cockpit del viaggio rimanda prima della partenza alle regole della destinazione.",
-        "More know-how for your destination: the countries page now shows plug types with an adapter tip and the tipping etiquette. During a trip abroad the SOS page puts your destination's emergency numbers on top, and the trip cockpit points to the destination's rules before departure."
-      ),
-      l4(
-        "Die Umgebung kennt deine Reiseart noch besser: Velotouren zeigen Velo-Läden und Werkstätten, der Wintersport Bahnen und Loipen samt Neuschnee-Angabe, das Platz-Dossier Waschsalons und die SOS-Seite die nächsten Apotheken mit Öffnungszeiten.",
-        "Les environs connaissent encore mieux ton type de voyage : les tours à vélo montrent magasins et ateliers vélo, les sports d'hiver les remontées et pistes de fond avec la neige fraîche, le dossier de l'emplacement les laveries et la page SOS les pharmacies les plus proches avec horaires.",
-        "I dintorni conoscono ancora meglio il tuo tipo di viaggio: i giri in bici mostrano negozi e officine, gli sport invernali impianti e piste di fondo con la neve fresca, il dossier della piazzola le lavanderie e la pagina SOS le farmacie più vicine con gli orari.",
-        "The surroundings know your trip type even better: bike tours show bike shops and repair stations, winter sports show lifts and cross-country trails plus fresh snow, the spot dossier shows laundromats and the SOS page the nearest pharmacies with opening hours."
-      ),
-      l4(
-        "Kleines dazu: Hotel- und Städtereisen erfassen Zimmer statt Parzelle, die Sprachhilfe kennt vier neue Hotel-Sätze, das Wetter schlägt den Ort deiner nächsten Reise als Wetter-Ort vor, und die Liste «Was ist neu» lädt ihre ältere Geschichte erst auf Wunsch.",
-        "En plus : les voyages à l'hôtel et en ville saisissent une chambre au lieu d'une parcelle, l'aide linguistique connaît quatre nouvelles phrases d'hôtel, la météo propose le lieu de ton prochain voyage comme lieu météo, et « Quoi de neuf » ne charge son historique ancien que sur demande.",
-        "In più: i viaggi in hotel e in città registrano una camera invece di una piazzola, l'aiuto linguistico conosce quattro nuove frasi da hotel, il meteo propone il luogo del tuo prossimo viaggio come località meteo, e «Cosa c'è di nuovo» carica la storia più vecchia solo su richiesta.",
-        "Also new: hotel and city trips record a room instead of a pitch, the phrasebook knows four new hotel phrases, the weather suggests your next trip's location as a weather place, and “What's new” loads its older history only on request."
       ),
     ],
   },
