@@ -151,6 +151,33 @@ export const EMERGENCY_COUNTRIES: CountryEmergency[] = [
     numbers: [{ label: GENERAL, number: "112" }],
   },
   {
+    code: "cz",
+    name: l4("Tschechien", "Tchéquie", "Cechia", "Czechia"),
+    numbers: [
+      { label: GENERAL, number: "112" },
+      { label: POLICE, number: "158" },
+      { label: AMBULANCE, number: "155" },
+    ],
+  },
+  {
+    code: "pl",
+    name: l4("Polen", "Pologne", "Polonia", "Poland"),
+    numbers: [
+      { label: GENERAL, number: "112" },
+      { label: POLICE, number: "997" },
+      { label: AMBULANCE, number: "999" },
+    ],
+  },
+  {
+    code: "hu",
+    name: l4("Ungarn", "Hongrie", "Ungheria", "Hungary"),
+    numbers: [
+      { label: GENERAL, number: "112" },
+      { label: AMBULANCE, number: "104" },
+      { label: POLICE, number: "107" },
+    ],
+  },
+  {
     code: "pt",
     name: l4("Portugal", "Portugal", "Portogallo", "Portugal"),
     numbers: [{ label: GENERAL, number: "112" }],
