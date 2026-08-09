@@ -107,6 +107,7 @@ describe("packScenarios", () => {
     expect(ids).toContain("solo");
     expect(ids).toContain("familie");
     expect(ids).toContain("motorrad");
+    expect(ids).toContain("wildcampen");
     expect(ids).toContain("custom");
   });
 

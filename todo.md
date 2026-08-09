@@ -1091,6 +1091,7 @@ Die zwanzig Vorschläge:
 
 ## Zwanzig Vorschläge (09.08.2026, Runde 56) + Nutzerwünsche
 
+- [x] Nutzerwunsch: Reiseart «Freies Campen» (Zelt ohne Campingplatz) – Schnellzugriffe Landesregeln/Trinkwasser/Feuer-Ratgeber, Zeltausrüstung und Lagerfeuer-Ampel wie Camping, Formular ohne Parzellen-/WLAN-Block, eigene Packvorlage (Wasserfilter, Schäufelchen, Abfallsäcke, Powerbank) samt automatischem Vorschlag beim Reise-Anlegen; kein DB-Schema-Change (kind-Spalte nimmt den neuen Wert auf)
 - [x] Nutzerwunsch: Vergangene Aufenthalte archivieren – tripLogs.archivedAt (Migration 0123), trips.setArchived (nur Besitzer), Archiv-Abschnitt mit Aufklapper unter den vergangenen Reisen (Zurückholen per Knopf); archivierte Reisen zählen weiter in Statistik, Reisepass und Suche
 - [x] Nutzerwunsch: Zu breite Datums-/Zeitfelder auf dem iPhone (Reise-Formular, Vorlagen-Dialog) – iOS-@supports-Block in index.css nimmt nativen date/time-Inputs die intrinsische Breite (EHRLICH: nicht auf einem echten Gerät verifiziert)
 - [x] Nutzerwunsch (Vorrunde): Heimkehr-Karte abhakbar – jeder Kreis ist jetzt ein eigener Abhak-Knopf (localStorage je Reise), Text bleibt Link

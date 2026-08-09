@@ -32,6 +32,12 @@ export const changelog: ChangelogBlock[] = [
     date: "2026-08-09",
     entries: [
       l4(
+        "Neue Reiseart «Freies Campen»: Zelten ohne Campingplatz. Die Heute-Ansicht stellt Landesregeln, Trinkwasser-Rechner und Feuer-Ratgeber nach vorn, und die neue Packvorlage denkt an Wasserfilter, Schäufelchen und Abfallsäcke – alles wieder mitnehmen.",
+        "Nouveau type de voyage « Camping sauvage » : camper sans terrain. La vue Aujourd’hui met en avant les règles des pays, le calculateur d’eau potable et le guide du feu, et le nouveau modèle de liste pense au filtre à eau, à la petite pelle et aux sacs poubelle – tout remporter.",
+        "Nuovo tipo di viaggio «Campeggio libero»: in tenda senza campeggio. La vista Oggi mette in primo piano regole dei paesi, calcolatore dell’acqua potabile e guida al fuoco, e il nuovo modello di lista pensa a filtro dell’acqua, paletta e sacchi per i rifiuti – riportare tutto.",
+        "New trip type “Wild camping”: tenting without a campsite. The Today view brings country rules, the drinking water calculator and the fire guide to the front, and the new packing template thinks of a water filter, trowel and rubbish bags – pack everything out."
+      ),
+      l4(
         "Vergangene Aufenthalte lassen sich jetzt archivieren: Sie verschwinden aus der Liste in einen eigenen Archiv-Abschnitt, bleiben aber in Statistik, Reisepass und Suche erhalten – und kommen per Klick zurück.",
         "Les séjours passés peuvent désormais être archivés : ils quittent la liste pour une section d’archives dédiée, mais restent dans les statistiques, le passeport et la recherche – et reviennent d’un clic.",
         "I soggiorni passati ora si possono archiviare: spariscono dalla lista in una sezione archivio dedicata, ma restano in statistiche, passaporto e ricerca – e tornano con un clic.",
