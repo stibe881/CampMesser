@@ -1,5 +1,29 @@
 # CampMesser – Projekt TODO
 
+## Zwanzig Vorschläge (09.08.2026, Runde 53)
+
+- [x] #516 Packvorlagen für Reisearten – NUR Hotelferien + Velotour neu; Städtereise/Strand/Wintersport EXISTIERTEN BEREITS
+- [x] #517 Vorlagen-Vorschlag im Reise-Formular (Ein-Klick-Liste, ohne Camping/Tagesausflug)
+- [ ] #518 Gepäck-Limite pro Person
+- [ ] #519 Reisekasse in Fremdwährung (EZB-Kurse)
+- [ ] #520 Aufenthalts-Details je Reiseart (Hotel: Zimmer/Etage/Frühstück)
+- [x] #521 SOS kennt das Reiseland – Katalog EXISTIERTE (#432), neu ist die Automatik bei laufender Auslandsreise
+- [x] #522 Steckdosen & Adapter pro Land (9 Länder)
+- [x] #523 Trinkgeld-Knigge pro Land (9 Länder)
+- [x] #524 Auslands-Hinweis im Reise-Cockpit (Link ?land=…; Push-Teil bewusst weggelassen – Push bleibt kurz)
+- [ ] #525 Schneehöhe & Neuschnee (Wintersport)
+- [ ] #526 Pisten & Loipen in der Nähe
+- [ ] #527 Velo-Werkstätten in der Nähe
+- [ ] #528 Waschsalon-Finder im Dossier
+- [ ] #529 Apotheken im SOS
+- [ ] #530 Sprachhilfe Hotel & Städtereise
+- [ ] #531 Statistik: Verteilung nach Reisearten
+- [ ] #532 Wander-Summen in der Statistik
+- [ ] #533 Reise-Ort als Wetter-Ort anbieten
+- [ ] #534 Tests in die Typprüfung (tsconfig)
+- [ ] #535 Changelog-Chunk entlasten (ältere Blöcke lazy)
+- Druck-Fix vorgezogen: PrintButton mit echtem _blank-Link für alle 9 Druckseiten (iOS-PWA verschluckte window.open)
+
 ## Nachbesserungen (09.08.2026)
 
 - [x] Reisepass-Fix: `trips.list` lieferte für eigene Reisen keinen Platznamen (spotName fest null) – Stempel blieben aus, obwohl ein Zeltplatz verknüpft war. getTripLogs joint den Namen jetzt mit. Gemergt (main `abcff98`).
