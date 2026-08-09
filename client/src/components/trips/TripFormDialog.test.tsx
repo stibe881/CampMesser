@@ -15,7 +15,12 @@ import { expectNoA11yViolations } from "@/test/a11y";
  */
 vi.mock("@/lib/trpc", async () => {
   const { trpcMock } = await import("@/test/trpcMock");
-  return { trpc: trpcMock({}) };
+  return {
+    trpc: trpcMock({
+      // Kosten-Schätzung (#568): Erfahrungswert aus vergleichbaren Reisen
+      "trips.expenses.costHint": { perNightRappen: 4500, tripCount: 3 },
+    }),
+  };
 });
 
 vi.mock("@/_core/hooks/useAuth", () => ({
@@ -68,6 +73,16 @@ describe("Reise-Erfassungs-Dialog", () => {
     await userEvent.click(screen.getByRole("button", { name: "Day trip" }));
     // Tagesausflug: die getrennte Abreise verschwindet (singleDay)
     expect(screen.queryByLabelText("Departure")).toBeNull();
+  });
+
+  it("zeigt die Kosten-Schätzung aus vergleichbaren Reisen (#568)", async () => {
+    await renderDialog();
+    await screen.findByText("New trip");
+    // 4500 Rappen pro Nacht über 3 vergleichbare Reisen (siehe Mock oben)
+    expect(
+      screen.getByText(/Your 3 comparable trips cost/)
+    ).toBeInTheDocument();
+    expect(screen.getByText(/45\.00 CHF per night/)).toBeInTheDocument();
   });
 
   it("ist barrierefrei", async () => {
