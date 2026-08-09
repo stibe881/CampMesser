@@ -28,6 +28,48 @@ export type { ChangelogBlock };
 
 export const changelog: ChangelogBlock[] = [
   {
+    id: "2026-08-09.3",
+    date: "2026-08-09",
+    entries: [
+      l4(
+        "Die Druck-Knöpfe (Packliste, Reisepass, Reise-Bericht und weitere) funktionieren jetzt auch in der installierten App auf dem iPhone: Sie öffnen die Seite im Browser, wo sich der Druck-Dialog zuverlässig zeigt.",
+        "Les boutons d'impression (liste de bagages, passeport, rapport de voyage et autres) fonctionnent désormais aussi dans l'app installée sur iPhone : ils ouvrent la page dans le navigateur, où la boîte d'impression s'affiche de façon fiable.",
+        "I pulsanti di stampa (lista bagagli, passaporto, rapporto di viaggio e altri) ora funzionano anche nell'app installata su iPhone: aprono la pagina nel browser, dove la finestra di stampa appare in modo affidabile.",
+        "The print buttons (packing list, passport, trip report and more) now also work in the installed app on iPhone: they open the page in the browser, where the print dialog shows up reliably."
+      ),
+      l4(
+        "Die Packliste kennt neu eine Limite pro Person – zum Beispiel 23 kg Fluggepäck. Die Traglast-Zeile färbt ein, wer darüber liegt. Dazu gibt es neue Vorlagen für Hotelferien und Velotouren, und beim Anlegen einer Reise schlägt die App gleich die passende Packliste vor.",
+        "La liste de bagages connaît désormais une limite par personne – par exemple 23 kg de bagages en avion. La ligne de charge met en évidence qui la dépasse. S'y ajoutent de nouveaux modèles pour les vacances à l'hôtel et les tours à vélo, et en créant un voyage, l'app propose directement la liste adaptée.",
+        "La lista bagagli ora conosce un limite per persona – per esempio 23 kg di bagaglio aereo. La riga del carico evidenzia chi lo supera. In più ci sono nuovi modelli per le vacanze in hotel e i giri in bici, e creando un viaggio l'app propone subito la lista adatta.",
+        "The packing list now knows a limit per person – for example 23 kg of flight luggage. The load line highlights who is over it. There are also new templates for hotel holidays and bike tours, and when creating a trip the app suggests the matching list right away."
+      ),
+      l4(
+        "Die Reisekasse holt den Euro-Kurs jetzt bei der EZB: Der Referenzkurs steht mit Datum im Kurs-Kasten und lässt sich mit einem Klick übernehmen – offline bleibt der letzte bekannte Kurs.",
+        "La caisse de voyage va désormais chercher le cours de l'euro à la BCE : le cours de référence figure avec sa date dans l'encadré et se reprend d'un clic – hors ligne, le dernier cours connu reste disponible.",
+        "La cassa di viaggio ora prende il cambio dell'euro dalla BCE: il tasso di riferimento sta con la sua data nel riquadro e si applica con un clic – offline resta l'ultimo cambio noto.",
+        "The trip wallet now fetches the euro rate from the ECB: the reference rate sits in the rate box with its date and can be applied with one click – offline, the last known rate remains."
+      ),
+      l4(
+        "Mehr Wissen fürs Reiseland: Die Länder-Seite zeigt neu Steckdosen samt Adapter-Tipp und den Trinkgeld-Knigge. Bei einer laufenden Auslandsreise stellt die SOS-Seite die Notrufnummern deines Reiselands zuoberst, und das Reise-Cockpit verweist vor der Abreise auf die Regeln des Ziellands.",
+        "Plus de repères pour le pays de voyage : la page des pays montre désormais les prises avec conseil d'adaptateur et les usages du pourboire. Pendant un voyage à l'étranger, la page SOS place les numéros d'urgence de ton pays de voyage en tête, et le cockpit du voyage renvoie avant le départ aux règles du pays de destination.",
+        "Più riferimenti per il paese di viaggio: la pagina dei paesi ora mostra le prese con consiglio sull'adattatore e il galateo della mancia. Durante un viaggio all'estero la pagina SOS mette in cima i numeri di emergenza del tuo paese di viaggio, e il cockpit del viaggio rimanda prima della partenza alle regole della destinazione.",
+        "More know-how for your destination: the countries page now shows plug types with an adapter tip and the tipping etiquette. During a trip abroad the SOS page puts your destination's emergency numbers on top, and the trip cockpit points to the destination's rules before departure."
+      ),
+      l4(
+        "Die Umgebung kennt deine Reiseart noch besser: Velotouren zeigen Velo-Läden und Werkstätten, der Wintersport Bahnen und Loipen samt Neuschnee-Angabe, das Platz-Dossier Waschsalons und die SOS-Seite die nächsten Apotheken mit Öffnungszeiten.",
+        "Les environs connaissent encore mieux ton type de voyage : les tours à vélo montrent magasins et ateliers vélo, les sports d'hiver les remontées et pistes de fond avec la neige fraîche, le dossier de l'emplacement les laveries et la page SOS les pharmacies les plus proches avec horaires.",
+        "I dintorni conoscono ancora meglio il tuo tipo di viaggio: i giri in bici mostrano negozi e officine, gli sport invernali impianti e piste di fondo con la neve fresca, il dossier della piazzola le lavanderie e la pagina SOS le farmacie più vicine con gli orari.",
+        "The surroundings know your trip type even better: bike tours show bike shops and repair stations, winter sports show lifts and cross-country trails plus fresh snow, the spot dossier shows laundromats and the SOS page the nearest pharmacies with opening hours."
+      ),
+      l4(
+        "Kleines dazu: Hotel- und Städtereisen erfassen Zimmer statt Parzelle, die Sprachhilfe kennt vier neue Hotel-Sätze, das Wetter schlägt den Ort deiner nächsten Reise als Wetter-Ort vor, und die Liste «Was ist neu» lädt ihre ältere Geschichte erst auf Wunsch.",
+        "En plus : les voyages à l'hôtel et en ville saisissent une chambre au lieu d'une parcelle, l'aide linguistique connaît quatre nouvelles phrases d'hôtel, la météo propose le lieu de ton prochain voyage comme lieu météo, et « Quoi de neuf » ne charge son historique ancien que sur demande.",
+        "In più: i viaggi in hotel e in città registrano una camera invece di una piazzola, l'aiuto linguistico conosce quattro nuove frasi da hotel, il meteo propone il luogo del tuo prossimo viaggio come località meteo, e «Cosa c'è di nuovo» carica la storia più vecchia solo su richiesta.",
+        "Also new: hotel and city trips record a room instead of a pitch, the phrasebook knows four new hotel phrases, the weather suggests your next trip's location as a weather place, and “What's new” loads its older history only on request."
+      ),
+    ],
+  },
+  {
     id: "2026-08-09.2",
     date: "2026-08-09",
     entries: [

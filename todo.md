@@ -23,6 +23,7 @@
 - [x] #534 Tests in die Typprüfung: das `**/*.test.ts`-Exclude in tsconfig.json entfernt (die Wurzel der CI-Altlasten aus den Runden zuvor – .test.ts-Dateien sah nur vitest, nie tsc) und die neun aufgelaufenen Typ-Fehler bereinigt (fehlende User-/Vehicle-/PushPrefs-/Tariff-Felder in Fixtures, zwei Iterator-Spreads, ein überzähliges Feld, ein möglicherweise-undefined)
 - [x] #535 Changelog-Chunk entlastet: `changelog.ts` (366 kB) zweigeteilt in den aktuellen Teil (~6 kB, höchstens drei Blöcke – Test wacht darüber) und `changelogArchive.ts` (~360 kB), das erst auf «Ältere anzeigen» im Profil-Dialog geladen wird. ABWEICHUNG vom Vorschlagstext «älter als ein Jahr»: kein Block ist älter als eine Woche – der Jahres-Schnitt hätte heute NICHTS bewegt; der Schnitt bei drei Blöcken bewegt 98 % der Datei (der Block vom 04.08. trägt allein die ganze frühe App-Geschichte mit 276 kB)
 - Druck-Fix vorgezogen: PrintButton mit echtem _blank-Link für alle 9 Druckseiten (iOS-PWA verschluckte window.open)
+- Runde abgeschlossen (Changelog-Block 2026-08-09.3). Serverseitig pendent bis zum nächsten Deploy: Migration **0118** (packLists.personWeightBudgetGrams)
 
 ## Nachbesserungen (09.08.2026)
 
