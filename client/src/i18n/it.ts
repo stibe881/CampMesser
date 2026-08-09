@@ -124,10 +124,10 @@ export const it: Translation = {
       evening: (name: string) => `Buonasera, ${name}`,
     },
     tripArrivalAt: (time: string) => `Arrivo ${time}`,
-    heroTitle1: "Tutto per il campo.",
+    heroTitle1: "Tutti i tuoi viaggi.",
     heroTitle2: "In una sola app.",
     heroSubtitle:
-      "Pianificazione, sicurezza, energia e natura – oltre 40 strumenti smart per la tua prossima avventura.",
+      "Campeggio, hotel, città, spiaggia o escursioni – pianificazione, meteo, liste bagagli e oltre 40 strumenti smart per il viaggio.",
     sunInfo: (sunrise, sunset) => `Oggi: alba ${sunrise} · tramonto ${sunset}`,
     nextTripFallback: "Prossimo trip",
     nextTripAria: place => `Prossimo soggiorno pianificato: ${place}`,

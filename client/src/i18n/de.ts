@@ -126,10 +126,10 @@ export const de = {
       evening: (name: string) => `Guten Abend, ${name}`,
     },
     tripArrivalAt: (time: string) => `Anreise ${time}`,
-    heroTitle1: "Alles fürs Camp.",
+    heroTitle1: "Alle deine Reisen.",
     heroTitle2: "In einer App.",
     heroSubtitle:
-      "Planung, Sicherheit, Energie und Naturerlebnis – über 40 smarte Werkzeuge für dein nächstes Abenteuer.",
+      "Camping, Hotel, Städte, Strand oder Wandern – Planung, Wetter, Packlisten und über 40 smarte Werkzeuge für unterwegs.",
     sunInfo: (sunrise: string, sunset: string) =>
       `Heute: Sonnenaufgang ${sunrise} · Sonnenuntergang ${sunset}`,
     nextTripFallback: "Nächster Trip",

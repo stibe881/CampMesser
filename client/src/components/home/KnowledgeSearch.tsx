@@ -44,7 +44,12 @@ function loadRecentSearches(): string[] {
   return [];
 }
 
-export default function KnowledgeSearch() {
+export default function KnowledgeSearch({
+  className = "mb-8",
+}: {
+  /** Aussenabstand/Breite – im Hero (#556) anders als früher im Grid. */
+  className?: string;
+}) {
   const { lang, t } = useI18n();
   const { isAuthenticated } = useAuth();
   const [query, setQuery] = useState("");
@@ -227,7 +232,7 @@ export default function KnowledgeSearch() {
   // Eigene Treffer stehen vor den statischen Wissens-Inhalten
   const combined = [...ownResults, ...results];
   return (
-    <div className="mb-8">
+    <div className={className}>
       <div className="relative">
         <Search
           className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"

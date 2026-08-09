@@ -32,6 +32,12 @@ export const changelog: ChangelogBlock[] = [
     date: "2026-08-09",
     entries: [
       l4(
+        "Die Startseite zeigt sich neu: Die Suche steht jetzt direkt im Titelbild \u2013 ein Tipp, und du findest Wissen und eigene Inhalte. Der Titel sagt, was die App heute ist: Alle deine Reisen. In einer App.",
+        "La page d\u2019accueil fait peau neuve : la recherche se trouve d\u00e9sormais directement dans l\u2019image de titre \u2013 un geste, et tu trouves le savoir et tes propres contenus. Le titre dit ce qu\u2019est l\u2019app aujourd\u2019hui : tous tes voyages, dans une seule app.",
+        "La pagina iniziale si rinnova: la ricerca ora sta direttamente nell\u2019immagine di copertina \u2013 un tocco, e trovi conoscenze e contenuti tuoi. Il titolo dice cos\u2019\u00e8 l\u2019app oggi: tutti i tuoi viaggi, in una sola app.",
+        "The home page has a fresh look: the search now sits right in the hero image \u2013 one tap and you find knowledge and your own content. The title says what the app is today: all your travels, in one app."
+      ),
+      l4(
         "Rundreisen bekommen Etappen: Trage pro Reise mehrere Orte mit eigenem Von/Bis ein \u2013 eine Mini-Karte verbindet die Stationen, und die Heute-Ansicht zeigt Wetter und Umgebung der Etappe, an der du gerade bist.",
         "Les circuits ont d\u00e9sormais des \u00e9tapes : saisis plusieurs lieux par voyage avec leurs propres dates \u2013 une mini-carte relie les stations, et la vue Aujourd\u2019hui montre la m\u00e9t\u00e9o et les environs de l\u2019\u00e9tape o\u00f9 tu te trouves.",
         "I viaggi itineranti ora hanno le tappe: inserisci pi\u00f9 luoghi per viaggio con date proprie \u2013 una mini-mappa collega le stazioni, e la vista Oggi mostra meteo e dintorni della tappa in cui ti trovi.",

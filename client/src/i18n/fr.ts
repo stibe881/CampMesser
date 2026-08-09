@@ -128,10 +128,10 @@ export const fr: Translation = {
       evening: (name: string) => `Bonsoir, ${name}`,
     },
     tripArrivalAt: (time: string) => `Arrivée ${time}`,
-    heroTitle1: "Tout pour le camp.",
+    heroTitle1: "Tous tes voyages.",
     heroTitle2: "Dans une seule app.",
     heroSubtitle:
-      "Planification, sécurité, énergie et nature – plus de 40 outils malins pour ta prochaine aventure.",
+      "Camping, hôtel, villes, plage ou randonnée – planification, météo, listes de bagages et plus de 40 outils malins pour la route.",
     sunInfo: (sunrise, sunset) =>
       `Aujourd'hui : lever du soleil ${sunrise} · coucher du soleil ${sunset}`,
     nextTripFallback: "Prochain trip",

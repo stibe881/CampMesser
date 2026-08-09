@@ -122,10 +122,10 @@ export const en: Translation = {
       evening: (name: string) => `Good evening, ${name}`,
     },
     tripArrivalAt: (time: string) => `Arrival ${time}`,
-    heroTitle1: "Everything for camp.",
+    heroTitle1: "All your travels.",
     heroTitle2: "In one app.",
     heroSubtitle:
-      "Planning, safety, energy and nature – over 40 smart tools for your next adventure.",
+      "Camping, hotel, cities, beach or hiking – planning, weather, packing lists and over 40 smart tools for the road.",
     sunInfo: (sunrise, sunset) =>
       `Today: sunrise ${sunrise} · sunset ${sunset}`,
     nextTripFallback: "Next trip",
