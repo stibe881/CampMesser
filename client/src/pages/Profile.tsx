@@ -79,6 +79,13 @@ import {
   saveThemePreference,
   type ThemePreference,
 } from "@/lib/themePreference";
+import {
+  FONT_SCALES,
+  applyFontScale,
+  getFontScale,
+  saveFontScale,
+  type FontScale,
+} from "@/lib/fontScale";
 import { useI18n } from "@/i18n";
 import { LANGUAGE_LABELS, LANGUAGES, LOCALE_TAGS } from "@shared/i18n";
 import { RETENTION_DAYS } from "@shared/trash";
@@ -141,6 +148,13 @@ export default function ProfilePage() {
   const [themePref, setThemePref] = useState<ThemePreference | null>(() =>
     getThemePreference()
   );
+  /** Schriftgrösse (#546) – nur auf diesem Gerät gespeichert. */
+  const [fontScale, setFontScale] = useState<FontScale>(() => getFontScale());
+  const chooseFontScale = (scale: FontScale) => {
+    setFontScale(scale);
+    saveFontScale(scale);
+    applyFontScale(scale);
+  };
   // «Was ist neu»: Dialog mit ALLEN Changelog-Blöcken (unabhängig vom Marker)
   const [whatsNewOpen, setWhatsNewOpen] = useState(false);
   /**
@@ -533,6 +547,30 @@ export default function ProfilePage() {
             {t.profile.themeAuto}
           </Button>
         </div>
+        {/* Schriftgrösse (#546): drei Stufen, nur auf diesem Gerät */}
+        <p className="mb-2 mt-5 text-sm font-medium">
+          {t.profile.fontScaleTitle}
+        </p>
+        <div
+          className="flex gap-2"
+          role="group"
+          aria-label={t.profile.fontScaleTitle}
+        >
+          {FONT_SCALES.map(scale => (
+            <Button
+              key={scale}
+              type="button"
+              variant={fontScale === scale ? "default" : "outline"}
+              className="flex-1"
+              onClick={() => chooseFontScale(scale)}
+            >
+              {t.profile.fontScaleLabels[scale]}
+            </Button>
+          ))}
+        </div>
+        <p className="mt-2 text-xs text-muted-foreground">
+          {t.profile.fontScaleHint}
+        </p>
       </CollapsibleCard>
 
       {/* Karten-App für Routen: Die Frage beim ersten Routen-Klick lässt

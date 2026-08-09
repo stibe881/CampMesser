@@ -301,3 +301,49 @@ describe("Mahlzeiten-Slots", () => {
     });
   });
 });
+
+describe("Wetterbewusstes Autofüllen (#549)", () => {
+  const days = ["2026-08-10", "2026-08-11"];
+  const recipes = [
+    { id: "grill", kind: "main" as const, fireOnly: true },
+    { id: "topf", kind: "main" as const },
+    { id: "muesli", kind: "breakfast" as const },
+  ];
+
+  it("lässt Feuer-Rezepte an Regentagen aus", () => {
+    const result = autofillMenuPlan({
+      days,
+      meals: ["dinner"],
+      existing: [],
+      recipes,
+      seed: 1,
+      rainyDays: days,
+    });
+    // Tag 2 bleibt leer: «topf» fällt unter die Nachbartage-Regel,
+    // «grill» unter die Regen-Weiche – ehrlich leer statt nass grillieren.
+    expect(result.map(a => a.recipeId)).toEqual(["topf"]);
+  });
+
+  it("bevorzugt am trockenen Abend das Feuer-Rezept", () => {
+    const result = autofillMenuPlan({
+      days: ["2026-08-10"],
+      meals: ["dinner"],
+      existing: [],
+      recipes,
+      seed: 1,
+    });
+    expect(result[0].recipeId).toBe("grill");
+  });
+
+  it("greift beim Frühstück nicht in die Wetter-Weiche", () => {
+    const result = autofillMenuPlan({
+      days: ["2026-08-10"],
+      meals: ["breakfast"],
+      existing: [],
+      recipes,
+      seed: 1,
+      rainyDays: [],
+    });
+    expect(result[0].recipeId).toBe("muesli");
+  });
+});

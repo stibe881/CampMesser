@@ -286,3 +286,22 @@
 .gm-style .gm-style-iw a {
   color: #2563eb;
 }
+
+/*
+ * iOS zoomt beim Fokussieren von Eingabefeldern mit Schrift unter 16px
+ * automatisch hinein – und in der installierten App springt der Zoom oft
+ * nicht zurück (Nutzermeldung 09.08.2026: «Finger zusammenschieben, damit
+ * wieder alles drauf ist»). 16px am Feld verhindert den Zoom an der
+ * Wurzel. max(16px, 1em) hebt nur zu kleine Schriften an und folgt sonst
+ * der Umgebung (inkl. Schriftgrösse-Einstellung #546). Die Regel steht
+ * bewusst AUSSERHALB der Tailwind-Layer (unlayered gewinnt über
+ * text-sm/text-xs) und greift nur auf iOS: -webkit-touch-callout gibt es
+ * nur dort.
+ */
+@supports (-webkit-touch-callout: none) {
+  input,
+  select,
+  textarea {
+    font-size: max(16px, 1em);
+  }
+}

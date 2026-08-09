@@ -7,12 +7,15 @@
 import {
   InsertCampSpot,
   InsertHomeLocation,
+  InsertSavedPlace,
   and,
   campSpots,
+  desc,
   eq,
   getDb,
   homeLocations,
   requireDb,
+  savedPlaces,
 } from "./_shared";
 
 // ── Zeltplatz-Favoriten ──
@@ -99,4 +102,37 @@ export async function upsertHomeLocation(data: InsertHomeLocation) {
 export async function deleteHomeLocation(userId: number) {
   const db = requireDb(await getDb());
   await db.delete(homeLocations).where(eq(homeLocations.userId, userId));
+}
+
+// ── Merkorte (#537) ──
+/** Alle Merkorte eines Kontos, neuste zuoberst. */
+export async function getSavedPlaces(userId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(savedPlaces)
+    .where(eq(savedPlaces.userId, userId))
+    .orderBy(desc(savedPlaces.id));
+}
+export async function addSavedPlace(data: InsertSavedPlace) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(savedPlaces).values(data);
+  return result.insertId;
+}
+export async function updateSavedPlace(
+  id: number,
+  userId: number,
+  data: Partial<InsertSavedPlace>
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(savedPlaces)
+    .set(data)
+    .where(and(eq(savedPlaces.id, id), eq(savedPlaces.userId, userId)));
+}
+export async function deleteSavedPlace(id: number, userId: number) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(savedPlaces)
+    .where(and(eq(savedPlaces.id, id), eq(savedPlaces.userId, userId)));
 }

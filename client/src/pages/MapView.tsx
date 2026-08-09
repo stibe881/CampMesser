@@ -83,6 +83,7 @@ import {
   PawPrint,
   Satellite,
   Search,
+  Star,
   Tent,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -158,7 +159,15 @@ import {
 } from "@/lib/tentFinderTargets";
 import { cn } from "@/lib/utils";
 import { useI18n, useT } from "@/i18n";
-import { LOCALE_TAGS } from "@shared/i18n";
+import { LOCALE_TAGS, pick } from "@shared/i18n";
+import {
+  SAVED_PLACE_COLOR_HEX,
+  SAVED_PLACE_COLOR_LABELS,
+  SAVED_PLACE_COLORS,
+  SAVED_PLACE_NOTE_MAX_LENGTH,
+  normalizeSavedPlaceColor,
+  type SavedPlaceColor,
+} from "@shared/savedPlaces";
 import { distanceMeters } from "@shared/geo";
 import { costLevelSymbols, type Excursion } from "@shared/excursions";
 import { tripNights } from "@shared/trips";
@@ -168,6 +177,16 @@ interface SpotPin {
   name: string;
   latitude: number;
   longitude: number;
+}
+
+/** Merkort (#537) – Wunschziel mit Notiz und selbst gewählter Pin-Farbe. */
+interface SavedPlacePin {
+  id: number;
+  name: string;
+  latitude: number;
+  longitude: number;
+  note: string | null;
+  color: string;
 }
 
 /** Natur-Beobachtung mit Koordinaten – Datum bereits sprachrichtig formatiert. */
@@ -272,6 +291,22 @@ function familyIconFor(kind: FamilyPlaceKind): IconSpec {
   });
 }
 
+/**
+ * Merkort (#537): Kreis in der selbst gewählten Farbe mit Stern-Umriss –
+ * der Stern unterscheidet ihn von allen Ebenen-Pins, egal welche Farbe
+ * gewählt ist (der Katalog nutzt bewusst hellere Töne als die Ebenen).
+ */
+function savedPlaceIconFor(color: string): IconSpec {
+  const hex = SAVED_PLACE_COLOR_HEX[normalizeSavedPlaceColor(color)];
+  return divIcon({
+    className: "",
+    html: `<svg viewBox="0 0 28 28" width="28" height="28" aria-hidden="true"><circle cx="14" cy="14" r="12" fill="${hex}" stroke="#ffffff" stroke-width="2.5"/><path d="M14 7.8l1.9 3.8 4.2.6-3 3 .7 4.2-3.8-2-3.8 2 .7-4.2-3-3 4.2-.6Z" fill="#ffffff"/></svg>`,
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
+    popupAnchor: [0, -16],
+  });
+}
+
 /** Pin-Typen für die Cluster-Färbung (Farben wie die jeweiligen Einzel-Icons). */
 type PinKind =
   | "spot"
@@ -280,7 +315,8 @@ type PinKind =
   | "campsite"
   | "excursion"
   | "firepit"
-  | "family";
+  | "family"
+  | "savedPlace";
 
 const PIN_COLORS: Record<PinKind, string> = {
   spot: "#2f6b4f",
@@ -290,6 +326,9 @@ const PIN_COLORS: Record<PinKind, string> = {
   excursion: "#be123c",
   firepit: "#dc2626",
   family: "#0d9488",
+  // Merkorte haben pro Pin eine eigene Farbe – fürs Cluster zählt die
+  // Standard-Farbe des Katalogs.
+  savedPlace: SAVED_PLACE_COLOR_HEX.red,
 };
 
 /** Neutrales Grau, wenn kein Pin-Typ im Cluster klar dominiert. */
@@ -353,6 +392,7 @@ function SpotsMap({
   excursionsAvailable,
   focusExcursionId,
   nightsBySpotId,
+  savedPlaces,
 }: {
   spots: SpotPin[];
   targets: TentFinderTarget[];
@@ -363,6 +403,8 @@ function SpotsMap({
   /** Ausflug, den das Platz-Dossier verlinkt hat (`/karte?ausflug=…`). */
   focusExcursionId: string | null;
   nightsBySpotId: Map<number, number>;
+  /** Merkorte (#537). */
+  savedPlaces: SavedPlacePin[];
 }) {
   const { lang, t } = useI18n();
   const [, navigate] = useLocation();
@@ -389,10 +431,16 @@ function SpotsMap({
   const measureClickRef = useRef<(point: LatLngTuple) => void>(() => {});
 
   // Karten-Klick auf freie Stelle: Vorschlag für einen neuen Favoriten
+  // – oder seit #537 wahlweise einen Merkort (Wunschziel mit Pin-Farbe)
   const [proposed, setProposed] = useState<{ lat: number; lon: number } | null>(
     null
   );
   const [newName, setNewName] = useState("");
+  const [createKind, setCreateKind] = useState<"favorit" | "merkort">(
+    "favorit"
+  );
+  const [newNote, setNewNote] = useState("");
+  const [newColor, setNewColor] = useState<SavedPlaceColor>("red");
 
   // Basis-Layer «Karte / Satellit» – Wahl bleibt in localStorage erhalten
   const [layerKind, setLayerKind] = useState<MapLayerKind>(loadMapLayer);
@@ -1248,6 +1296,69 @@ function SpotsMap({
       return marker;
     };
 
+    // Merkorte (#537): Stern-Pin in der gewählten Farbe. Das Popup zeigt
+    // Name, Notiz und Navigation und erlaubt das Entfernen – bearbeitet
+    // wird nicht: Ein Merkort ist schnell neu gesetzt.
+    const createSavedPlaceMarker = (place: SavedPlacePin): MarkerObject => {
+      const marker = engine.marker([place.latitude, place.longitude], {
+        icon: savedPlaceIconFor(place.color),
+        title: place.name,
+        layer,
+      });
+      const popup = document.createElement("div");
+      popup.className =
+        "flex flex-col gap-1.5 overflow-y-auto max-h-[50vh] pr-1 pb-1";
+      const name = document.createElement("p");
+      name.className = "text-[15px] font-bold leading-tight text-slate-800";
+      name.textContent = place.name;
+      popup.appendChild(name);
+      const kind = document.createElement("p");
+      kind.className = "text-xs";
+      kind.textContent = t.mapView.savedPlaceKind;
+      popup.appendChild(kind);
+      if (place.note) {
+        const note = document.createElement("p");
+        note.className = "text-xs";
+        note.textContent = place.note;
+        popup.appendChild(note);
+      }
+      const route = document.createElement("a");
+      route.href = directionsUrl(
+        place.latitude,
+        place.longitude,
+        defaultProvider()
+      );
+      route.addEventListener("click", event => {
+        event.preventDefault();
+        openDirections(place.latitude, place.longitude);
+      });
+      route.target = "_blank";
+      route.rel = "noopener noreferrer";
+      route.textContent = t.mapView.routeLink;
+      route.className =
+        "mt-1.5 flex w-full items-center justify-center rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors no-underline";
+      popup.appendChild(route);
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.textContent = t.mapView.savedPlaceDelete;
+      remove.className = "block text-sm font-medium underline";
+      remove.addEventListener("click", async () => {
+        remove.disabled = true;
+        try {
+          await utils.client.savedPlaces.remove.mutate({ id: place.id });
+          toast.success(t.mapView.savedPlaceDeleted);
+          void utils.savedPlaces.list.invalidate();
+          engineRef.current?.closePopup();
+        } catch {
+          toast.error(t.common.actionFailed);
+          remove.disabled = false;
+        }
+      });
+      popup.appendChild(remove);
+      marker.bindPopup(popup);
+      return marker;
+    };
+
     // Alle sichtbaren Pins einsammeln und pro Zoomstufe gruppieren.
     // `map.project` liefert absolute Pixel-Koordinaten der Zoomstufe –
     // unabhängig vom Ausschnitt, deshalb genügt der Neuaufbau nach Zoom.
@@ -1318,6 +1429,14 @@ function SpotsMap({
             createMarker: () => createFamilyMarker(place),
           }))
         : []),
+      ...(layerVisibility.savedPlaces
+        ? savedPlaces.map<MapPin>(place => ({
+            lat: place.latitude,
+            lon: place.longitude,
+            kind: "savedPlace" as const,
+            createMarker: () => createSavedPlaceMarker(place),
+          }))
+        : []),
     ];
 
     const clusters = clusterPoints(
@@ -1379,6 +1498,7 @@ function SpotsMap({
     excursions,
     firepits,
     familyPlaces,
+    savedPlaces,
     focusExcursionId,
     nightsBySpotId,
     clusterZoom,
@@ -1405,17 +1525,43 @@ function SpotsMap({
     onError: () => toast.error(t.common.saveFailed),
   });
 
+  // Merkort aus dem Karten-Klick anlegen (#537) – Farbe/Notiz bleiben
+  // für den nächsten Merkort stehen, wer sammelt, sammelt in Serie.
+  const savedPlaceMutation = trpc.savedPlaces.add.useMutation({
+    onSuccess: (_data, vars) => {
+      void utils.savedPlaces.list.invalidate();
+      setProposed(null);
+      setNewName("");
+      setNewNote("");
+      toast.success(t.mapView.savedPlaceCreatedToast(vars.name));
+    },
+    onError: () => toast.error(t.common.saveFailed),
+  });
+
   const closeCreateDialog = () => {
     setProposed(null);
     setNewName("");
+    setNewNote("");
   };
 
   const submitCreate = (event: React.FormEvent) => {
     event.preventDefault();
-    if (!proposed || createMutation.isPending) return;
+    if (!proposed || createMutation.isPending || savedPlaceMutation.isPending) {
+      return;
+    }
     const trimmed = newName.trim();
     if (!trimmed) {
       toast.error(t.mapView.createNameRequired);
+      return;
+    }
+    if (createKind === "merkort") {
+      savedPlaceMutation.mutate({
+        name: trimmed,
+        latitude: Number(proposed.lat.toFixed(5)),
+        longitude: Number(proposed.lon.toFixed(5)),
+        note: newNote.trim() || null,
+        color: newColor,
+      });
       return;
     }
     createMutation.mutate({
@@ -1635,6 +1781,16 @@ function SpotsMap({
               ),
             },
             {
+              key: "savedPlaces",
+              label: t.mapView.layerSavedPlaces,
+              icon: (
+                <Star
+                  className="h-3.5 w-3.5 text-rose-500 dark:text-rose-400"
+                  aria-hidden="true"
+                />
+              ),
+            },
+            {
               key: "firepits",
               label: t.mapView.layerFirepits,
               icon: (
@@ -1757,6 +1913,15 @@ function SpotsMap({
             {t.mapView.excursionLegend(excursions.length)}
           </span>
         )}
+        {layerVisibility.savedPlaces && savedPlaces.length > 0 && (
+          <span className="flex items-center gap-1.5">
+            <Star
+              className="h-3.5 w-3.5 text-rose-500 dark:text-rose-400"
+              aria-hidden="true"
+            />
+            {t.mapView.savedPlaceLegend(savedPlaces.length)}
+          </span>
+        )}
         {layerVisibility.firepits && firepits.length > 0 && (
           <span className="flex items-center gap-1.5">
             <Flame
@@ -1798,6 +1963,35 @@ function SpotsMap({
                   : ""}
               </DialogDescription>
             </DialogHeader>
+            {/* Favorit oder Merkort (#537)? Der Favorit bleibt der
+                Normalfall, der Merkort ist die leichte Ablage. */}
+            <div
+              className="flex gap-1.5"
+              role="group"
+              aria-label={t.mapView.createKindAria}
+            >
+              {(
+                [
+                  { key: "favorit", label: t.mapView.createKindFavorite },
+                  { key: "merkort", label: t.mapView.createKindSavedPlace },
+                ] as const
+              ).map(({ key, label }) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setCreateKind(key)}
+                  aria-pressed={createKind === key}
+                  className={cn(
+                    "rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
+                    createKind === key
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
             <div>
               <Label htmlFor="map-new-spot-name">
                 {t.mapView.createNameLabel}
@@ -1811,6 +2005,51 @@ function SpotsMap({
                 required
               />
             </div>
+            {createKind === "merkort" && (
+              <>
+                <div>
+                  <Label htmlFor="map-new-place-note">
+                    {t.mapView.createNoteLabel}
+                  </Label>
+                  <Input
+                    id="map-new-place-note"
+                    value={newNote}
+                    onChange={event => setNewNote(event.target.value)}
+                    placeholder={t.mapView.createNotePlaceholder}
+                    maxLength={SAVED_PLACE_NOTE_MAX_LENGTH}
+                  />
+                </div>
+                <div>
+                  <Label className="mb-1.5 block">
+                    {t.mapView.createColorLabel}
+                  </Label>
+                  <div
+                    className="flex gap-2"
+                    role="group"
+                    aria-label={t.mapView.createColorLabel}
+                  >
+                    {SAVED_PLACE_COLORS.map(color => (
+                      <button
+                        key={color}
+                        type="button"
+                        onClick={() => setNewColor(color)}
+                        aria-pressed={newColor === color}
+                        aria-label={pick(SAVED_PLACE_COLOR_LABELS[color], lang)}
+                        className={cn(
+                          "h-7 w-7 rounded-full border-2 transition-transform",
+                          newColor === color
+                            ? "scale-110 border-foreground"
+                            : "border-transparent hover:scale-105"
+                        )}
+                        style={{
+                          backgroundColor: SAVED_PLACE_COLOR_HEX[color],
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
             <DialogFooter>
               <Button
                 type="button"
@@ -1819,10 +2058,17 @@ function SpotsMap({
               >
                 {t.common.cancel}
               </Button>
-              <Button type="submit" disabled={createMutation.isPending}>
-                {createMutation.isPending
+              <Button
+                type="submit"
+                disabled={
+                  createMutation.isPending || savedPlaceMutation.isPending
+                }
+              >
+                {createMutation.isPending || savedPlaceMutation.isPending
                   ? t.common.saving
-                  : t.mapView.createConfirm}
+                  : createKind === "merkort"
+                    ? t.mapView.createSavedPlaceConfirm
+                    : t.mapView.createConfirm}
               </Button>
             </DialogFooter>
           </form>
@@ -1843,6 +2089,10 @@ export default function MapViewPage() {
     enabled: isAuthenticated,
   });
   const { data: sightingsData } = trpc.sightings.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+  // Merkorte (#537) – Wunschziele mit eigener Pin-Farbe
+  const { data: savedPlacesData } = trpc.savedPlaces.list.useQuery(undefined, {
     enabled: isAuthenticated,
   });
 
@@ -1988,6 +2238,7 @@ export default function MapViewPage() {
             excursionsAvailable={excursionsAvailable}
             focusExcursionId={focusExcursionId}
             nightsBySpotId={nightsBySpotId}
+            savedPlaces={savedPlacesData ?? []}
           />
         </>
       )}

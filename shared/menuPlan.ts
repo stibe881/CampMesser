@@ -84,6 +84,11 @@ export type AutofillKind = "breakfast" | "main" | "any";
 export interface AutofillRecipe {
   id: string;
   kind: AutofillKind;
+  /**
+   * Braucht zwingend offenes Feuer (#549): an Regentagen ausgelassen,
+   * an trockenen Abenden bevorzugt («Grillwetter»).
+   */
+  fireOnly?: boolean;
 }
 
 /** Bereits belegter Slot; recipeId zählt für die Folgetag-Regel mit. */
@@ -150,9 +155,17 @@ export function autofillMenuPlan(options: {
   existing: AutofillExisting[];
   recipes: AutofillRecipe[];
   seed: string | number;
+  /**
+   * Regentage (ISO) aus der Prognose (#549): Feuer-Rezepte werden dort
+   * ausgelassen, an trockenen Abenden dafür zuerst versucht. Ohne
+   * Prognose bleibt alles beim alten Verhalten.
+   */
+  rainyDays?: readonly string[];
 }): AutofillAssignment[] {
   const { days, meals, existing, recipes, seed } = options;
   const rand = mulberry32(hashSeed(seed));
+  const rainy = new Set(options.rainyDays ?? []);
+  const fireOnly = new Set(recipes.filter(r => r.fireOnly).map(r => r.id));
 
   // Rotations-Warteschlangen pro Eignung, deterministisch gemischt
   const queues: Record<AutofillKind, string[]> = {
@@ -185,14 +198,19 @@ export function autofillMenuPlan(options: {
   const usedOn = (day: string | undefined, recipeId: string) =>
     day !== undefined && (usedByDay.get(day)?.has(recipeId) ?? false);
 
-  /** Erstes Rezept der Warteschlange, das die Nachbartage-Regel erfüllt. */
-  const pickFrom = (queue: string[], dayIndex: number): string | null => {
+  /** Erstes Rezept der Warteschlange, das Nachbartage-Regel und Filter erfüllt. */
+  const pickFrom = (
+    queue: string[],
+    dayIndex: number,
+    allow?: (id: string) => boolean
+  ): string | null => {
     const prev = days[dayIndex - 1];
     const day = days[dayIndex];
     const next = days[dayIndex + 1];
     for (let i = 0; i < queue.length; i++) {
       const id = queue[i];
       if (usedOn(prev, id) || usedOn(day, id) || usedOn(next, id)) continue;
+      if (allow && !allow(id)) continue;
       queue.splice(i, 1);
       queue.push(id); // ans Ende rotieren → gleichmässige Abwechslung
       return id;
@@ -202,13 +220,28 @@ export function autofillMenuPlan(options: {
 
   const assignments: AutofillAssignment[] = [];
   days.forEach((day, dayIndex) => {
+    const isRainy = rainy.has(day);
     meals.forEach(meal => {
       if (meal === "snack") return; // Snacks nie automatisch füllen
       if (occupied.has(`${day}|${meal}`)) return;
       const order: AutofillKind[] =
         meal === "breakfast" ? ["breakfast", "any", "main"] : ["main", "any"];
+      // Grillwetter (#549): am trockenen Abend zuerst ein Feuer-Rezept
+      // versuchen – am Regentag stünde man dafür im Nassen.
+      if (!isRainy && meal === "dinner" && fireOnly.size > 0) {
+        const fireId = pickFrom(queues.main, dayIndex, id => fireOnly.has(id));
+        if (fireId !== null) {
+          assignments.push({ day, meal, recipeId: fireId });
+          markUsed(day, fireId);
+          return;
+        }
+      }
       for (const kind of order) {
-        const id = pickFrom(queues[kind], dayIndex);
+        const id = pickFrom(
+          queues[kind],
+          dayIndex,
+          isRainy ? id => !fireOnly.has(id) : undefined
+        );
         if (id !== null) {
           assignments.push({ day, meal, recipeId: id });
           markUsed(day, id);

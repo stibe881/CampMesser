@@ -1428,3 +1428,31 @@ export function parseWintersport(json: unknown): OsmPoi[] {
     return cleanTag(tags["piste:type"]);
   });
 }
+
+/**
+ * Indoor-Ziele für Regentage (#548): Museen, Galerien, Aquarien,
+ * Hallen-/Erlebnisbäder. Gedacht für die Heute-Ansicht, wenn die Prognose
+ * nass ist – draussen fällt heute aus, drinnen nicht.
+ */
+export function indoorQuery(lat: number, lon: number, radiusM: number): string {
+  return poiQuery(
+    [
+      'nwr["tourism"~"^(museum|gallery|aquarium)$"]',
+      'nwr["leisure"="water_park"]',
+      'nwr["leisure"="sports_centre"]["sport"~"swimming"]',
+    ],
+    lat,
+    lon,
+    radiusM
+  );
+}
+
+export function parseIndoor(json: unknown): OsmPoi[] {
+  return parsePois(json, tags => {
+    // Art als Detail: «Museum», «Hallenbad» – hilft beim Aussuchen
+    if (tags.tourism) return cleanTag(tags.tourism);
+    if (tags.leisure === "water_park") return "Aquapark";
+    if (tags.leisure === "sports_centre") return cleanTag(tags.sport);
+    return undefined;
+  });
+}

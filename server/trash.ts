@@ -41,6 +41,7 @@ import {
   tripDateOptions,
   tripDateVotes,
   tripExpenses,
+  tripStops,
   tripGuestbook,
   tripInvites,
   tripJournal,
@@ -80,6 +81,7 @@ const TABLES: Record<string, MySqlTable> = {
   tripLogs,
   tripPhotos,
   tripExpenses,
+  tripStops,
   tripBoardNotes,
   tripChanges,
   tripJournal,
@@ -181,17 +183,24 @@ async function snapshotTrip(
     .where(eq(tripDateOptions.tripId, id));
   const optionIds = options.map(option => option.id);
 
+  const expenses = await db
+    .select()
+    .from(tripExpenses)
+    .where(eq(tripExpenses.tripId, id));
+
   const payload: TrashPayload = {
     tripLogs: trips,
     tripPhotos: photos,
-    tripExpenses: await db
-      .select()
-      .from(tripExpenses)
-      .where(eq(tripExpenses.tripId, id)),
+    tripExpenses: expenses,
     tripBoardNotes: await db
       .select()
       .from(tripBoardNotes)
       .where(eq(tripBoardNotes.tripId, id)),
+    // Etappen (#536) gehören zur Reise
+    tripStops: await db
+      .select()
+      .from(tripStops)
+      .where(eq(tripStops.tripId, id)),
     tripJournal: await db
       .select()
       .from(tripJournal)
@@ -250,6 +259,12 @@ async function snapshotTrip(
   if (trip.reservationFileName) {
     files.push({ storage: "reservations", fileName: trip.reservationFileName });
   }
+  // Belege der Reisekasse (#540) überleben den Papierkorb wie die Zeilen
+  expenses.forEach(expense => {
+    if (expense.photoFileName) {
+      files.push({ storage: "expenses", fileName: expense.photoFileName });
+    }
+  });
 
   return {
     payload,
@@ -659,6 +674,8 @@ async function removeFiles(files: readonly TrashFile[]): Promise<void> {
     receipts: [],
     // Ab #433: das Foto einer freien Notiz.
     notes: [],
+    // Ab #540: die Belege der Reisekasse.
+    expenses: [],
   };
   files.forEach(file => {
     if (byStorage[file.storage]) byStorage[file.storage].push(file.fileName);
@@ -672,6 +689,7 @@ async function removeFiles(files: readonly TrashFile[]): Promise<void> {
       [byStorage.inventory, storages.inventoryPhotoStorage],
       [byStorage.receipts, storages.receiptPhotoStorage],
       [byStorage.notes, storages.notePhotoStorage],
+      [byStorage.expenses, storages.expensePhotoStorage],
     ];
   for (const [names, storage] of targets) {
     if (names.length > 0) await storage.deleteFiles(names);

@@ -93,6 +93,53 @@ export function normalizeNoteText(raw: string): string {
   return cutCodePoints(cleaned, NOTE_TEXT_MAX_LENGTH);
 }
 
+/**
+ * Abhakbare Zeilen (#544): «- [ ] Text» bzw. «- [x] Text» am Zeilenanfang
+ * (Einrückung erlaubt). Genau diese Markdown-Schreibweise und keine
+ * weitere – wer sie kennt, trifft sie; wer nicht, schreibt normale Zeilen.
+ */
+const NOTE_CHECKBOX_RE = /^(\s*)- \[( |x|X)\] (.*)$/;
+
+export interface NoteLine {
+  kind: "text" | "checkbox";
+  text: string;
+  /** Nur bei kind "checkbox" gesetzt. */
+  checked?: boolean;
+}
+
+/** Notiztext in Zeilen zerlegen; der Index entspricht der Textzeile. */
+export function parseNoteLines(text: string): NoteLine[] {
+  return text.split("\n").map(line => {
+    const match = NOTE_CHECKBOX_RE.exec(line);
+    if (!match) return { kind: "text" as const, text: line };
+    return {
+      kind: "checkbox" as const,
+      text: match[3],
+      checked: match[2] !== " ",
+    };
+  });
+}
+
+/** Enthält die Notiz mindestens eine abhakbare Zeile? */
+export function hasNoteCheckboxes(text: string): boolean {
+  return text.split("\n").some(line => NOTE_CHECKBOX_RE.test(line));
+}
+
+/**
+ * Häkchen einer Zeile umschalten; Zeilen ohne Checkbox-Syntax (oder ein
+ * Index daneben) lassen den Text unverändert zurückkommen.
+ */
+export function toggleNoteCheckbox(text: string, lineIndex: number): string {
+  const lines = text.split("\n");
+  const line = lines[lineIndex];
+  if (line === undefined) return text;
+  const match = NOTE_CHECKBOX_RE.exec(line);
+  if (!match) return text;
+  const checked = match[2] !== " ";
+  lines[lineIndex] = `${match[1]}- [${checked ? " " : "x"}] ${match[3]}`;
+  return lines.join("\n");
+}
+
 /** Minimalform einer Notiz für Suche, Filter und Sortierung. */
 export interface NoteLike {
   id: number;

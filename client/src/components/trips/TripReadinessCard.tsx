@@ -92,6 +92,7 @@ import {
 } from "@shared/packSuggestions";
 import { useTripReadinessCounts } from "@/hooks/useTripReadinessCounts";
 import { loadCantonHolidays, type CantonHolidays } from "@/lib/holidays";
+import { fmtShort } from "@/lib/dateFormat";
 import TripCalendar, { type CalendarTrip } from "@/components/TripCalendar";
 
 const READINESS_ICONS: Record<ReadinessKey, typeof ListChecks> = {
@@ -142,6 +143,17 @@ export default function TripReadinessCard({
     if (!code || code === "CH") return null;
     return findCountryRules(code);
   }, [trip.location, trip.title, trip.spotName]);
+
+  // Feiertage des Reiselands (#539): erst beim Aufklappen und nur im
+  // Ausland abgefragt; der Server cacht pro Land und Jahr.
+  const holidaysQuery = trpc.trips.holidaysAbroad.useQuery(
+    {
+      country: abroad?.code ?? "CH",
+      from: trip.startDate,
+      to: trip.endDate,
+    },
+    { enabled: open && abroad !== null, staleTime: 24 * 60 * 60 * 1000 }
+  );
 
   const packQuery = trpc.packing.progress.useQuery(
     { listId: trip.packListId ?? 0 },
@@ -401,6 +413,23 @@ export default function TripReadinessCard({
               >
                 {t.trips.readinessAbroadLink}
               </Link>
+            </p>
+          )}
+          {/* Feiertage des Reiselands (#539): Läden zu, Strassen voll –
+              das gehört in die Vorbereitung, nicht in die Überraschung. */}
+          {(holidaysQuery.data?.length ?? 0) > 0 && (
+            <p className="mt-2 text-xs text-muted-foreground">
+              {t.trips.readinessHolidaysTitle}{" "}
+              {holidaysQuery.data!.slice(0, 3).map((h, idx) => (
+                <span key={h.date}>
+                  {idx > 0 && " · "}
+                  <span className="font-medium text-foreground">
+                    {fmtShort(new Date(`${h.date}T00:00:00`), lang)}
+                  </span>{" "}
+                  {h.localName}
+                </span>
+              ))}{" "}
+              {t.trips.readinessHolidaysHint}
             </p>
           )}
         </div>

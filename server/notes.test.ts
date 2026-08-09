@@ -8,9 +8,12 @@ import {
   noteHasTag,
   noteMatchesQuery,
   normalizeNoteTags,
+  hasNoteCheckboxes,
   normalizeNoteText,
   normalizeNoteTitle,
+  parseNoteLines,
   parseNoteTags,
+  toggleNoteCheckbox,
   serializeNoteTags,
   sortNotes,
 } from "@shared/notes";
@@ -265,5 +268,45 @@ describe("collectNoteTags", () => {
   it("liefert ohne Stichwörter eine leere Liste", () => {
     expect(collectNoteTags([])).toEqual([]);
     expect(collectNoteTags([{ id: 1, text: "a", tags: null }])).toEqual([]);
+  });
+});
+
+describe("Abhakbare Notiz-Zeilen (#544)", () => {
+  const text =
+    "Vor der Fahrt\n- [ ] Gasflasche tauschen\n- [x] Kühlbox laden\nSonst nichts";
+
+  it("erkennt Checkbox-Zeilen samt Zustand, Rest bleibt Text", () => {
+    expect(parseNoteLines(text)).toEqual([
+      { kind: "text", text: "Vor der Fahrt" },
+      { kind: "checkbox", text: "Gasflasche tauschen", checked: false },
+      { kind: "checkbox", text: "Kühlbox laden", checked: true },
+      { kind: "text", text: "Sonst nichts" },
+    ]);
+    expect(hasNoteCheckboxes(text)).toBe(true);
+    expect(hasNoteCheckboxes("nur Text")).toBe(false);
+  });
+
+  it("schaltet genau die eine Zeile um", () => {
+    const toggled = toggleNoteCheckbox(text, 1);
+    expect(toggled).toContain("- [x] Gasflasche tauschen");
+    expect(toggled).toContain("- [x] Kühlbox laden");
+    expect(toggleNoteCheckbox(toggled, 2)).toContain("- [ ] Kühlbox laden");
+  });
+
+  it("erlaubt Einrückung und grosses X", () => {
+    expect(parseNoteLines("  - [X] eingerückt")[0]).toEqual({
+      kind: "checkbox",
+      text: "eingerückt",
+      checked: true,
+    });
+    expect(toggleNoteCheckbox("  - [X] a", 0)).toBe("  - [ ] a");
+  });
+
+  it("lässt Text ohne Checkbox (oder daneben gegriffene Indizes) unverändert", () => {
+    expect(toggleNoteCheckbox(text, 0)).toBe(text);
+    expect(toggleNoteCheckbox(text, 99)).toBe(text);
+    // Halbherzige Schreibweisen bleiben Text
+    expect(parseNoteLines("-[ ] ohne Leerzeichen")[0].kind).toBe("text");
+    expect(parseNoteLines("* [ ] Stern statt Strich")[0].kind).toBe("text");
   });
 });

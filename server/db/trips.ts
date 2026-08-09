@@ -32,6 +32,8 @@ import {
   tripDateOptions,
   tripDateVotes,
   tripExpenses,
+  tripStops,
+  InsertTripStop,
   tripGuestbook,
   tripInvites,
   tripJournal,
@@ -1044,6 +1046,19 @@ export async function getTripExpenseById(id: number) {
     .limit(1);
   return rows[0];
 }
+/**
+ * Ausgabe über ihren Beleg-Dateinamen finden (#540) – die Auslieferung
+ * des Fotos prüft den Zugriff danach über canAccessTrip.
+ */
+export async function getTripExpenseByPhotoFileName(fileName: string) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(tripExpenses)
+    .where(eq(tripExpenses.photoFileName, fileName))
+    .limit(1);
+  return rows[0];
+}
 /** Ausgabe erfassen – nur NACH einer canAccessTrip-Prüfung im Router. */
 export async function addTripExpense(data: InsertTripExpense) {
   const db = requireDb(await getDb());
@@ -1169,4 +1184,46 @@ export async function getUserByCalendarToken(token: string) {
     .where(eq(users.calendarToken, token))
     .limit(1);
   return rows[0] ?? null;
+}
+
+// ── Etappen (#536) ──
+/** Etappen einer Reise, Anreise zuerst – nur NACH canAccessTrip im Router. */
+export async function getTripStops(tripId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(tripStops)
+    .where(eq(tripStops.tripId, tripId))
+    .orderBy(asc(tripStops.startDate), asc(tripStops.id));
+}
+/** Einzelne Etappe laden (für die Zugriffsprüfung über ihre tripId). */
+export async function getTripStopById(id: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(tripStops)
+    .where(eq(tripStops.id, id))
+    .limit(1);
+  return rows[0];
+}
+export async function addTripStop(data: InsertTripStop) {
+  const db = requireDb(await getDb());
+  const [result] = await db.insert(tripStops).values(data);
+  return result.insertId;
+}
+export async function updateTripStop(
+  id: number,
+  data: Partial<InsertTripStop>
+) {
+  const db = requireDb(await getDb());
+  await db.update(tripStops).set(data).where(eq(tripStops.id, id));
+}
+export async function deleteTripStop(id: number) {
+  const db = requireDb(await getDb());
+  await db.delete(tripStops).where(eq(tripStops.id, id));
+}
+/** Alle Etappen einer Reise entfernen (beim Löschen der Reise). */
+export async function deleteAllTripStopsForTrip(tripId: number) {
+  const db = requireDb(await getDb());
+  await db.delete(tripStops).where(eq(tripStops.tripId, tripId));
 }

@@ -142,4 +142,18 @@ export const EMERGENCY_COUNTRIES: CountryEmergency[] = [
     name: l4("Dänemark", "Danemark", "Danimarca", "Denmark"),
     numbers: [{ label: GENERAL, number: "112" }],
   },
+  {
+    code: "pt",
+    name: l4("Portugal", "Portugal", "Portogallo", "Portugal"),
+    numbers: [{ label: GENERAL, number: "112" }],
+  },
+  {
+    code: "gr",
+    name: l4("Griechenland", "Grèce", "Grecia", "Greece"),
+    numbers: [
+      { label: GENERAL, number: "112" },
+      { label: POLICE, number: "100" },
+      { label: AMBULANCE, number: "166" },
+    ],
+  },
 ];

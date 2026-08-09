@@ -1,6 +1,15 @@
 import { useMemo, useState } from "react";
-import { Copy, Languages, Search, Volume2, VolumeX } from "lucide-react";
+import {
+  Copy,
+  Languages,
+  Plus,
+  Search,
+  Trash2,
+  Volume2,
+  VolumeX,
+} from "lucide-react";
 import { toast } from "sonner";
+import { useSyncedSetting } from "@/lib/useSyncedSetting";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,6 +27,67 @@ import { cn } from "@/lib/utils";
 import { LANGUAGE_LABELS, LANGUAGES, pick, type Language } from "@shared/i18n";
 
 const TARGET_STORAGE_KEY = "campmesser.phrasebookTarget";
+
+/** Eigene Sätze (#545): lokal gespeichert und über das Konto gesynct. */
+const CUSTOM_STORAGE_KEY = "campmesser.phrasebookCustom";
+/** Obergrenzen: mehr wäre keine Sprachhilfe mehr, sondern ein Wörterbuch. */
+const CUSTOM_MAX_ENTRIES = 100;
+const CUSTOM_MAX_LENGTH = 200;
+
+export interface CustomPhrase {
+  id: string;
+  /** Der Satz in der eigenen Sprache («Wo ist die nächste Apotheke?»). */
+  meaning: string;
+  /** Die Übersetzung in der Zielsprache. */
+  translation: string;
+  /** Zielsprache, für die die Übersetzung gilt. */
+  target: Language;
+}
+
+/** Unbekanntes (alte Stände, fremde Geräte) auf brauchbare Einträge filtern. */
+function sanitizeCustomPhrases(value: unknown): CustomPhrase[] {
+  if (!Array.isArray(value)) return [];
+  const clean: CustomPhrase[] = [];
+  for (const entry of value) {
+    if (typeof entry !== "object" || entry === null) continue;
+    const e = entry as Record<string, unknown>;
+    if (
+      typeof e.id !== "string" ||
+      typeof e.meaning !== "string" ||
+      typeof e.translation !== "string" ||
+      !(LANGUAGES as readonly string[]).includes(e.target as string)
+    )
+      continue;
+    const meaning = e.meaning.trim().slice(0, CUSTOM_MAX_LENGTH);
+    const translation = e.translation.trim().slice(0, CUSTOM_MAX_LENGTH);
+    if (!meaning || !translation) continue;
+    clean.push({
+      id: e.id,
+      meaning,
+      translation,
+      target: e.target as Language,
+    });
+    if (clean.length >= CUSTOM_MAX_ENTRIES) break;
+  }
+  return clean;
+}
+
+function loadCustomPhrases(): CustomPhrase[] {
+  try {
+    const raw = localStorage.getItem(CUSTOM_STORAGE_KEY);
+    return raw ? sanitizeCustomPhrases(JSON.parse(raw)) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveCustomPhrases(list: CustomPhrase[]) {
+  try {
+    localStorage.setItem(CUSTOM_STORAGE_KEY, JSON.stringify(list));
+  } catch {
+    // localStorage nicht verfügbar
+  }
+}
 
 /**
  * Zuletzt gewählte Zielsprache laden. Ohne gespeicherte Wahl wird eine
@@ -124,6 +194,43 @@ export default function PhrasebookPage() {
   const [speakingId, setSpeakingId] = useState<string | null>(null);
   const speech = useSpeech();
 
+  // Eigene Sätze (#545): lokal + Geräte-Sync (Muster Einkaufs-Verlauf)
+  const [custom, setCustom] = useState<CustomPhrase[]>(() =>
+    loadCustomPhrases()
+  );
+  const customSync = useSyncedSetting<CustomPhrase[]>(
+    "phrasebookCustom",
+    value => {
+      const clean = sanitizeCustomPhrases(value);
+      setCustom(clean);
+      saveCustomPhrases(clean);
+    }
+  );
+  const updateCustom = (next: CustomPhrase[]) => {
+    setCustom(next);
+    saveCustomPhrases(next);
+    customSync.push(next);
+  };
+  const [customMeaning, setCustomMeaning] = useState("");
+  const [customTranslation, setCustomTranslation] = useState("");
+  const addCustom = () => {
+    const meaning = customMeaning.trim().slice(0, CUSTOM_MAX_LENGTH);
+    const translation = customTranslation.trim().slice(0, CUSTOM_MAX_LENGTH);
+    if (!meaning || !translation) return;
+    if (custom.length >= CUSTOM_MAX_ENTRIES) {
+      toast.error(t.phrasebook.customFull);
+      return;
+    }
+    updateCustom([
+      ...custom,
+      { id: crypto.randomUUID(), meaning, translation, target },
+    ]);
+    setCustomMeaning("");
+    setCustomTranslation("");
+  };
+  /** Eigene Sätze der GEWÄHLTEN Zielsprache – andere bleiben gespeichert. */
+  const customForTarget = custom.filter(entry => entry.target === target);
+
   const chooseTarget = (next: Language) => {
     setTarget(next);
     speech.stop();
@@ -214,6 +321,96 @@ export default function PhrasebookPage() {
           className="pl-9"
         />
       </div>
+
+      {/* Eigene Sätze (#545): was DIR auf dieser Reise wichtig ist */}
+      <section className="mb-6">
+        <h2 className="mb-1 font-serif text-lg font-semibold">
+          {t.phrasebook.customTitle}
+        </h2>
+        <p className="mb-2 text-xs text-muted-foreground">
+          {t.phrasebook.customHint}
+        </p>
+        {customForTarget.length > 0 && (
+          <div className="mb-3 space-y-2">
+            {customForTarget.map(entry => (
+              <Card key={entry.id}>
+                <CardContent className="flex items-start justify-between gap-2 p-3.5">
+                  <div className="min-w-0">
+                    <p className="font-medium">{entry.translation}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {entry.meaning}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 gap-1">
+                    {speech.supported && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        aria-label={t.phrasebook.speakAria(entry.translation)}
+                        onClick={() => speakPhrase(entry.id, entry.translation)}
+                      >
+                        {speakingId === entry.id && speech.speaking ? (
+                          <VolumeX className="h-4 w-4" aria-hidden="true" />
+                        ) : (
+                          <Volume2 className="h-4 w-4" aria-hidden="true" />
+                        )}
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                      aria-label={t.phrasebook.customDeleteAria(
+                        entry.translation
+                      )}
+                      onClick={() =>
+                        updateCustom(custom.filter(e => e.id !== entry.id))
+                      }
+                    >
+                      <Trash2 className="h-4 w-4" aria-hidden="true" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+        <form
+          className="grid gap-2 sm:grid-cols-[1fr_1fr_auto]"
+          onSubmit={e => {
+            e.preventDefault();
+            addCustom();
+          }}
+        >
+          <Input
+            value={customMeaning}
+            onChange={e => setCustomMeaning(e.target.value)}
+            placeholder={t.phrasebook.customMeaningPlaceholder}
+            maxLength={CUSTOM_MAX_LENGTH}
+            aria-label={t.phrasebook.customMeaningPlaceholder}
+          />
+          <Input
+            value={customTranslation}
+            onChange={e => setCustomTranslation(e.target.value)}
+            placeholder={t.phrasebook.customTranslationPlaceholder(
+              LANGUAGE_LABELS[target]
+            )}
+            maxLength={CUSTOM_MAX_LENGTH}
+            aria-label={t.phrasebook.customTranslationPlaceholder(
+              LANGUAGE_LABELS[target]
+            )}
+          />
+          <Button
+            type="submit"
+            variant="outline"
+            disabled={!customMeaning.trim() || !customTranslation.trim()}
+          >
+            <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
+            {t.phrasebook.customAdd}
+          </Button>
+        </form>
+      </section>
 
       {visible.length === 0 ? (
         <p className="rounded-lg bg-muted p-4 text-sm text-muted-foreground">

@@ -207,6 +207,7 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     foodTemplates,
     campSpots,
     homeLocations,
+    savedPlaces,
     spotPhotos,
     tripLogs,
     tripDateOptions,
@@ -339,6 +340,8 @@ export async function deleteUserAccount(userId: number): Promise<void> {
   await db.delete(foodItems).where(eq(foodItems.userId, userId));
   await db.delete(foodTemplates).where(eq(foodTemplates.userId, userId));
   await db.delete(homeLocations).where(eq(homeLocations.userId, userId));
+  // Merkorte (#537) gehören dem Konto
+  await db.delete(savedPlaces).where(eq(savedPlaces.userId, userId));
   await db.delete(spotPhotos).where(eq(spotPhotos.userId, userId));
   await db.delete(campSpots).where(eq(campSpots.userId, userId));
   // Reise-Tagebuch samt Fotos und Menüplänen (referenzieren Trips) –

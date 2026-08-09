@@ -1,25 +1,17 @@
-import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { formatTripRange, MAX_FORECAST_DAYS } from "@/components/trips/shared";
-import TripBoard from "@/components/trips/TripBoard";
 import {
   PackProgress,
   RunningBadge,
   TripCoverBanner,
-  TripPhotos,
 } from "@/components/trips/TripWidgets";
-
-/**
- * Die beiden schwersten Bausteine erst laden, wenn eine Reise aufgeklappt
- * ist (#322). Reisekasse (911 Zeilen mit Diagramm) und Foto-Collage
- * (Zeichenfläche, Bildbearbeitung) machten zusammen rund ein Viertel der
- * alten Trips.tsx aus – gebraucht werden sie erst, wenn man eine einzelne
- * Reise öffnet, und die Liste soll nicht darauf warten.
- */
-const TripExpenses = lazy(() => import("@/components/trips/TripExpenses"));
-const TripCollage = lazy(() => import("@/components/trips/TripCollage"));
+import {
+  TripActionColumn,
+  TripDetailSections,
+  TripMetaLine,
+} from "@/components/trips/TripListItemParts";
 import TripDuplicateDialog from "@/components/trips/TripDuplicateDialog";
 import TripHolidayHints from "@/components/trips/TripHolidayHints";
-import TripJournal from "@/components/trips/TripJournal";
 import TripMembersDialog from "@/components/trips/TripMembersDialog";
 import TripPackSuggestions from "@/components/trips/TripPackSuggestions";
 import PackExperienceHints from "@/components/trips/PackExperienceHints";
@@ -44,7 +36,6 @@ import {
   BookOpen,
   CalendarClock,
   CalendarPlus,
-  Clock,
   CalendarDays,
   ChevronDown,
   CloudSun,
@@ -52,7 +43,6 @@ import {
   Eye,
   EyeOff,
   ChartColumn,
-  CopyPlus,
   Download,
   Fuel,
   Gauge,
@@ -60,21 +50,15 @@ import {
   LayoutGrid,
   List,
   Loader2,
-  LogOut,
   MapPin,
   MapPinned,
   MessageSquare,
-  Moon,
-  Pencil,
   Pin,
   Plus,
-  Printer,
-  Share2,
   ShoppingBasket,
   Refrigerator,
   Signpost,
   Tent,
-  Trash2,
   Trophy,
   Users,
   UtensilsCrossed,
@@ -192,16 +176,7 @@ import {
 } from "@/lib/holidays";
 import { drawCollage } from "@/lib/collageImage";
 import TripCalendar, { type CalendarTrip } from "@/components/TripCalendar";
-import LazySection from "@/components/LazySection";
-import TripMoreSections from "@/components/trips/TripMoreSections";
-import TripReview from "@/components/trips/TripReview";
-import TripOfflinePrep from "@/components/trips/TripOfflinePrep";
-import NextTimeReminder from "@/components/trips/NextTimeReminder";
 import TripYearReview from "@/components/trips/TripYearReview";
-import TripDatePoll from "@/components/TripDatePoll";
-import TripGuestbook from "@/components/TripGuestbook";
-import TripHistory from "@/components/TripHistory";
-import TripReservation from "@/components/TripReservation";
 import TripTemplatePicker from "@/components/TripTemplatePicker";
 import TripFormDialog, { StarRating } from "@/components/trips/TripFormDialog";
 import { useTodayIso } from "@/lib/useTodayIso";
@@ -1026,53 +1001,13 @@ export default function TripsPage() {
                           </span>
                         )}
                       </p>
-                      <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                        {trip.role === "member" && trip.ownerName && (
-                          <span className="flex items-center gap-1">
-                            <Users className="h-3 w-3" aria-hidden="true" />
-                            {t.trips.sharedWith(trip.ownerName)}
-                          </span>
-                        )}
-                        {/* Ort als Weg ins Dossier: Wer den Aufenthalt
-                            anschaut, will von dort zum Platz – bisher
-                            musste man über die Zeltplatz-Liste suchen */}
-                        {(trip.title || dossierId != null) &&
-                          (dossierId != null ? (
-                            <Link
-                              href={`/zeltplaetze/${dossierId}`}
-                              className="flex items-center gap-1 font-medium text-primary hover:underline"
-                              aria-label={t.trips.dossierAria(placeName(trip))}
-                            >
-                              <MapPin className="h-3 w-3" aria-hidden="true" />
-                              {placeName(trip)}
-                            </Link>
-                          ) : (
-                            <span className="flex items-center gap-1">
-                              <MapPin className="h-3 w-3" aria-hidden="true" />
-                              {placeName(trip)}
-                            </span>
-                          ))}
-                        <span className="flex items-center gap-1">
-                          <CalendarDays
-                            className="h-3 w-3"
-                            aria-hidden="true"
-                          />
-                          {formatRange(trip.startDate, trip.endDate)}
-                        </span>
-                        {(trip.arrivalTime || trip.departureTime) && (
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" aria-hidden="true" />
-                            {t.trips.timesLine(
-                              trip.arrivalTime,
-                              trip.departureTime
-                            )}
-                          </span>
-                        )}
-                        <span className="flex items-center gap-1">
-                          <Moon className="h-3 w-3" aria-hidden="true" />
-                          {t.trips.nightsCount(nights)}
-                        </span>
-                      </p>
+                      <TripMetaLine
+                        trip={trip}
+                        dossierId={dossierId}
+                        place={placeName(trip)}
+                        range={formatRange(trip.startDate, trip.endDate)}
+                        nights={nights}
+                      />
                       {(holidays || tripDestinationHolidays(trip)) && (
                         <TripHolidayHints
                           startDate={trip.startDate}
@@ -1217,237 +1152,42 @@ export default function TripsPage() {
                           {trip.notes}
                         </p>
                       )}
-                      {/* ABSCHNITTE ERST BEIM SCROLLEN (#347): Ein Aufenthalt
-                          stapelt hier ein Dutzend Abschnitte, und mehrere
-                          holen sofort Daten – die Fotogalerie zum Beispiel
-                          fragt ohne Aufklappen. Bei zwanzig Reisen sind das
-                          zwanzig Galerie-Abfragen für drei sichtbare Karten.
-                          `LazySection` gibt es seit #304 fürs Platz-Dossier,
-                          das genau dasselbe Problem hatte. */}
-                      {/* NUR AUF DER DETAILSEITE (#359): In der LISTE stapelte jede
-                          Reise hier acht Abschnitte übereinander. Bei einer Reise
-                          ging das noch; bei fünf war die Seite eine Wand aus grauen
-                          Balken, und die Reise, die man suchte, lag irgendwo
-                          dazwischen. Weg ist nichts: Die Abschnitte stehen auf
-                          `/tagebuch/<id>`, der eigenen Adresse jeder Reise (#310),
-                          zu der der Titel und der Knopf «Reise öffnen» führen. Die
-                          Liste ist damit wieder eine Liste – ein Blick, welche
-                          Reisen es gibt und wie es um sie steht. */}
+                      {/* Detail-Abschnitte NUR auf der Detailseite (#359),
+                          lazy beim Scrollen (#347) – der Stapel selbst
+                          lebt seit #554 in TripDetailSections. */}
                       {focusId !== null && (
-                        <LazySection minHeight={320}>
-                          {/* Reise-Tagebuch (#192): auch bei einer geplanten
-                            Reise, sobald sie heute begonnen hat */}
-                          {trip.startDate <= today && (
-                            <TripJournal
-                              tripId={trip.id}
-                              tripName={label(trip)}
-                              startDate={trip.startDate}
-                              endDate={trip.endDate}
-                              shared={trip.shared || trip.role === "member"}
-                            />
-                          )}
-                          {/* Reisekasse (#219): auch schon vor der Anreise –
-                            Platzmiete und Sprit fallen oft vorher an */}
-                          <Suspense fallback={null}>
-                            <TripExpenses
-                              tripId={trip.id}
-                              tripName={label(trip)}
-                              defaultDay={
-                                today > trip.endDate ? trip.endDate : today
-                              }
-                              shared={trip.shared || trip.role === "member"}
-                              budgetRappen={trip.budgetRappen}
-                              eurRateX10000={trip.eurRateX10000}
-                              spotId={trip.spotId}
-                              startDate={trip.startDate}
-                              endDate={trip.endDate}
-                            />
-                          </Suspense>
-                          {/* Termin-Finder (#253): nur bei gemeinsamen Reisen und
-                            nur, solange die Reise noch bevorsteht – über einen
-                            bereits gelaufenen Aufenthalt stimmt niemand ab */}
-                          {(trip.shared || trip.role === "member") &&
-                            trip.startDate > today && (
-                              <TripDatePoll
-                                tripId={trip.id}
-                                tripName={label(trip)}
-                              />
-                            )}
-                          {/* Pinnwand (#245, geöffnet in #344): früher nur bei
-                            gemeinsamen Reisen – «allein hat man niemanden, dem
-                            man etwas anpinnt». Nur zeigt die «Heute»-Ansicht
-                            die offenen Aufgaben JEDER Reise an, und wer dort
-                            «Nichts offen» las, hatte allein keine Möglichkeit,
-                            etwas einzutragen. Aufgaben braucht man auch für
-                            sich; nur der Hinweistext ist ein anderer. */}
-                          <TripBoard
-                            tripId={trip.id}
-                            tripName={label(trip)}
-                            shared={trip.shared || trip.role === "member"}
-                          />
-                          <TripPhotos
-                            tripId={trip.id}
-                            tripName={label(trip)}
-                            coverPhotoId={trip.coverPhotoId}
-                          />
-                          {/* Foto-Collage (#226) */}
-                          <Suspense fallback={null}>
-                            <TripCollage
-                              tripId={trip.id}
-                              tripName={label(trip)}
-                              startDate={trip.startDate}
-                              endDate={trip.endDate}
-                            />
-                          </Suspense>
-                          {/* SELTENES HINTER EINEN SCHALTER (#357): Verlauf, Gästebuch
-                            und Reservation braucht man selten – als eigene graue
-                            Balken machten sie den Stapel unlesbar. */}
-                          {/* «Beim nächsten Mal» (#396): Die Notiz vom
-                            letzten Aufenthalt gehört GENAU hierher – beim
-                            Planen der nächsten Reise an denselben Platz,
-                            nicht versteckt im Dossier. */}
-                          {trip.spotId != null && (
-                            <NextTimeReminder spotId={trip.spotId} />
-                          )}
-                          <TripMoreSections count={4}>
-                            {/* Für unterwegs vorbereiten (#387): Offline gab
-                              es bisher stückweise, und man musste an
-                              mehrere Dinge einzeln denken. Ein Knopf für
-                              diese Reise – vor der Abfahrt, nicht im
-                              Funkloch. */}
-                            <TripOfflinePrep
-                              tripId={trip.id}
-                              spotId={trip.spotId}
-                              packListId={trip.packListId}
-                            />
-                            {/* Änderungsverlauf (#296): nur bei gemeinsamen
-                              Reisen – allein ist «wer war das» schon
-                              beantwortet */}
-                            {(trip.shared || trip.role === "member") && (
-                              <TripHistory
-                                tripId={trip.id}
-                                tripName={label(trip)}
-                              />
-                            )}
-                            {/* Gästebuch (#254): auch bei einer Reise ohne
-                              Mitreisende – über den Teil-Link können Bekannte
-                              einen Gruss hinterlassen */}
-                            <TripGuestbook
-                              tripId={trip.id}
-                              tripName={label(trip)}
-                            />
-                            {/* Buchungsbestätigung (#279): nur bei eigenen Reisen –
-                              die Datei liegt am Konto der Besitzerin/des
-                              Besitzers, Mitglieder sehen sie nicht */}
-                            {trip.role !== "member" && (
-                              <TripReservation
-                                tripId={trip.id}
-                                fileName={trip.reservationFileName ?? null}
-                                className="mt-2"
-                              />
-                            )}
-                          </TripMoreSections>
-                        </LazySection>
+                        <TripDetailSections
+                          trip={trip}
+                          name={label(trip)}
+                          today={today}
+                          phase="planned"
+                        />
                       )}
                     </div>
-                    <div className="flex shrink-0 flex-col gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground/60 hover:text-foreground"
-                        onClick={() => startEdit(trip)}
-                        aria-label={t.trips.editEntryAria(label(trip))}
-                      >
-                        <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground/60 hover:text-foreground"
-                        onClick={() =>
-                          setDuplicateTrip({
-                            id: trip.id,
-                            name: label(trip),
-                            startDate: trip.startDate,
-                            endDate: trip.endDate,
-                          })
-                        }
-                        aria-label={t.trips.duplicateAria(label(trip))}
-                        title={t.trips.duplicateDialogTitle}
-                      >
-                        <CopyPlus className="h-3.5 w-3.5" aria-hidden="true" />
-                      </Button>
-                      {trip.role === "owner" ? (
-                        <>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-muted-foreground/60 hover:text-foreground"
-                            onClick={() =>
-                              setMembersTrip({
-                                id: trip.id,
-                                name: label(trip),
-                              })
-                            }
-                            aria-label={t.trips.membersAria(label(trip))}
-                          >
-                            <Users className="h-3.5 w-3.5" aria-hidden="true" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-muted-foreground/60 hover:text-foreground"
-                            onClick={() =>
-                              setHubTrip({
-                                id: trip.id,
-                                name: label(trip),
-                              })
-                            }
-                            aria-label={t.trips.hubShareAria(label(trip))}
-                          >
-                            <Share2
-                              className="h-3.5 w-3.5"
-                              aria-hidden="true"
-                            />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-muted-foreground/60 hover:text-destructive"
-                            onClick={() =>
-                              removeMutation.mutate({ id: trip.id })
-                            }
-                            aria-label={t.trips.deletePlannedAria(label(trip))}
-                          >
-                            <Trash2
-                              className="h-3.5 w-3.5"
-                              aria-hidden="true"
-                            />
-                          </Button>
-                        </>
-                      ) : (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-muted-foreground/60 hover:text-destructive"
-                          disabled={leaveMutation.isPending}
-                          onClick={async () => {
-                            if (
-                              await ask({
-                                title: t.trips.leaveConfirm(label(trip)),
-                                confirmLabel: t.common.confirmLeave,
-                              })
-                            ) {
-                              leaveMutation.mutate({ tripId: trip.id });
-                            }
-                          }}
-                          aria-label={t.trips.leaveTripAria(label(trip))}
-                          title={t.trips.leaveTrip}
-                        >
-                          <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
-                        </Button>
-                      )}
-                    </div>
+                    <TripActionColumn
+                      trip={trip}
+                      name={label(trip)}
+                      phase="planned"
+                      onEdit={() => startEdit(trip)}
+                      onDuplicate={() =>
+                        setDuplicateTrip({
+                          id: trip.id,
+                          name: label(trip),
+                          startDate: trip.startDate,
+                          endDate: trip.endDate,
+                        })
+                      }
+                      onMembers={() =>
+                        setMembersTrip({ id: trip.id, name: label(trip) })
+                      }
+                      onHub={() =>
+                        setHubTrip({ id: trip.id, name: label(trip) })
+                      }
+                      onRemove={() => removeMutation.mutate({ id: trip.id })}
+                      onIcs={() => downloadTripIcs(trip)}
+                      onLeave={() => leaveMutation.mutate({ tripId: trip.id })}
+                      leavePending={leaveMutation.isPending}
+                    />
                   </div>
                 </li>
               );
@@ -1540,60 +1280,13 @@ export default function TripsPage() {
                               «Heute», nur die Reiseliste nicht. */}
                           <RunningBadge trip={trip} today={today} />
                         </p>
-                        <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                          {trip.role === "member" && trip.ownerName && (
-                            <span className="flex items-center gap-1">
-                              <Users className="h-3 w-3" aria-hidden="true" />
-                              {t.trips.sharedWith(trip.ownerName)}
-                            </span>
-                          )}
-                          {/* Ort als Weg ins Dossier: Wer den Aufenthalt
-                              anschaut, will von dort zum Platz */}
-                          {(trip.title || dossierId != null) &&
-                            (dossierId != null ? (
-                              <Link
-                                href={`/zeltplaetze/${dossierId}`}
-                                className="flex items-center gap-1 font-medium text-primary hover:underline"
-                                aria-label={t.trips.dossierAria(
-                                  placeName(trip)
-                                )}
-                              >
-                                <MapPin
-                                  className="h-3 w-3"
-                                  aria-hidden="true"
-                                />
-                                {placeName(trip)}
-                              </Link>
-                            ) : (
-                              <span className="flex items-center gap-1">
-                                <MapPin
-                                  className="h-3 w-3"
-                                  aria-hidden="true"
-                                />
-                                {placeName(trip)}
-                              </span>
-                            ))}
-                          <span className="flex items-center gap-1">
-                            <CalendarDays
-                              className="h-3 w-3"
-                              aria-hidden="true"
-                            />
-                            {formatRange(trip.startDate, trip.endDate)}
-                          </span>
-                          {(trip.arrivalTime || trip.departureTime) && (
-                            <span className="flex items-center gap-1">
-                              <Clock className="h-3 w-3" aria-hidden="true" />
-                              {t.trips.timesLine(
-                                trip.arrivalTime,
-                                trip.departureTime
-                              )}
-                            </span>
-                          )}
-                          <span className="flex items-center gap-1">
-                            <Moon className="h-3 w-3" aria-hidden="true" />
-                            {t.trips.nightsCount(nights)}
-                          </span>
-                        </p>
+                        <TripMetaLine
+                          trip={trip}
+                          dossierId={dossierId}
+                          place={placeName(trip)}
+                          range={formatRange(trip.startDate, trip.endDate)}
+                          nights={nights}
+                        />
                         {weatherSpot && (
                           <TripWeatherArchive
                             tripId={trip.id}
@@ -1657,239 +1350,44 @@ export default function TripsPage() {
                             </Button>
                           )}
                         </div>
-                        {/* ABSCHNITTE ERST BEIM SCROLLEN (#347): Ein Aufenthalt
-                          stapelt hier ein Dutzend Abschnitte, und mehrere
-                          holen sofort Daten – die Fotogalerie zum Beispiel
-                          fragt ohne Aufklappen. Bei zwanzig Reisen sind das
-                          zwanzig Galerie-Abfragen für drei sichtbare Karten.
-                          `LazySection` gibt es seit #304 fürs Platz-Dossier,
-                          das genau dasselbe Problem hatte. */}
-                        {/* NUR AUF DER DETAILSEITE (#359): In der LISTE stapelte jede
-                            Reise hier acht Abschnitte übereinander. Bei einer Reise
-                            ging das noch; bei fünf war die Seite eine Wand aus grauen
-                            Balken, und die Reise, die man suchte, lag irgendwo
-                            dazwischen. Weg ist nichts: Die Abschnitte stehen auf
-                            `/tagebuch/<id>`, der eigenen Adresse jeder Reise (#310),
-                            zu der der Titel und der Knopf «Reise öffnen» führen. Die
-                            Liste ist damit wieder eine Liste – ein Blick, welche
-                            Reisen es gibt und wie es um sie steht. */}
+                        {/* Detail-Abschnitte NUR auf der Detailseite (#359),
+                            lazy beim Scrollen (#347) – der Stapel selbst
+                            lebt seit #554 in TripDetailSections. */}
                         {focusId !== null && (
-                          <LazySection minHeight={320}>
-                            {/* Reise-Tagebuch (#192): vergangene und laufende Reisen */}
-                            <TripJournal
-                              tripId={trip.id}
-                              tripName={label(trip)}
-                              startDate={trip.startDate}
-                              endDate={trip.endDate}
-                              shared={trip.shared || trip.role === "member"}
-                            />
-                            {/* Reisekasse (#219) */}
-                            <TripExpenses
-                              tripId={trip.id}
-                              tripName={label(trip)}
-                              defaultDay={
-                                today > trip.endDate ? trip.endDate : today
-                              }
-                              shared={trip.shared || trip.role === "member"}
-                              budgetRappen={trip.budgetRappen}
-                              eurRateX10000={trip.eurRateX10000}
-                              spotId={trip.spotId}
-                              startDate={trip.startDate}
-                              endDate={trip.endDate}
-                            />
-                            {/* Pinnwand (#245, für jede Reise seit #344) */}
-                            <TripBoard
-                              tripId={trip.id}
-                              tripName={label(trip)}
-                              shared={trip.shared || trip.role === "member"}
-                            />
-                            <TripPhotos
-                              tripId={trip.id}
-                              tripName={label(trip)}
-                              coverPhotoId={trip.coverPhotoId}
-                            />
-                            {/* Foto-Collage (#226) */}
-                            <TripCollage
-                              tripId={trip.id}
-                              tripName={label(trip)}
-                              startDate={trip.startDate}
-                              endDate={trip.endDate}
-                            />
-                            {/* Seltenes hinter einen Schalter (#357) */}
-                            <TripMoreSections count={4}>
-                              {/* Rückblick (#381): Erst nach der Reise
-                                weiss man, was nicht nötig war und was
-                                gefehlt hat – und nur dann verbessert es
-                                die nächste Liste. */}
-                              <TripReview
-                                tripId={trip.id}
-                                packListId={trip.packListId}
-                                tripName={label(trip)}
-                              />
-                              {/* Änderungsverlauf (#296) auch rückblickend:
-                                «wer hat das damals eingetragen» */}
-                              {(trip.shared || trip.role === "member") && (
-                                <TripHistory
-                                  tripId={trip.id}
-                                  tripName={label(trip)}
-                                />
-                              )}
-                              {/* Gästebuch (#254): gerade bei vergangenen Reisen
-                                die Erinnerungs-Seite – Grüsse bleiben stehen */}
-                              <TripGuestbook
-                                tripId={trip.id}
-                                tripName={label(trip)}
-                              />
-                              {/* Buchungsbestätigung (#279) – auch bei vergangenen
-                                Reisen: die Rechnung will man später noch finden */}
-                              {trip.role !== "member" && (
-                                <TripReservation
-                                  tripId={trip.id}
-                                  fileName={trip.reservationFileName ?? null}
-                                  className="mt-2"
-                                />
-                              )}
-                            </TripMoreSections>
-                          </LazySection>
+                          <TripDetailSections
+                            trip={trip}
+                            name={label(trip)}
+                            today={today}
+                            phase="past"
+                          />
                         )}
                       </div>
-                      <div className="flex shrink-0 flex-col gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-muted-foreground/60 hover:text-foreground"
-                          onClick={() => startEdit(trip)}
-                          aria-label={t.trips.editEntryAria(label(trip))}
-                        >
-                          <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
-                        </Button>
-                        <Button
-                          asChild
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-muted-foreground/60 hover:text-foreground"
-                        >
-                          <Link
-                            href={`/tagebuch/${trip.id}/drucken`}
-                            aria-label={t.trips.printEntryAria(label(trip))}
-                          >
-                            <Printer
-                              className="h-3.5 w-3.5"
-                              aria-hidden="true"
-                            />
-                          </Link>
-                        </Button>
-                        {/* Kalender-Export (#244) – auch für vergangene Reisen */}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-muted-foreground/60 hover:text-foreground"
-                          onClick={() => downloadTripIcs(trip)}
-                          aria-label={t.trips.icsAria(label(trip))}
-                          title={t.trips.icsButton}
-                        >
-                          <CalendarPlus
-                            className="h-3.5 w-3.5"
-                            aria-hidden="true"
-                          />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-muted-foreground/60 hover:text-foreground"
-                          onClick={() =>
-                            setDuplicateTrip({
-                              id: trip.id,
-                              name: label(trip),
-                              startDate: trip.startDate,
-                              endDate: trip.endDate,
-                            })
-                          }
-                          aria-label={t.trips.duplicateAria(label(trip))}
-                          title={t.trips.duplicateDialogTitle}
-                        >
-                          <CopyPlus
-                            className="h-3.5 w-3.5"
-                            aria-hidden="true"
-                          />
-                        </Button>
-                        {trip.role === "owner" ? (
-                          <>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-muted-foreground/60 hover:text-foreground"
-                              onClick={() =>
-                                setMembersTrip({
-                                  id: trip.id,
-                                  name: label(trip),
-                                })
-                              }
-                              aria-label={t.trips.membersAria(label(trip))}
-                            >
-                              <Users
-                                className="h-3.5 w-3.5"
-                                aria-hidden="true"
-                              />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-muted-foreground/60 hover:text-foreground"
-                              onClick={() =>
-                                setHubTrip({
-                                  id: trip.id,
-                                  name: label(trip),
-                                })
-                              }
-                              aria-label={t.trips.hubShareAria(label(trip))}
-                            >
-                              <Share2
-                                className="h-3.5 w-3.5"
-                                aria-hidden="true"
-                              />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-muted-foreground/60 hover:text-destructive"
-                              onClick={() =>
-                                removeMutation.mutate({ id: trip.id })
-                              }
-                              aria-label={t.trips.deleteEntryAria(label(trip))}
-                            >
-                              <Trash2
-                                className="h-3.5 w-3.5"
-                                aria-hidden="true"
-                              />
-                            </Button>
-                          </>
-                        ) : (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-muted-foreground/60 hover:text-destructive"
-                            disabled={leaveMutation.isPending}
-                            onClick={async () => {
-                              if (
-                                await ask({
-                                  title: t.trips.leaveConfirm(label(trip)),
-                                  confirmLabel: t.common.confirmLeave,
-                                })
-                              ) {
-                                leaveMutation.mutate({ tripId: trip.id });
-                              }
-                            }}
-                            aria-label={t.trips.leaveTripAria(label(trip))}
-                            title={t.trips.leaveTrip}
-                          >
-                            <LogOut
-                              className="h-3.5 w-3.5"
-                              aria-hidden="true"
-                            />
-                          </Button>
-                        )}
-                      </div>
+                      <TripActionColumn
+                        trip={trip}
+                        name={label(trip)}
+                        phase="past"
+                        onEdit={() => startEdit(trip)}
+                        onDuplicate={() =>
+                          setDuplicateTrip({
+                            id: trip.id,
+                            name: label(trip),
+                            startDate: trip.startDate,
+                            endDate: trip.endDate,
+                          })
+                        }
+                        onMembers={() =>
+                          setMembersTrip({ id: trip.id, name: label(trip) })
+                        }
+                        onHub={() =>
+                          setHubTrip({ id: trip.id, name: label(trip) })
+                        }
+                        onRemove={() => removeMutation.mutate({ id: trip.id })}
+                        onIcs={() => downloadTripIcs(trip)}
+                        onLeave={() =>
+                          leaveMutation.mutate({ tripId: trip.id })
+                        }
+                        leavePending={leaveMutation.isPending}
+                      />
                     </div>
                   </li>
                 );

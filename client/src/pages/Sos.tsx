@@ -521,7 +521,8 @@ export default function SosPage() {
                       const phrase = emergencyPhrase(
                         phraseLang,
                         geo.lat!,
-                        geo.lng!
+                        geo.lng!,
+                        lv95
                       );
                       return (
                         <li

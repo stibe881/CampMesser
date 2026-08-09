@@ -126,10 +126,10 @@ export const de = {
       evening: (name: string) => `Guten Abend, ${name}`,
     },
     tripArrivalAt: (time: string) => `Anreise ${time}`,
-    heroTitle1: "Alles fürs Camp.",
+    heroTitle1: "Alle deine Reisen.",
     heroTitle2: "In einer App.",
     heroSubtitle:
-      "Planung, Sicherheit, Energie und Naturerlebnis – über 40 smarte Werkzeuge für dein nächstes Abenteuer.",
+      "Camping, Hotel, Städte, Strand oder Wandern – Planung, Wetter, Packlisten und über 40 smarte Werkzeuge für unterwegs.",
     sunInfo: (sunrise: string, sunset: string) =>
       `Heute: Sonnenaufgang ${sunrise} · Sonnenuntergang ${sunset}`,
     nextTripFallback: "Nächster Trip",
@@ -359,6 +359,14 @@ export const de = {
     themeLight: "Hell",
     themeDark: "Dunkel",
     themeAuto: "Automatisch (System)",
+    fontScaleTitle: "Schriftgrösse",
+    fontScaleLabels: {
+      normal: "Normal",
+      large: "Gross",
+      xlarge: "Sehr gross",
+    },
+    fontScaleHint:
+      "Gilt nur auf diesem Gerät – auf dem Tablet darf es anders sein als auf dem Handy.",
     nameTitle: "Name ändern",
     nameAria: "Name",
     namePlaceholder: "Dein Name",
@@ -702,6 +710,9 @@ export const de = {
     personBudgetHint:
       "Zum Beispiel 23 kg Fluggepäck – die Traglast-Zeile färbt Personen über der Limite ein. Leer lassen für keine Limite.",
     personBudgetInfo: (limit: string) => `Limite: ${limit} pro Person`,
+    copyTextButton: "Als Text kopieren",
+    copyTextDone: "Liste kopiert – zum Einfügen bereit",
+    copyTextFailed: "Kopieren fehlgeschlagen",
     uncheckAllButton: "Alle Haken lösen",
     uncheckAllConfirm: (n: number) =>
       n === 1
@@ -1081,6 +1092,14 @@ export const de = {
       "Balken = Regenmenge (mm/h, linke Achse) · Linie = Regenwahrscheinlichkeit (%, rechte Achse).",
     forecast7: "7-Tage-Vorhersage",
     week2Title: "Woche 2",
+    windowTitle: "Wetterfenster",
+    windowHint: "Welches Wochenende taugt fürs Rausgehen?",
+    windowWeekend: (sa: string, so: string) => `Sa ${sa} – So ${so}`,
+    windowSummary: (temp: number, rain: number) =>
+      rain > 0
+        ? `bis ${temp} °C · ${rain} mm Regen`
+        : `bis ${temp} °C · trocken`,
+    windowVerdicts: { top: "Top", ok: "Passt", bad: "Eher nicht" },
     week2Hint: "Ausblick – geringere Zuverlässigkeit",
     week2Aria: "Ausblick auf Woche 2",
     dayToggleAria: (day: string) =>
@@ -1494,6 +1513,7 @@ export const de = {
   roadRules: {
     plugTitle: "Steckdosen & Adapter",
     tippingTitle: "Trinkgeld",
+    paymentTitle: "Bargeld & Karte",
     title: "Maut, Vignette & Regeln",
     subtitle:
       "Kurzinfo fürs Zielland: Maut, Tempo mit Anhänger, Pflichtausrüstung, Notruf.",
@@ -2021,6 +2041,20 @@ export const de = {
     createNamePlaceholder: "z. B. Camping Seeblick",
     createNameRequired: "Bitte gib zuerst einen Namen ein.",
     createConfirm: "Favorit anlegen",
+    createKindAria: "Was hier entstehen soll",
+    createKindFavorite: "Zeltplatz-Favorit",
+    createKindSavedPlace: "Merkort",
+    createSavedPlaceConfirm: "Merkort anlegen",
+    createNoteLabel: "Notiz (optional)",
+    createNotePlaceholder: "z. B. vom Nachbarn empfohlen",
+    createColorLabel: "Pin-Farbe",
+    layerSavedPlaces: "Merkorte",
+    savedPlaceKind: "Merkort \u2013 Wunschziel",
+    savedPlaceLegend: (n: number) => `${n} Merkort${n === 1 ? "" : "e"}`,
+    savedPlaceDelete: "Merkort entfernen",
+    savedPlaceDeleted: "Merkort entfernt",
+    savedPlaceCreatedToast: (name: string) =>
+      `Merkort \u00ab${name}\u00bb gespeichert`,
     createdToast: (name: string) => `«${name}» als Favorit angelegt`,
     createdToastAction: "Zum Dossier",
     sightingKind: "Natur-Beobachtung",
@@ -2528,6 +2562,8 @@ export const de = {
     readinessAbroadHint: (country: string) =>
       `Diese Reise führt nach ${country} – denk an Vignette, Maut und Mitführpflichten.`,
     readinessAbroadLink: "Länder-Merkblatt öffnen",
+    readinessHolidaysTitle: "Feiertag im Reiseland:",
+    readinessHolidaysHint: "– Läden sind dann oft geschlossen.",
     whoAlongTitle: "Wer ist dabei?",
     whoAlongHint:
       "Angetippt heisst dabei. Daraus entstehen die Stempel im Reisepass – der Familien-Stempel nur, wenn alle dabei sind.",
@@ -2633,6 +2669,7 @@ export const de = {
     locationSearchButton: "Ort suchen",
     locationSearchFailed: "Ortssuche nicht erreichbar",
     locationSearchNoResults: "Kein Ort gefunden – anders schreiben?",
+    savedPlacesSuggestTitle: "Gemerkte Orte",
     locationCoordsSet: "Koordinaten übernommen",
     locationCoordsClearAria: "Koordinaten entfernen",
     dayLabel: "Datum",
@@ -3019,6 +3056,46 @@ export const de = {
     paidByLine: (name: string) => `bezahlt von ${name}`,
     byLine: (name: string) => `erfasst von ${name}`,
     untitled: "Ohne Beschreibung",
+    photoLabel: "Beleg-Foto (optional)",
+    photoAdd: "Beleg fotografieren",
+    photoChange: "Beleg ersetzen",
+    photoRemove: "Beleg entfernen",
+    photoHint:
+      "Ein Foto der Quittung zur Ausgabe – praktisch fürs Abrechnen daheim.",
+    photoViewAria: (label: string) => `Beleg zu ${label} ansehen`,
+    photoTooLarge: "Das Foto ist zu gross.",
+    photoUploadFailed: "Beleg konnte nicht hochgeladen werden",
+    photoRemoveFailed: "Beleg konnte nicht entfernt werden",
+    photoReadFailed: "Foto konnte nicht gelesen werden",
+    photoHeic:
+      "HEIC-Fotos werden nicht unterstützt \u2013 bitte als JPG w\u00e4hlen.",
+  },
+  tripStops: {
+    title: "Etappen",
+    hint: "Rundreise? Mehrere Orte mit je eigenem Von/Bis \u2013 Wetter und Umgebung in der Heute-Ansicht folgen der aktuellen Etappe.",
+    empty: "Noch keine Etappen \u2013 lege die erste Station der Rundreise an.",
+    toggleAria: (trip: string) => `Etappen von ${trip} ein- oder ausblenden`,
+    addButton: "Etappe hinzuf\u00fcgen",
+    newTitle: "Neue Etappe",
+    editTitle: "Etappe bearbeiten",
+    nameLabel: "Ort",
+    namePlaceholder: "z. B. Comersee",
+    fromLabel: "Ankunft",
+    toLabel: "Weiterreise",
+    saved: "Etappe gespeichert",
+    updated: "Etappe aktualisiert",
+    deleted: "Etappe entfernt",
+    deleteConfirm: (name: string) =>
+      `Etappe \u00ab${name}\u00bb wirklich entfernen?`,
+    deleteAria: (name: string) => `Etappe ${name} entfernen`,
+    editAria: (name: string) => `Etappe ${name} bearbeiten`,
+    nameRequired: "Gib der Etappe einen Ort.",
+    currentBadge: "jetzt hier",
+    noCoordsNote:
+      "Etappen ohne Treffer aus der Ortssuche stehen nicht auf der Karte.",
+    noCoordsShort: "ohne Koordinaten",
+    mapAria: "Karte der Etappen",
+    maxReached: (n: number) => `H\u00f6chstens ${n} Etappen`,
   },
   tripInvite: {
     badge: "Reise-Einladung",
@@ -3192,6 +3269,15 @@ export const de = {
     searchPlaceholder: "Satz suchen …",
     searchAria: "Sprachhilfe durchsuchen",
     searchEmpty: "Kein Satz gefunden – versuch ein anderes Stichwort.",
+    customTitle: "Eigene Sätze",
+    customHint:
+      "Was DIR auf dieser Reise wichtig ist – gespeichert auf deinem Konto, offline verfügbar. Die Sätze gehören zur gewählten Zielsprache.",
+    customMeaningPlaceholder: "In deiner Sprache",
+    customTranslationPlaceholder: (langName: string) =>
+      `Übersetzung (${langName})`,
+    customAdd: "Speichern",
+    customFull: "Mehr als 100 eigene Sätze gehen nicht – lösch zuerst alte.",
+    customDeleteAria: (text: string) => `Eigenen Satz «${text}» löschen`,
     copyAria: (text: string) => `«${text}» kopieren`,
     copied: "Satz kopiert.",
     copyFailed: "Kopieren hat nicht geklappt.",
@@ -4513,6 +4599,8 @@ export const de = {
     nightsLeft: (nights: number) =>
       nights === 1 ? "noch 1 Nacht" : `noch ${nights} Nächte`,
     departureToday: "Heute ist Abreisetag",
+    stageLine: (name: string, until: string) =>
+      `Etappe: ${name} \u00b7 bis ${until}`,
     weather: "Wetter",
     menu: "Menüplan",
     shopping: "Einkaufsliste",
@@ -4527,6 +4615,13 @@ export const de = {
       label ? `${min}–${max} °C · ${label}` : `${min}–${max} °C`,
     snowDepthLine: (cm: number) => `Schneehöhe: rund ${cm} cm`,
     snowfallLine: (cm: number) => `Neuschnee heute: rund ${cm} cm`,
+    expenseButton: "Ausgabe erfassen",
+    expenseHint: "Landet mit dem heutigen Tag in der Reisekasse dieser Reise.",
+    expenseAmountLabel: "Betrag",
+    expenseNotePlaceholder: "Wofür? (optional)",
+    expenseSave: "Speichern",
+    expenseSaved: "In der Reisekasse gespeichert",
+    expenseInvalid: "Gib einen gültigen Betrag ein",
     choresTitle: "Ämtli heute",
     choresEmpty: "Für heute ist nichts verteilt.",
     choresToggleAria: (title: string) => `${title} abhaken`,
@@ -4781,6 +4876,14 @@ export const de = {
       unnamed: "Velo-Laden",
       empty: (radius: string) =>
         `Im Umkreis von ${radius} ist kein Velo-Laden eingetragen.`,
+    },
+    indoor: {
+      title: "Regentag: Museen & Bäder in der Nähe",
+      subtitle:
+        "Heute wird es nass – das hier geht trotzdem. Aus OpenStreetMap, ohne Gewähr.",
+      unnamed: "Indoor-Ziel",
+      empty: (radius: string) =>
+        `Im Umkreis von ${radius} ist nichts Passendes eingetragen.`,
     },
     winterSpots: {
       title: "Bahnen & Loipen in der Nähe",
@@ -5246,6 +5349,16 @@ export const de = {
     summary: (distance: string, ascent: number, time: string) =>
       `${distance} · ↑${ascent} m · ${time}`,
     removeAria: (name: string) => `Route ${name} löschen`,
+    offlineDownload: "Offline-Karte laden",
+    offlineDownloadAria: (name: string) =>
+      `Offline-Karte f\u00fcr Route ${name} laden`,
+    offlineDelete: "Offline-Karte l\u00f6schen",
+    offlineDeleteAria: (name: string) =>
+      `Offline-Karte der Route ${name} l\u00f6schen`,
+    offlineSaved: (tiles: number, mb: string) =>
+      `${tiles} Kacheln \u00b7 ${mb} MB`,
+    offlineHint:
+      "\u00abOffline-Karte laden\u00bb legt die Karten-Kacheln in einem 1-km-Korridor entlang der Route auf dem Ger\u00e4t ab \u2013 f\u00fcr unterwegs ohne Empfang.",
   },
   trackProfile: {
     sectionAria: "Höhenprofil und Zwischenzeiten",
@@ -5883,6 +5996,9 @@ export const de = {
     printButton: "Drucken",
     shareButton: "Teilen",
     shareAria: "Einkaufsliste per Link teilen",
+    copyTextButton: "Als Text kopieren",
+    copyTextDone: "Liste kopiert – zum Einfügen bereit",
+    copyTextFailed: "Kopieren fehlgeschlagen",
     shareTitle: "Einkaufsliste teilen",
     shareDescription:
       "Alle mit diesem Link sehen deine Einkaufsliste und können ohne Anmeldung mit abhaken.",
@@ -6015,6 +6131,8 @@ export const de = {
     printButton: "Drucken",
     autofillButton: "Automatisch füllen",
     autofillNothing: "Keine leeren Mahlzeiten-Slots zum Füllen gefunden.",
+    autofillWeatherNote:
+      "Wetter berücksichtigt: An Regentagen kein Feuer-Rezept, an trockenen Abenden zuerst der Grill.",
     autofillDone: (n: number) =>
       n === 1
         ? "1 Mahlzeit automatisch geplant"
@@ -6544,6 +6662,8 @@ export const de = {
     titlePlaceholder: "z. B. Ideen fürs Tessin",
     textLabel: "Notiz",
     textPlaceholder: "Schreib einfach drauflos …",
+    checkboxHint:
+      "Tipp: Eine Zeile wie «- [ ] Gasflasche tauschen» wird zur abhakbaren Checkbox.",
     tagsLabel: "Stichwörter",
     tagsPlaceholder: "z. B. Tessin, Sommer, Zelt",
     tagsHint: (max: number) =>
@@ -6726,6 +6846,17 @@ export const de = {
     spotCostsHint:
       "Preis pro Nacht inklusive Kurtaxe und Nebenkosten, günstigster Platz zuoberst. Die Gesamtbeträge sind Nächte × Preis und damit nur eine Schätzung – was du wirklich bezahlt hast, steht in der Reisekasse der jeweiligen Reise.",
     yearCompareTitle: "Übernachtungen pro Jahr",
+    goalTitle: "Jahresziel Reisenächte",
+    goalHint:
+      "Steck dir ein Ziel – zum Beispiel 30 Nächte draussen – und schau zu, wie der Balken übers Jahr wächst.",
+    goalLine: (nights: number, goal: number, year: number) =>
+      `${nights} von ${goal} Nächten im ${year}`,
+    goalAria: (pct: number) => `Jahresziel: ${pct} Prozent erreicht`,
+    goalReached: "Ziel erreicht – schöner Jahrgang!",
+    goalRemaining: (n: number) =>
+      n === 1 ? "Noch 1 Nacht bis zum Ziel" : `Noch ${n} Nächte bis zum Ziel`,
+    goalSet: "Ziel setzen",
+    goalRemove: "Ziel entfernen",
     nightsCount: (n: number) => (n === 1 ? "1 Nacht" : `${n} Nächte`),
     milestonesTitle: "Meilensteine",
     milestonesAchieved: (achieved: number, total: number) =>

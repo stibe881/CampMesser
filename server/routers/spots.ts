@@ -38,6 +38,11 @@ import {
   sortNotes,
   z,
 } from "./_shared";
+import {
+  SAVED_PLACE_COLORS,
+  SAVED_PLACE_NAME_MAX_LENGTH,
+  SAVED_PLACE_NOTE_MAX_LENGTH,
+} from "@shared/savedPlaces";
 
 export const spotsRouters = {
   spots: router({
@@ -340,6 +345,67 @@ export const spotsRouters = {
         // dasselbe wie «nicht eingerichtet»: Sie fragt dann OSM.
         if (!places) return { configured: false as const, places: [] };
         return { configured: true as const, places };
+      }),
+  }),
+
+  /**
+   * Merkorte (#537): Wunschziele von der Karte – schlichtes CRUD auf
+   * eigenen Zeilen. Leichter als ein Zeltplatz-Favorit (kein Dossier,
+   * keine Fotos); die Pin-Farbe kommt aus dem festen Katalog in
+   * shared/savedPlaces.ts, damit die Karte nie fremde Werte zeichnet.
+   */
+  savedPlaces: router({
+    list: protectedProcedure.query(({ ctx }) => db.getSavedPlaces(ctx.user.id)),
+    add: protectedProcedure
+      .input(
+        z.object({
+          name: z.string().trim().min(1).max(SAVED_PLACE_NAME_MAX_LENGTH),
+          latitude: z.number().min(-90).max(90),
+          longitude: z.number().min(-180).max(180),
+          note: z.string().max(SAVED_PLACE_NOTE_MAX_LENGTH).nullish(),
+          color: z.enum(SAVED_PLACE_COLORS).default("red"),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const id = await db.addSavedPlace({
+          userId: ctx.user.id,
+          name: input.name.trim(),
+          latitude: input.latitude,
+          longitude: input.longitude,
+          note: input.note?.trim() || null,
+          color: input.color,
+        });
+        return { id };
+      }),
+    update: protectedProcedure
+      .input(
+        z.object({
+          id: z.number().int().positive(),
+          name: z
+            .string()
+            .trim()
+            .min(1)
+            .max(SAVED_PLACE_NAME_MAX_LENGTH)
+            .optional(),
+          note: z.string().max(SAVED_PLACE_NOTE_MAX_LENGTH).nullish(),
+          color: z.enum(SAVED_PLACE_COLORS).optional(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        await db.updateSavedPlace(input.id, ctx.user.id, {
+          ...(input.name !== undefined ? { name: input.name.trim() } : {}),
+          ...(input.note !== undefined
+            ? { note: input.note?.trim() || null }
+            : {}),
+          ...(input.color !== undefined ? { color: input.color } : {}),
+        });
+        return { success: true } as const;
+      }),
+    remove: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.deleteSavedPlace(input.id, ctx.user.id);
+        return { success: true } as const;
       }),
   }),
 

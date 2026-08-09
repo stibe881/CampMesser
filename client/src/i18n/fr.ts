@@ -128,10 +128,10 @@ export const fr: Translation = {
       evening: (name: string) => `Bonsoir, ${name}`,
     },
     tripArrivalAt: (time: string) => `Arrivée ${time}`,
-    heroTitle1: "Tout pour le camp.",
+    heroTitle1: "Tous tes voyages.",
     heroTitle2: "Dans une seule app.",
     heroSubtitle:
-      "Planification, sécurité, énergie et nature – plus de 40 outils malins pour ta prochaine aventure.",
+      "Camping, hôtel, villes, plage ou randonnée – planification, météo, listes de bagages et plus de 40 outils malins pour la route.",
     sunInfo: (sunrise, sunset) =>
       `Aujourd'hui : lever du soleil ${sunrise} · coucher du soleil ${sunset}`,
     nextTripFallback: "Prochain trip",
@@ -355,6 +355,14 @@ export const fr: Translation = {
     themeLight: "Clair",
     themeDark: "Sombre",
     themeAuto: "Automatique (système)",
+    fontScaleTitle: "Taille du texte",
+    fontScaleLabels: {
+      normal: "Normale",
+      large: "Grande",
+      xlarge: "Très grande",
+    },
+    fontScaleHint:
+      "Ne vaut que sur cet appareil – la tablette peut différer du téléphone.",
     nameTitle: "Changer le nom",
     nameAria: "Nom",
     namePlaceholder: "Ton nom",
@@ -695,6 +703,9 @@ export const fr: Translation = {
     personBudgetHint:
       "Par exemple 23 kg de bagages en avion – la ligne de charge met en évidence les personnes au-dessus de la limite. Laisser vide pour aucune limite.",
     personBudgetInfo: (limit: string) => `Limite : ${limit} par personne`,
+    copyTextButton: "Copier comme texte",
+    copyTextDone: "Liste copiée – prête à coller",
+    copyTextFailed: "Échec de la copie",
     uncheckAllButton: "Décocher tout",
     uncheckAllConfirm: (n: number) =>
       n === 1
@@ -1082,6 +1093,14 @@ export const fr: Translation = {
       "Barres = quantité de pluie (mm/h, axe gauche) · Ligne = probabilité de pluie (%, axe droit).",
     forecast7: "Prévisions à 7 jours",
     week2Title: "Semaine 2",
+    windowTitle: "Fenêtres météo",
+    windowHint: "Quel week-end vaut la sortie ?",
+    windowWeekend: (sa: string, so: string) => `sa ${sa} – di ${so}`,
+    windowSummary: (temp: number, rain: number) =>
+      rain > 0
+        ? `jusqu'à ${temp} °C · ${rain} mm de pluie`
+        : `jusqu'à ${temp} °C · sec`,
+    windowVerdicts: { top: "Top", ok: "Correct", bad: "Plutôt non" },
     week2Hint: "Tendance – fiabilité réduite",
     week2Aria: "Tendance pour la semaine 2",
     dayToggleAria: (day: string) =>
@@ -1496,6 +1515,7 @@ export const fr: Translation = {
   roadRules: {
     plugTitle: "Prises & adaptateurs",
     tippingTitle: "Pourboire",
+    paymentTitle: "Espèces & cartes",
     title: "Péage, vignette & règles",
     subtitle:
       "Fiche pour le pays de destination : péage, vitesse avec remorque, équipement obligatoire, urgences.",
@@ -2023,6 +2043,21 @@ export const fr: Translation = {
     createNamePlaceholder: "p. ex. Camping Seeblick",
     createNameRequired: "Saisis d'abord un nom.",
     createConfirm: "Créer le favori",
+    createKindAria: "Que cr\u00e9er ici",
+    createKindFavorite: "Camping favori",
+    createKindSavedPlace: "Lieu \u00e0 retenir",
+    createSavedPlaceConfirm: "Enregistrer le lieu",
+    createNoteLabel: "Note (optionnelle)",
+    createNotePlaceholder: "p. ex. recommand\u00e9 par le voisin",
+    createColorLabel: "Couleur du rep\u00e8re",
+    layerSavedPlaces: "Lieux retenus",
+    savedPlaceKind: "Lieu retenu \u2013 destination de r\u00eave",
+    savedPlaceLegend: (n: number) =>
+      `${n} lieu${n === 1 ? "" : "x"} retenu${n === 1 ? "" : "s"}`,
+    savedPlaceDelete: "Retirer le lieu",
+    savedPlaceDeleted: "Lieu retir\u00e9",
+    savedPlaceCreatedToast: (name: string) =>
+      `Lieu \u00ab\u202f${name}\u202f\u00bb enregistr\u00e9`,
     createdToast: (name: string) => `«${name}» créé comme favori`,
     createdToastAction: "Vers le dossier",
     sightingKind: "Observation nature",
@@ -2524,6 +2559,8 @@ export const fr: Translation = {
     readinessAbroadHint: (country: string) =>
       `Ce voyage mène en ${country} – pense à la vignette, aux péages et aux équipements obligatoires.`,
     readinessAbroadLink: "Ouvrir la fiche pays",
+    readinessHolidaysTitle: "Jour férié au pays de destination :",
+    readinessHolidaysHint: "– les magasins sont souvent fermés ce jour-là.",
     whoAlongTitle: "Qui vient ?",
     whoAlongHint:
       "Touché = présent. Les tampons du passeport en découlent – le tampon familial seulement si tout le monde est là.",
@@ -2627,6 +2664,7 @@ export const fr: Translation = {
     locationSearchButton: "Chercher le lieu",
     locationSearchFailed: "Recherche de lieu indisponible",
     locationSearchNoResults: "Aucun lieu trouvé – autre orthographe ?",
+    savedPlacesSuggestTitle: "Lieux retenus",
     locationCoordsSet: "Coordonnées reprises",
     locationCoordsClearAria: "Supprimer les coordonnées",
     dayLabel: "Date",
@@ -3012,6 +3050,49 @@ export const fr: Translation = {
     paidByLine: (name: string) => `payé par ${name}`,
     byLine: (name: string) => `saisi par ${name}`,
     untitled: "Sans description",
+    photoLabel: "Photo du justificatif (optionnel)",
+    photoAdd: "Photographier le justificatif",
+    photoChange: "Remplacer le justificatif",
+    photoRemove: "Retirer le justificatif",
+    photoHint:
+      "Une photo du ticket pour cette d\u00e9pense \u2013 pratique pour les comptes de retour.",
+    photoViewAria: (label: string) => `Voir le justificatif de ${label}`,
+    photoTooLarge: "La photo est trop volumineuse.",
+    photoUploadFailed:
+      "Le justificatif n\u2019a pas pu \u00eatre t\u00e9l\u00e9vers\u00e9",
+    photoRemoveFailed: "Le justificatif n\u2019a pas pu \u00eatre retir\u00e9",
+    photoReadFailed: "La photo n\u2019a pas pu \u00eatre lue",
+    photoHeic:
+      "Les photos HEIC ne sont pas prises en charge \u2013 choisis un JPG.",
+  },
+  tripStops: {
+    title: "\u00c9tapes",
+    hint: "Circuit\u202f? Plusieurs lieux avec leurs propres dates \u2013 la m\u00e9t\u00e9o et les environs de la vue Aujourd\u2019hui suivent l\u2019\u00e9tape en cours.",
+    empty:
+      "Pas encore d\u2019\u00e9tapes \u2013 ajoute la premi\u00e8re station du circuit.",
+    toggleAria: (trip: string) =>
+      `Afficher ou masquer les \u00e9tapes de ${trip}`,
+    addButton: "Ajouter une \u00e9tape",
+    newTitle: "Nouvelle \u00e9tape",
+    editTitle: "Modifier l\u2019\u00e9tape",
+    nameLabel: "Lieu",
+    namePlaceholder: "p. ex. lac de C\u00f4me",
+    fromLabel: "Arriv\u00e9e",
+    toLabel: "D\u00e9part",
+    saved: "\u00c9tape enregistr\u00e9e",
+    updated: "\u00c9tape mise \u00e0 jour",
+    deleted: "\u00c9tape retir\u00e9e",
+    deleteConfirm: (name: string) =>
+      `Retirer vraiment l\u2019\u00e9tape \u00ab\u202f${name}\u202f\u00bb\u202f?`,
+    deleteAria: (name: string) => `Retirer l\u2019\u00e9tape ${name}`,
+    editAria: (name: string) => `Modifier l\u2019\u00e9tape ${name}`,
+    nameRequired: "Donne un lieu \u00e0 l\u2019\u00e9tape.",
+    currentBadge: "ici maintenant",
+    noCoordsNote:
+      "Les \u00e9tapes sans r\u00e9sultat de la recherche de lieu n\u2019apparaissent pas sur la carte.",
+    noCoordsShort: "sans coordonn\u00e9es",
+    mapAria: "Carte des \u00e9tapes",
+    maxReached: (n: number) => `Au plus ${n} \u00e9tapes`,
   },
   tripInvite: {
     badge: "Invitation au voyage",
@@ -3182,6 +3263,16 @@ export const fr: Translation = {
     searchPlaceholder: "Chercher une phrase …",
     searchAria: "Rechercher dans l'aide linguistique",
     searchEmpty: "Aucune phrase trouvée – essaie un autre mot-clé.",
+    customTitle: "Tes propres phrases",
+    customHint:
+      "Ce qui compte pour TOI sur ce voyage – enregistré sur ton compte, disponible hors ligne. Les phrases appartiennent à la langue cible choisie.",
+    customMeaningPlaceholder: "Dans ta langue",
+    customTranslationPlaceholder: (langName: string) =>
+      `Traduction (${langName})`,
+    customAdd: "Enregistrer",
+    customFull:
+      "Pas plus de 100 phrases personnelles – supprime d'abord les anciennes.",
+    customDeleteAria: (text: string) => `Supprimer la phrase « ${text} »`,
     copyAria: (text: string) => `Copier « ${text} »`,
     copied: "Phrase copiée.",
     copyFailed: "La copie n'a pas fonctionné.",
@@ -4504,6 +4595,8 @@ export const fr: Translation = {
     nightsLeft: (nights: number) =>
       nights === 1 ? "encore 1 nuit" : `encore ${nights} nuits`,
     departureToday: "Départ aujourd'hui",
+    stageLine: (name: string, until: string) =>
+      `\u00c9tape\u202f: ${name} \u00b7 jusqu\u2019au ${until}`,
     weather: "Météo",
     menu: "Menu",
     shopping: "Liste de courses",
@@ -4518,6 +4611,13 @@ export const fr: Translation = {
       label ? `${min}–${max} °C · ${label}` : `${min}–${max} °C`,
     snowDepthLine: (cm: number) => `Hauteur de neige : environ ${cm} cm`,
     snowfallLine: (cm: number) => `Neige fraîche aujourd’hui : env. ${cm} cm`,
+    expenseButton: "Saisir une dépense",
+    expenseHint: "Ajoutée à la caisse de ce voyage avec la date du jour.",
+    expenseAmountLabel: "Montant",
+    expenseNotePlaceholder: "Pour quoi ? (facultatif)",
+    expenseSave: "Enregistrer",
+    expenseSaved: "Enregistrée dans la caisse du voyage",
+    expenseInvalid: "Indique un montant valable",
     choresTitle: "Tâches du jour",
     choresEmpty: "Rien n’est réparti pour aujourd’hui.",
     choresToggleAria: (title: string) => `Cocher ${title}`,
@@ -4770,6 +4870,14 @@ export const fr: Translation = {
       unnamed: "Magasin de vélos",
       empty: (radius: string) =>
         `Aucun magasin de vélos répertorié dans un rayon de ${radius}.`,
+    },
+    indoor: {
+      title: "Jour de pluie : musées & piscines à proximité",
+      subtitle:
+        "Il va pleuvoir aujourd'hui – ceci reste possible. D'OpenStreetMap, sans garantie.",
+      unnamed: "Lieu couvert",
+      empty: (radius: string) =>
+        `Rien de convenable n'est répertorié dans un rayon de ${radius}.`,
     },
     winterSpots: {
       title: "Remontées & pistes de fond à proximité",
@@ -5239,6 +5347,16 @@ export const fr: Translation = {
     summary: (distance: string, ascent: number, time: string) =>
       `${distance} · ↑${ascent} m · ${time}`,
     removeAria: (name: string) => `Supprimer l'itinéraire ${name}`,
+    offlineDownload: "Charger la carte hors ligne",
+    offlineDownloadAria: (name: string) =>
+      `Charger la carte hors ligne pour l\u2019itin\u00e9raire ${name}`,
+    offlineDelete: "Supprimer la carte hors ligne",
+    offlineDeleteAria: (name: string) =>
+      `Supprimer la carte hors ligne de l\u2019itin\u00e9raire ${name}`,
+    offlineSaved: (tiles: number, mb: string) =>
+      `${tiles} tuiles \u00b7 ${mb} Mo`,
+    offlineHint:
+      "\u00ab\u202fCharger la carte hors ligne\u202f\u00bb enregistre les tuiles de carte dans un corridor de 1 km le long de l\u2019itin\u00e9raire \u2013 pour la route sans r\u00e9seau.",
   },
   trackProfile: {
     sectionAria: "Profil altimétrique et temps intermédiaires",
@@ -5878,6 +5996,9 @@ export const fr: Translation = {
     printButton: "Imprimer",
     shareButton: "Partager",
     shareAria: "Partager la liste de courses par lien",
+    copyTextButton: "Copier comme texte",
+    copyTextDone: "Liste copiée – prête à coller",
+    copyTextFailed: "Échec de la copie",
     shareTitle: "Partager la liste de courses",
     shareDescription:
       "Toutes les personnes disposant de ce lien voient ta liste de courses et peuvent cocher sans se connecter.",
@@ -6011,6 +6132,8 @@ export const fr: Translation = {
     printButton: "Imprimer",
     autofillButton: "Remplir automatiquement",
     autofillNothing: "Aucun créneau de repas vide à remplir.",
+    autofillWeatherNote:
+      "Météo prise en compte : pas de recette au feu les jours de pluie, le gril d’abord les soirs secs.",
     autofillDone: (n: number) =>
       n === 1
         ? "1 repas planifié automatiquement"
@@ -6545,6 +6668,8 @@ export const fr: Translation = {
     titlePlaceholder: "p. ex. idées pour le Tessin",
     textLabel: "Note",
     textPlaceholder: "Écris simplement …",
+    checkboxHint:
+      "Astuce : une ligne comme « - [ ] échanger la bouteille de gaz » devient une case à cocher.",
     tagsLabel: "Mots-clés",
     tagsPlaceholder: "p. ex. Tessin, été, tente",
     tagsHint: (max: number) =>
@@ -6724,6 +6849,19 @@ export const fr: Translation = {
     spotCostsHint:
       "Prix par nuit taxe de séjour et frais annexes compris, le moins cher en haut. Les totaux sont le produit nuits × prix et donc de simples estimations – ce que tu as vraiment payé figure dans la caisse du séjour concerné.",
     yearCompareTitle: "Nuitées par année",
+    goalTitle: "Objectif annuel de nuitées",
+    goalHint:
+      "Fixe-toi un objectif – par exemple 30 nuits dehors – et regarde la barre grandir au fil de l'année.",
+    goalLine: (nights: number, goal: number, year: number) =>
+      `${nights} nuitées sur ${goal} en ${year}`,
+    goalAria: (pct: number) => `Objectif annuel : ${pct} pour cent atteints`,
+    goalReached: "Objectif atteint – belle année !",
+    goalRemaining: (n: number) =>
+      n === 1
+        ? "Encore 1 nuit jusqu'à l'objectif"
+        : `Encore ${n} nuits jusqu'à l'objectif`,
+    goalSet: "Définir l'objectif",
+    goalRemove: "Retirer l'objectif",
     nightsCount: n => (n === 1 ? "1 nuit" : `${n} nuits`),
     milestonesTitle: "Jalons",
     milestonesAchieved: (achieved, total) =>

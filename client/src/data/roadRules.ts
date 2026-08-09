@@ -46,6 +46,8 @@ export interface CountryRules {
   plug: L4;
   /** Trinkgeld-Gepflogenheiten, aus Schweizer Sicht (#523). */
   tipping: L4;
+  /** Bargeld oder Karte? Was auf Reisen wirklich angenommen wird (#550). */
+  payment: L4;
   /** Wichtigste Notrufnummer. */
   emergency: string;
   emergencyNote: L4;
@@ -110,6 +112,12 @@ export const roadRules: CountryRules[] = [
       "Le service est compris. Arrondir est courant et suffit – le pourboire est une reconnaissance, pas une obligation.",
       "Il servizio è incluso. Arrotondare è consueto e basta – la mancia è un riconoscimento, non un obbligo.",
       "Service is included. Rounding up is common and enough – a tip is appreciation, not an obligation."
+    ),
+    payment: l4(
+      "Kartenzahlung fast überall, auch kontaktlos und mit Handy – Bargeld braucht es höchstens am Hofladen oder auf sehr kleinen Plätzen.",
+      "Paiement par carte presque partout, aussi sans contact et par téléphone – l'argent liquide ne sert guère qu'au magasin de ferme ou sur de très petits campings.",
+      "Pagamento con carta quasi ovunque, anche contactless e con il telefono – il contante serve al massimo al negozio della fattoria o in campeggi molto piccoli.",
+      "Card payment almost everywhere, including contactless and by phone – cash is only needed at farm shops or very small campsites."
     ),
     emergency: "112",
     emergencyNote: l4(
@@ -194,6 +202,12 @@ export const roadRules: CountryRules[] = [
       "Il 5–10 % è consueto; al momento di pagare indica l’importo totale («faccia 27»).",
       "5–10% is customary; when paying, state the total (“make it 27”)."
     ),
+    payment: l4(
+      "Deutlich mehr Bargeld als daheim: Kleinere Restaurants, Bäckereien, Kiosks und manche Campingplätze nehmen NUR Bargeld – immer etwas Euro dabeihaben. Girocard ist verbreiteter als Kreditkarte.",
+      "Nettement plus d'argent liquide que chez nous : petits restaurants, boulangeries, kiosques et certains campings n'acceptent QUE le liquide – garde toujours quelques euros. La Girocard est plus répandue que la carte de crédit.",
+      "Molto più contante che da noi: piccoli ristoranti, panetterie, chioschi e alcuni campeggi accettano SOLO contanti – tieni sempre qualche euro. La Girocard è più diffusa della carta di credito.",
+      "Noticeably more cash than at home: smaller restaurants, bakeries, kiosks and some campsites take CASH ONLY – always carry some euros. Girocard is more common than credit cards."
+    ),
     emergency: "112",
     emergencyNote: l4(
       "112 für Feuerwehr und Rettung, 110 für die Polizei.",
@@ -277,6 +291,12 @@ export const roadRules: CountryRules[] = [
       "5–10 % consueto, da dire pagando. In rifugi e caffè basta arrotondare.",
       "5–10% customary, said when paying. In huts and cafés rounding up is fine."
     ),
+    payment: l4(
+      "Karten sind verbreitet, aber Bargeld bleibt beliebt – Berghütten, kleine Beizen und Parkautomaten wollen oft Münz. Ein Euro-Notgroschen gehört ins Handschuhfach.",
+      "Les cartes sont répandues, mais le liquide reste apprécié – refuges, petites auberges et horodateurs veulent souvent des pièces. Garde une réserve d'euros dans la boîte à gants.",
+      "Le carte sono diffuse, ma il contante resta amato – rifugi, piccole osterie e parchimetri vogliono spesso monete. Tieni una riserva di euro nel cassetto.",
+      "Cards are widespread, but cash stays popular – mountain huts, small inns and parking meters often want coins. Keep a euro reserve in the glovebox."
+    ),
     emergency: "112",
     emergencyNote: l4(
       "112 europaweit, 133 Polizei, 144 Rettung, 140 Bergrettung.",
@@ -357,6 +377,12 @@ export const roadRules: CountryRules[] = [
       "Pas obligatoire : la note comporte souvent un « coperto » (couvert). Arrondir ou laisser quelques euros pour un bon service.",
       "Non obbligatoria: spesso in conto c’è il «coperto». Arrotonda o lascia qualche euro per un buon servizio.",
       "Not a must: the bill often includes a “coperto” (cover charge). Round up or leave a few euros for good service."
+    ),
+    payment: l4(
+      "Kartenzahlung ist seit ein paar Jahren Pflicht für Händler und klappt meist – an Strandbars, Märkten und auf kleinen Plätzen ist Bargeld trotzdem schneller. Autobahn-Maut geht mit Karte.",
+      "Le paiement par carte est obligatoire pour les commerçants depuis quelques années et fonctionne le plus souvent – aux bars de plage, marchés et petits campings, le liquide reste plus rapide. Le péage d'autoroute se paie par carte.",
+      "Il pagamento con carta è obbligatorio per gli esercenti da qualche anno e di solito funziona – nei bar in spiaggia, ai mercati e nei piccoli campeggi il contante resta più veloce. Il pedaggio autostradale si paga con carta.",
+      "Card payment has been mandatory for merchants for a few years and usually works – at beach bars, markets and small campsites cash is still quicker. Motorway tolls take cards."
     ),
     emergency: "112",
     emergencyNote: l4(
@@ -445,6 +471,12 @@ export const roadRules: CountryRules[] = [
       "«Service compris» – il servizio è incluso. Lasciare gli spiccioli è un gesto gentile, niente di più.",
       "“Service compris” – service is included. Leaving small change is a nice gesture, nothing more."
     ),
+    payment: l4(
+      "Karte geht fast überall, oft schon ab kleinen Beträgen – nur Wochenmärkte und manche Boulangerien wollen Bargeld. Mautstellen nehmen Karten (nicht immer ausländische Debitkarten – eine Kreditkarte mitführen).",
+      "La carte passe presque partout, souvent dès de petits montants – seuls les marchés et certaines boulangeries veulent du liquide. Les péages acceptent les cartes (pas toujours les cartes de débit étrangères – emporte une carte de crédit).",
+      "La carta va quasi ovunque, spesso già per piccoli importi – solo i mercati e alcune boulangerie vogliono contanti. I caselli accettano carte (non sempre le carte di debito estere – porta una carta di credito).",
+      "Cards work almost everywhere, often even for small amounts – only weekly markets and some bakeries want cash. Toll booths take cards (not always foreign debit cards – carry a credit card)."
+    ),
     emergency: "112",
     emergencyNote: l4(
       "112 europaweit, 15 Rettungsdienst, 17 Polizei, 18 Feuerwehr.",
@@ -531,6 +563,12 @@ export const roadRules: CountryRules[] = [
       "Arrotondare è consueto; al ristorante fino al 10 % è gradito, ma non obbligatorio.",
       "Rounding up is common; in restaurants up to 10% is appreciated but not required."
     ),
+    payment: l4(
+      "Karten sind in Städten und auf grösseren Plätzen normal, auf Bauernhöfen, Hütten und an Parkuhren hilft Bargeld. Die Vignette kauft man ohnehin online.",
+      "Les cartes sont normales en ville et sur les grands campings ; dans les fermes, refuges et aux parcmètres, le liquide dépanne. La vignette s'achète de toute façon en ligne.",
+      "Le carte sono normali in città e nei campeggi grandi; in agriturismi, rifugi e ai parchimetri aiuta il contante. La vignetta si compra comunque online.",
+      "Cards are normal in cities and on bigger campsites; at farms, huts and parking meters cash helps. The vignette is bought online anyway."
+    ),
     emergency: "112",
     emergencyNote: l4(
       "112 für Rettung und Feuerwehr, 113 für die Polizei.",
@@ -608,6 +646,12 @@ export const roadRules: CountryRules[] = [
       "Le service est compris ; arrondis ou laisse 5–10 % pour un bon service.",
       "Il servizio è incluso; arrotonda o lascia il 5–10 % per un buon servizio.",
       "Service is included; round up or leave 5–10% for good service."
+    ),
+    payment: l4(
+      "Vorsicht: Viele Supermärkte und Automaten nehmen NUR Debitkarten (Maestro/V-Pay-Nachfolger), oft KEINE Kreditkarten – die Schweizer Debitkarte funktioniert meist, Bargeld wird vielerorts gar nicht mehr angenommen.",
+      "Attention : beaucoup de supermarchés et d'automates n'acceptent QUE les cartes de débit, souvent PAS les cartes de crédit – la carte de débit suisse passe généralement, et le liquide n'est souvent plus accepté du tout.",
+      "Attenzione: molti supermercati e distributori accettano SOLO carte di debito, spesso NIENTE carte di credito – la carta di debito svizzera di solito funziona, e il contante in molti posti non è più accettato.",
+      "Careful: many supermarkets and machines take DEBIT cards only, often NO credit cards – Swiss debit cards usually work, and cash is no longer accepted in many places."
     ),
     emergency: "112",
     emergencyNote: l4(
@@ -687,6 +731,12 @@ export const roadRules: CountryRules[] = [
       "Au restaurant, 5–10 % sont d’usage, au café arrondir suffit – de préférence en espèces, la carte permet rarement le pourboire.",
       "Al ristorante il 5–10 % è consueto, al bar basta arrotondare – meglio in contanti, con la carta la mancia è raramente possibile.",
       "In restaurants 5–10% is customary, in cafés rounding up is fine – best in cash, cards rarely allow tips."
+    ),
+    payment: l4(
+      "Seit dem Euro-Beitritt einfach: Karten in Städten und auf Plätzen üblich, an Stränden, Märkten und für Parkgebühren ist Bargeld praktisch. Keine Kuna mehr wechseln!",
+      "Simple depuis le passage à l'euro : cartes courantes en ville et sur les campings ; aux plages, marchés et pour le parking, le liquide est pratique. Plus besoin de changer des kunas !",
+      "Semplice dall'ingresso nell'euro: carte comuni in città e nei campeggi; in spiaggia, ai mercati e per il parcheggio il contante è pratico. Niente più kune da cambiare!",
+      "Simple since the euro switch: cards are common in towns and on campsites; at beaches, markets and for parking, cash is handy. No more kuna to exchange!"
     ),
     emergency: "112",
     emergencyNote: l4(
@@ -769,6 +819,12 @@ export const roadRules: CountryRules[] = [
       "Nessun obbligo: arrotondare basta, al ristorante il 5–10 % è generoso.",
       "No obligation: rounding up is fine; in restaurants 5–10% is generous."
     ),
+    payment: l4(
+      "Karte geht fast überall, auch für den Kafi – nur Märkte, Chiringuitos und kleine Bars wollen manchmal Bargeld. Ausweis bereithalten: Bei Kartenzahlung wird gelegentlich ein Dokument verlangt.",
+      "La carte passe presque partout, même pour le café – seuls les marchés, chiringuitos et petits bars veulent parfois du liquide. Garde une pièce d'identité : elle est parfois demandée lors du paiement par carte.",
+      "La carta va quasi ovunque, anche per il caffè – solo mercati, chiringuiti e piccoli bar vogliono a volte contanti. Tieni un documento: con la carta a volte lo chiedono.",
+      "Cards work almost everywhere, even for coffee – only markets, chiringuitos and small bars sometimes want cash. Keep ID handy: card payments occasionally require a document."
+    ),
     emergency: "112",
     emergencyNote: l4(
       "112 für Polizei, Feuerwehr und Rettung.",
@@ -795,6 +851,272 @@ export const roadRules: CountryRules[] = [
       "mallorca",
       "costa brava",
       "costa blanca",
+    ],
+  },
+  {
+    code: "PT",
+    flag: "🇵🇹",
+    name: l4("Portugal", "Portugal", "Portogallo", "Portugal"),
+    updated: "2026-08-09",
+    toll: l4(
+      "Maut auf fast allen Autobahnen. Viele Strecken (die früheren SCUT) haben NUR elektronische Portale ohne Kassen – ausländische Kennzeichen vorab registrieren (EasyToll mit Kreditkarte oder Via-Verde-Leihgerät), sonst drohen Bussen.",
+      "Péage sur presque toutes les autoroutes. Beaucoup de tronçons (les anciennes SCUT) n'ont QUE des portiques électroniques sans caisses – enregistre la plaque étrangère à l'avance (EasyToll avec carte de crédit ou boîtier Via Verde), sinon gare aux amendes.",
+      "Pedaggio su quasi tutte le autostrade. Molte tratte (le ex SCUT) hanno SOLO portali elettronici senza casse – registra prima la targa straniera (EasyToll con carta di credito o dispositivo Via Verde), altrimenti arrivano multe.",
+      "Tolls on almost all motorways. Many stretches (the former SCUT roads) have ONLY electronic gantries with no booths – register a foreign plate in advance (EasyToll with a credit card or a Via Verde device) or fines follow."
+    ),
+    trailer: l4(
+      "Mit Anhänger oder Wohnwagen rutschst du an den Mautstellen in eine höhere Klasse (Klasse 2 statt 1) – gemessen wird die Höhe über der ersten Achse.",
+      "Avec remorque ou caravane, tu passes dans une classe de péage supérieure (classe 2 au lieu de 1) – la hauteur au-dessus du premier essieu fait foi.",
+      "Con rimorchio o roulotte passi a una classe di pedaggio superiore (classe 2 invece di 1) – conta l'altezza sopra il primo asse.",
+      "With a trailer or caravan you move up a toll class (class 2 instead of 1) – measured by the height above the first axle."
+    ),
+    speed: { motorway: 100, rural: 80, urban: 50 },
+    speedNote: l4(
+      "Angaben für Gespanne. Personenwagen allein: 120/90/50; im ersten Jahr nach der Prüfung gilt überall höchstens 90 km/h.",
+      "Valeurs pour les attelages. Voiture seule : 120/90/50 ; la première année de permis, 90 km/h au maximum partout.",
+      "Valori per i traini. Automobile da sola: 120/90/50; nel primo anno di patente vale ovunque al massimo 90 km/h.",
+      "Figures for car-and-trailer rigs. Car alone: 120/90/50; in the first year after the test the limit is 90 km/h everywhere."
+    ),
+    bacPermille: 0.5,
+    bacNote: l4(
+      "0,5 ‰; für Neulenkende (unter 3 Jahren) und Berufsfahrer 0,2 ‰.",
+      "0,5 ‰ ; pour les nouveaux conducteurs (moins de 3 ans) et les professionnels, 0,2 ‰.",
+      "0,5 ‰; per i neopatentati (meno di 3 anni) e i professionisti 0,2 ‰.",
+      "0.5 ‰; for new drivers (under 3 years) and professionals 0.2 ‰."
+    ),
+    equipment: l4(
+      "Warndreieck und Warnweste gehören ins Auto (die Weste muss VOR dem Aussteigen angezogen werden). Wer eine Brille braucht, führt eine Ersatzbrille mit – eine portugiesische Eigenheit.",
+      "Triangle et gilet dans la voiture (le gilet s'enfile AVANT de descendre). Qui porte des lunettes emporte une paire de rechange – une particularité portugaise.",
+      "Triangolo e gilet in auto (il gilet si indossa PRIMA di scendere). Chi porta occhiali tiene un paio di riserva – una particolarità portoghese.",
+      "Carry a warning triangle and hi-vis vest (put the vest on BEFORE getting out). Glasses wearers should carry a spare pair – a Portuguese quirk."
+    ),
+    zones: l4(
+      "Lissabon hat eine Umweltzone (ZER) in der Innenstadt für ältere Fahrzeuge; die Altstadtgassen sind ohnehin oft Anwohnenden vorbehalten. Sonst keine flächigen Zonen.",
+      "Lisbonne a une zone environnementale (ZER) au centre pour les véhicules anciens ; les ruelles de la vieille ville sont souvent réservées aux riverains. Sinon, pas de zones étendues.",
+      "Lisbona ha una zona ambientale (ZER) in centro per i veicoli più vecchi; i vicoli della città vecchia sono comunque spesso riservati ai residenti. Altrimenti niente zone estese.",
+      "Lisbon has a low-emission zone (ZER) in the centre for older vehicles; old-town lanes are often residents-only anyway. No other large zones."
+    ),
+    plug: l4(
+      "Typ F (Schuko) und Typ C. Der Schweizer Dreipol-Stecker braucht einen Adapter; zweipolige Eurostecker passen.",
+      "Type F (Schuko) et type C. La fiche suisse à trois broches nécessite un adaptateur ; les europlugs à deux broches passent.",
+      "Tipo F (Schuko) e tipo C. La spina svizzera a tre poli richiede un adattatore; le europlug a due poli passano.",
+      "Type F (Schuko) and type C. The Swiss three-pin plug needs an adapter; two-pin europlugs fit."
+    ),
+    tipping: l4(
+      "Kein Muss: Im Restaurant rundet man auf oder lässt 5–10 % bei gutem Service; im Café bleibt das Kleingeld liegen.",
+      "Pas obligatoire : au restaurant, on arrondit ou on laisse 5–10 % pour un bon service ; au café, on laisse la petite monnaie.",
+      "Non obbligatoria: al ristorante si arrotonda o si lascia il 5–10 % per un buon servizio; al caffè restano gli spiccioli.",
+      "Not compulsory: in restaurants round up or leave 5–10% for good service; in cafés leave the small change."
+    ),
+    payment: l4(
+      "Multibanco-Automaten und Kartenzahlung sind überall; kleine Cafés, Märkte und Strandbars wollen manchmal Bargeld. Für die elektronische Maut braucht es zwingend die Registrierung mit Karte.",
+      "Les automates Multibanco et la carte passent partout ; petits cafés, marchés et bars de plage veulent parfois du liquide. Pour le péage électronique, l'enregistrement avec carte est indispensable.",
+      "I bancomat Multibanco e la carta vanno ovunque; piccoli caffè, mercati e bar in spiaggia vogliono a volte contanti. Per il pedaggio elettronico serve per forza la registrazione con carta.",
+      "Multibanco machines and card payment are everywhere; small cafés, markets and beach bars sometimes want cash. The electronic toll strictly requires card registration."
+    ),
+    emergency: "112",
+    emergencyNote: l4(
+      "112 für Polizei, Feuerwehr und Rettung.",
+      "112 pour la police, les pompiers et les secours.",
+      "112 per polizia, pompieri e soccorso.",
+      "112 for police, fire brigade and ambulance."
+    ),
+    camping: l4(
+      "Wildcampen ist verboten und wird seit ein paar Jahren streng gebüsst – auch das Übernachten im Wohnmobil ausserhalb erlaubter Plätze. Dafür gibt es ein dichtes Netz offizieller Stellplätze (áreas de serviço) und günstige Plätze.",
+      "Le camping sauvage est interdit et sévèrement sanctionné depuis quelques années – y compris la nuit en camping-car hors des emplacements autorisés. En revanche, le réseau d'aires officielles (áreas de serviço) est dense et les campings bon marché.",
+      "Il campeggio libero è vietato e da qualche anno multato severamente – anche la notte in camper fuori dalle aree autorizzate. In compenso c'è una fitta rete di aree ufficiali (áreas de serviço) e campeggi economici.",
+      "Wild camping is banned and has been strictly fined for a few years – including motorhome overnights outside permitted spots. In return there is a dense network of official áreas de serviço and cheap campsites."
+    ),
+    aliases: [
+      "portugal",
+      "portogallo",
+      "algarve",
+      "lissabon",
+      "lisboa",
+      "lisbonne",
+      "porto",
+      "madeira",
+      "azoren",
+      "nazare",
+    ],
+  },
+  {
+    code: "GR",
+    flag: "🇬🇷",
+    name: l4("Griechenland", "Grèce", "Grecia", "Greece"),
+    updated: "2026-08-09",
+    toll: l4(
+      "Keine Vignette, dafür Mautstellen auf den Autobahnen (bar oder mit Karte). Die Strecken Athen–Thessaloniki und Richtung Peloponnes summieren sich ordentlich.",
+      "Pas de vignette, mais des gares de péage sur les autoroutes (espèces ou carte). Les trajets Athènes–Thessalonique et vers le Péloponnèse finissent par chiffrer.",
+      "Nessuna vignetta, ma caselli sulle autostrade (contanti o carta). Le tratte Atene–Salonicco e verso il Peloponneso alla fine pesano.",
+      "No vignette, but toll plazas on the motorways (cash or card). Athens–Thessaloniki and routes to the Peloponnese add up."
+    ),
+    trailer: l4(
+      "Gespanne zahlen an den Mautstellen die höhere Klasse (nach Höhe und Achsen).",
+      "Les attelages paient la classe supérieure aux péages (selon hauteur et essieux).",
+      "I traini pagano ai caselli la classe superiore (per altezza e assi).",
+      "Rigs pay the higher class at toll plazas (by height and axles)."
+    ),
+    speed: { motorway: 90, rural: 80, urban: 50 },
+    speedNote: l4(
+      "Angaben für Gespanne. Personenwagen allein: 130/90/50. Auf den Inseln sind die Strassen oft schmal – die Tafeln vor Ort gehen vor.",
+      "Valeurs pour les attelages. Voiture seule : 130/90/50. Sur les îles, les routes sont souvent étroites – les panneaux sur place priment.",
+      "Valori per i traini. Automobile da sola: 130/90/50. Sulle isole le strade sono spesso strette – prevalgono i cartelli sul posto.",
+      "Figures for rigs. Car alone: 130/90/50. Island roads are often narrow – local signs take precedence."
+    ),
+    bacPermille: 0.5,
+    bacNote: l4(
+      "0,5 ‰; für Neulenkende, Motorrad- und Berufsfahrer 0,2 ‰.",
+      "0,5 ‰ ; pour les nouveaux conducteurs, motards et professionnels, 0,2 ‰.",
+      "0,5 ‰; per neopatentati, motociclisti e professionisti 0,2 ‰.",
+      "0.5 ‰; for new drivers, motorcyclists and professionals 0.2 ‰."
+    ),
+    equipment: l4(
+      "Griechenland verlangt mehr als die Nachbarn: Warndreieck, Verbandskasten UND Feuerlöscher gehören ins Fahrzeug.",
+      "La Grèce exige plus que ses voisins : triangle, trousse de secours ET extincteur dans le véhicule.",
+      "La Grecia chiede più dei vicini: triangolo, kit di pronto soccorso E estintore nel veicolo.",
+      "Greece asks for more than its neighbours: warning triangle, first-aid kit AND a fire extinguisher in the vehicle."
+    ),
+    zones: l4(
+      "Athen beschränkt den innersten Ring (Daktylios) an Werktagen – Fahrzeuge mit ausländischen Kennzeichen sind davon praktisch nicht betroffen. Sonst keine Umweltzonen.",
+      "Athènes limite l'anneau central (Daktylios) en semaine – les véhicules immatriculés à l'étranger ne sont pratiquement pas concernés. Sinon, pas de zones environnementales.",
+      "Atene limita l'anello centrale (Daktylios) nei giorni feriali – i veicoli con targa estera in pratica non sono toccati. Altrimenti niente zone ambientali.",
+      "Athens restricts the innermost ring (Daktylios) on weekdays – foreign-plated vehicles are practically unaffected. No other environmental zones."
+    ),
+    plug: l4(
+      "Typ F (Schuko) und Typ C. Der Schweizer Dreipol-Stecker braucht einen Adapter; zweipolige Eurostecker passen.",
+      "Type F (Schuko) et type C. La fiche suisse à trois broches nécessite un adaptateur ; les europlugs à deux broches passent.",
+      "Tipo F (Schuko) e tipo C. La spina svizzera a tre poli richiede un adattatore; le europlug a due poli passano.",
+      "Type F (Schuko) and type C. The Swiss three-pin plug needs an adapter; two-pin europlugs fit."
+    ),
+    tipping: l4(
+      "In der Taverne rundet man auf oder lässt 5–10 %; das Kleingeld auf dem Tellerchen gehört zum guten Ton.",
+      "À la taverne, on arrondit ou on laisse 5–10 % ; la petite monnaie sur la soucoupe fait partie des usages.",
+      "In taverna si arrotonda o si lascia il 5–10 %; gli spiccioli sul piattino fanno parte del galateo.",
+      "In tavernas round up or leave 5–10%; small change on the saucer is good manners."
+    ),
+    payment: l4(
+      "Händler müssen Karten nehmen, und in Städten klappt das auch – auf Inseln, an Kiosken und in Familientavernen ist Bargeld trotzdem oft schneller. Die Maut nimmt Karten.",
+      "Les commerçants doivent accepter les cartes, et en ville ça marche – sur les îles, aux kiosques et dans les tavernes familiales, le liquide reste souvent plus rapide. Le péage prend les cartes.",
+      "Gli esercenti devono accettare le carte, e in città funziona – sulle isole, ai chioschi e nelle taverne a conduzione familiare il contante resta spesso più veloce. Il pedaggio accetta carte.",
+      "Merchants must take cards, and in cities they do – on islands, at kiosks and in family tavernas cash is still often quicker. Tolls take cards."
+    ),
+    emergency: "112",
+    emergencyNote: l4(
+      "112 europaweit; 100 ruft direkt die Polizei, 166 die Ambulanz.",
+      "112 européen ; le 100 appelle directement la police, le 166 l'ambulance.",
+      "112 europeo; il 100 chiama direttamente la polizia, il 166 l'ambulanza.",
+      "112 Europe-wide; 100 reaches the police directly, 166 the ambulance."
+    ),
+    camping: l4(
+      "Wildcampen ist offiziell verboten – gerade in der Hochsaison wird kontrolliert. Campingplätze gibt es viele, aber ausserhalb der Saison (November bis April) ist ein Grossteil geschlossen.",
+      "Le camping sauvage est officiellement interdit – des contrôles ont lieu surtout en haute saison. Les campings sont nombreux, mais hors saison (novembre à avril) beaucoup sont fermés.",
+      "Il campeggio libero è ufficialmente vietato – in alta stagione si controlla. I campeggi sono tanti, ma fuori stagione (novembre–aprile) in gran parte chiusi.",
+      "Wild camping is officially banned – checks happen especially in high season. There are many campsites, but off season (November to April) most are closed."
+    ),
+    aliases: [
+      "griechenland",
+      "grece",
+      "grecia",
+      "greece",
+      "kreta",
+      "rhodos",
+      "korfu",
+      "athen",
+      "peloponnes",
+      "chalkidiki",
+      "thessaloniki",
+      "santorini",
+    ],
+  },
+  {
+    code: "DK",
+    flag: "🇩🇰",
+    name: l4("Dänemark", "Danemark", "Danimarca", "Denmark"),
+    updated: "2026-08-09",
+    toll: l4(
+      "Keine Vignette und keine Streckenmaut – dafür kosten die grossen Brücken: Storebælt (Fünen–Seeland) und Øresund (nach Schweden) verlangen happige Gebühren; online vorbezahlen ist günstiger.",
+      "Ni vignette ni péage kilométrique – mais les grands ponts se paient : Storebælt (Fionie–Seeland) et Øresund (vers la Suède) coûtent cher ; prépayer en ligne revient moins cher.",
+      "Nessuna vignetta e nessun pedaggio chilometrico – ma i grandi ponti si pagano: Storebælt (Fionia–Selandia) e Øresund (verso la Svezia) costano parecchio; prepagare online conviene.",
+      "No vignette and no per-kilometre toll – but the big bridges charge: Storebælt (Funen–Zealand) and Øresund (to Sweden) are pricey; prepaying online is cheaper."
+    ),
+    trailer: l4(
+      "Auf den Brücken zahlt das Gespann nach Gesamtlänge – ab 6 m wird es deutlich teurer.",
+      "Sur les ponts, l'attelage paie selon la longueur totale – au-delà de 6 m, c'est nettement plus cher.",
+      "Sui ponti il traino paga in base alla lunghezza totale – oltre i 6 m diventa nettamente più caro.",
+      "On the bridges rigs pay by total length – beyond 6 m it gets noticeably dearer."
+    ),
+    speed: { motorway: 80, rural: 70, urban: 50 },
+    speedNote: l4(
+      "Angaben für Gespanne (Tempo-100-Zulassungen aus dem Ausland gelten nicht). Personenwagen allein: 110–130/80/50.",
+      "Valeurs pour les attelages (les homologations Tempo 100 étrangères ne comptent pas). Voiture seule : 110–130/80/50.",
+      "Valori per i traini (le omologazioni Tempo 100 estere non valgono). Automobile da sola: 110–130/80/50.",
+      "Figures for rigs (foreign Tempo 100 approvals do not apply). Car alone: 110–130/80/50."
+    ),
+    bacPermille: 0.5,
+    bacNote: l4(
+      "0,5 ‰ für alle – Busse als Prozentsatz des Monatslohns, das kann teuer werden.",
+      "0,5 ‰ pour tous – l'amende est un pourcentage du salaire mensuel, ça peut coûter cher.",
+      "0,5 ‰ per tutti – la multa è una percentuale dello stipendio mensile, può costare cara.",
+      "0.5 ‰ for everyone – fines are a percentage of your monthly pay, which can get expensive."
+    ),
+    equipment: l4(
+      "Warndreieck Pflicht, Warnweste nur empfohlen. Abblendlicht gilt rund um die Uhr – bei Schweizer Autos mit Tagfahrlicht kein Thema.",
+      "Triangle obligatoire, gilet seulement recommandé. Feux de croisement en permanence – aucun souci avec les feux de jour des voitures suisses.",
+      "Triangolo obbligatorio, gilet solo consigliato. Anabbaglianti sempre accesi – nessun problema con le luci diurne delle auto svizzere.",
+      "Warning triangle mandatory, vest only recommended. Dipped lights around the clock – no issue with Swiss cars' daytime running lights."
+    ),
+    zones: l4(
+      "Umweltzonen (miljøzoner) in Kopenhagen, Aarhus, Odense und Aalborg für Diesel-Fahrzeuge – ausländische Diesel-Wohnmobile und -Transporter müssen sich VOR der Einfahrt online registrieren.",
+      "Zones environnementales (miljøzoner) à Copenhague, Aarhus, Odense et Aalborg pour les diesels – camping-cars et utilitaires diesel étrangers doivent s'enregistrer en ligne AVANT d'entrer.",
+      "Zone ambientali (miljøzoner) a Copenaghen, Aarhus, Odense e Aalborg per i diesel – camper e furgoni diesel esteri devono registrarsi online PRIMA di entrare.",
+      "Environmental zones (miljøzoner) in Copenhagen, Aarhus, Odense and Aalborg for diesels – foreign diesel motorhomes and vans must register online BEFORE entering."
+    ),
+    plug: l4(
+      "Typ K (dänisch) und Typ F. Zweipolige Eurostecker passen; der Schweizer Dreipol-Stecker braucht einen Adapter, und geerdete Schuko-Stecker sitzen in alten Typ-K-Dosen ohne Erdung.",
+      "Type K (danois) et type F. Les europlugs à deux broches passent ; la fiche suisse à trois broches nécessite un adaptateur, et les fiches Schuko perdent la terre dans les vieilles prises K.",
+      "Tipo K (danese) e tipo F. Le europlug a due poli passano; la spina svizzera a tre poli richiede un adattatore, e le Schuko nelle vecchie prese K restano senza terra.",
+      "Type K (Danish) and type F. Two-pin europlugs fit; the Swiss three-pin plug needs an adapter, and earthed Schuko plugs lose their earth in old type-K sockets."
+    ),
+    tipping: l4(
+      "Bedienung ist im Preis inbegriffen – Trinkgeld ist unüblich; wer mag, rundet auf.",
+      "Le service est compris – le pourboire est inhabituel ; qui veut arrondit.",
+      "Il servizio è compreso – la mancia è inusuale; chi vuole arrotonda.",
+      "Service is included – tipping is unusual; round up if you like."
+    ),
+    payment: l4(
+      "Fast bargeldlos: Karte und Handy zahlen überall, manche Automaten und Läden nehmen gar kein Bargeld mehr. Eine Kreditkarte plus Debitkarte decken alles ab – Kronen wechseln lohnt kaum.",
+      "Presque sans espèces : carte et téléphone passent partout, certains automates et magasins n'acceptent plus du tout le liquide. Une carte de crédit plus une carte de débit couvrent tout – changer des couronnes ne vaut guère la peine.",
+      "Quasi senza contanti: carta e telefono vanno ovunque, alcuni distributori e negozi non accettano più contante. Una carta di credito più una di debito coprono tutto – cambiare corone conviene poco.",
+      "Almost cashless: card and phone pay everywhere, some machines and shops no longer take cash at all. A credit card plus a debit card cover everything – exchanging kroner is hardly worth it."
+    ),
+    emergency: "112",
+    emergencyNote: l4(
+      "112 für Polizei, Feuerwehr und Rettung; 114 für die Polizei ohne Notfall.",
+      "112 pour la police, les pompiers et les secours ; 114 pour la police hors urgence.",
+      "112 per polizia, pompieri e soccorso; 114 per la polizia senza emergenza.",
+      "112 for police, fire and ambulance; 114 for non-urgent police matters."
+    ),
+    camping: l4(
+      "Wildcampen mit dem Fahrzeug ist verboten; fürs Zelt gibt es dafür Hunderte einfacher Natur-Lagerplätze (Shelters) – oft gratis oder für wenige Kronen. Wohnmobile übernachten auf Plätzen oder ausgewiesenen Stellplätzen.",
+      "Le camping sauvage en véhicule est interdit ; pour la tente, il existe des centaines d'emplacements nature simples (shelters) – souvent gratuits ou pour quelques couronnes. Les camping-cars passent la nuit sur les campings ou aires balisées.",
+      "Il campeggio libero col veicolo è vietato; per la tenda ci sono centinaia di semplici piazzole natura (shelter) – spesso gratuite o per poche corone. I camper pernottano in campeggio o nelle aree segnalate.",
+      "Wild camping with a vehicle is banned; for tents there are hundreds of simple nature camps (shelters) – often free or a few kroner. Motorhomes stay on campsites or marked aires."
+    ),
+    aliases: [
+      "daenemark",
+      "dänemark",
+      "danemark",
+      "danimarca",
+      "denmark",
+      "kopenhagen",
+      "copenhague",
+      "jütland",
+      "jylland",
+      "bornholm",
+      "seeland",
+      "skagen",
+      "römö",
     ],
   },
 ];

@@ -124,10 +124,10 @@ export const it: Translation = {
       evening: (name: string) => `Buonasera, ${name}`,
     },
     tripArrivalAt: (time: string) => `Arrivo ${time}`,
-    heroTitle1: "Tutto per il campo.",
+    heroTitle1: "Tutti i tuoi viaggi.",
     heroTitle2: "In una sola app.",
     heroSubtitle:
-      "Pianificazione, sicurezza, energia e natura – oltre 40 strumenti smart per la tua prossima avventura.",
+      "Campeggio, hotel, città, spiaggia o escursioni – pianificazione, meteo, liste bagagli e oltre 40 strumenti smart per il viaggio.",
     sunInfo: (sunrise, sunset) => `Oggi: alba ${sunrise} · tramonto ${sunset}`,
     nextTripFallback: "Prossimo trip",
     nextTripAria: place => `Prossimo soggiorno pianificato: ${place}`,
@@ -347,6 +347,14 @@ export const it: Translation = {
     themeLight: "Chiaro",
     themeDark: "Scuro",
     themeAuto: "Automatico (sistema)",
+    fontScaleTitle: "Dimensione del testo",
+    fontScaleLabels: {
+      normal: "Normale",
+      large: "Grande",
+      xlarge: "Molto grande",
+    },
+    fontScaleHint:
+      "Vale solo su questo dispositivo – il tablet può differire dal telefono.",
     nameTitle: "Cambia nome",
     nameAria: "Nome",
     namePlaceholder: "Il tuo nome",
@@ -680,6 +688,9 @@ export const it: Translation = {
     personBudgetHint:
       "Per esempio 23 kg di bagaglio aereo – la riga del carico evidenzia le persone oltre il limite. Lascia vuoto per nessun limite.",
     personBudgetInfo: (limit: string) => `Limite: ${limit} a persona`,
+    copyTextButton: "Copia come testo",
+    copyTextDone: "Lista copiata – pronta da incollare",
+    copyTextFailed: "Copia non riuscita",
     uncheckAllButton: "Togli tutte le spunte",
     uncheckAllConfirm: (n: number) =>
       n === 1
@@ -1061,6 +1072,14 @@ export const it: Translation = {
       "Barre = quantità di pioggia (mm/h, asse sinistro) · Linea = probabilità di pioggia (%, asse destro).",
     forecast7: "Previsioni a 7 giorni",
     week2Title: "Settimana 2",
+    windowTitle: "Finestre meteo",
+    windowHint: "Quale fine settimana vale l'uscita?",
+    windowWeekend: (sa: string, so: string) => `sa ${sa} – do ${so}`,
+    windowSummary: (temp: number, rain: number) =>
+      rain > 0
+        ? `fino a ${temp} °C · ${rain} mm di pioggia`
+        : `fino a ${temp} °C · asciutto`,
+    windowVerdicts: { top: "Top", ok: "Va bene", bad: "Meglio di no" },
     week2Hint: "Tendenza – affidabilità ridotta",
     week2Aria: "Tendenza per la settimana 2",
     dayToggleAria: (day: string) =>
@@ -1474,6 +1493,7 @@ export const it: Translation = {
   roadRules: {
     plugTitle: "Prese e adattatori",
     tippingTitle: "Mancia",
+    paymentTitle: "Contanti e carte",
     title: "Pedaggi, vignetta e regole",
     subtitle:
       "Scheda per il paese di destinazione: pedaggi, velocità con rimorchio, dotazione obbligatoria, emergenze.",
@@ -1995,6 +2015,21 @@ export const it: Translation = {
     createNamePlaceholder: "es. Camping Seeblick",
     createNameRequired: "Inserisci prima un nome.",
     createConfirm: "Crea preferito",
+    createKindAria: "Cosa creare qui",
+    createKindFavorite: "Campeggio preferito",
+    createKindSavedPlace: "Luogo da ricordare",
+    createSavedPlaceConfirm: "Salva il luogo",
+    createNoteLabel: "Nota (facoltativa)",
+    createNotePlaceholder: "es. consigliato dal vicino",
+    createColorLabel: "Colore del segnaposto",
+    layerSavedPlaces: "Luoghi salvati",
+    savedPlaceKind: "Luogo salvato \u2013 meta dei desideri",
+    savedPlaceLegend: (n: number) =>
+      `${n} luogh${n === 1 ? "o salvato" : "i salvati"}`,
+    savedPlaceDelete: "Rimuovi il luogo",
+    savedPlaceDeleted: "Luogo rimosso",
+    savedPlaceCreatedToast: (name: string) =>
+      `Luogo \u00ab${name}\u00bb salvato`,
     createdToast: (name: string) => `«${name}» creato come preferito`,
     createdToastAction: "Al dossier",
     sightingKind: "Osservazione della natura",
@@ -2500,6 +2535,8 @@ export const it: Translation = {
     readinessAbroadHint: (country: string) =>
       `Questo viaggio porta in ${country} – pensa a vignetta, pedaggi e dotazioni obbligatorie.`,
     readinessAbroadLink: "Apri la scheda paese",
+    readinessHolidaysTitle: "Giorno festivo nel paese di viaggio:",
+    readinessHolidaysHint: "– i negozi sono spesso chiusi.",
     whoAlongTitle: "Chi viene?",
     whoAlongHint:
       "Toccato = presente. Da qui nascono i timbri del passaporto – quello di famiglia solo se ci sono tutti.",
@@ -2601,6 +2638,7 @@ export const it: Translation = {
     locationSearchButton: "Cerca località",
     locationSearchFailed: "Ricerca località non disponibile",
     locationSearchNoResults: "Nessuna località trovata – altra grafia?",
+    savedPlacesSuggestTitle: "Luoghi salvati",
     locationCoordsSet: "Coordinate acquisite",
     locationCoordsClearAria: "Rimuovi le coordinate",
     dayLabel: "Data",
@@ -2981,6 +3019,45 @@ export const it: Translation = {
     paidByLine: (name: string) => `pagato da ${name}`,
     byLine: (name: string) => `registrato da ${name}`,
     untitled: "Senza descrizione",
+    photoLabel: "Foto dello scontrino (facoltativa)",
+    photoAdd: "Fotografa lo scontrino",
+    photoChange: "Sostituisci lo scontrino",
+    photoRemove: "Rimuovi lo scontrino",
+    photoHint:
+      "Una foto della ricevuta per questa spesa \u2013 utile per i conti a casa.",
+    photoViewAria: (label: string) => `Vedi lo scontrino di ${label}`,
+    photoTooLarge: "La foto \u00e8 troppo grande.",
+    photoUploadFailed: "Impossibile caricare lo scontrino",
+    photoRemoveFailed: "Impossibile rimuovere lo scontrino",
+    photoReadFailed: "Impossibile leggere la foto",
+    photoHeic: "Le foto HEIC non sono supportate \u2013 scegli un JPG.",
+  },
+  tripStops: {
+    title: "Tappe",
+    hint: "Viaggio itinerante? Pi\u00f9 luoghi con date proprie \u2013 meteo e dintorni della vista Oggi seguono la tappa attuale.",
+    empty: "Ancora nessuna tappa \u2013 aggiungi la prima stazione del giro.",
+    toggleAria: (trip: string) => `Mostra o nascondi le tappe di ${trip}`,
+    addButton: "Aggiungi tappa",
+    newTitle: "Nuova tappa",
+    editTitle: "Modifica tappa",
+    nameLabel: "Luogo",
+    namePlaceholder: "es. Lago di Como",
+    fromLabel: "Arrivo",
+    toLabel: "Partenza",
+    saved: "Tappa salvata",
+    updated: "Tappa aggiornata",
+    deleted: "Tappa rimossa",
+    deleteConfirm: (name: string) =>
+      `Rimuovere davvero la tappa \u00ab${name}\u00bb?`,
+    deleteAria: (name: string) => `Rimuovi la tappa ${name}`,
+    editAria: (name: string) => `Modifica la tappa ${name}`,
+    nameRequired: "Indica un luogo per la tappa.",
+    currentBadge: "ora qui",
+    noCoordsNote:
+      "Le tappe senza risultato dalla ricerca luoghi non compaiono sulla mappa.",
+    noCoordsShort: "senza coordinate",
+    mapAria: "Mappa delle tappe",
+    maxReached: (n: number) => `Al massimo ${n} tappe`,
   },
   tripInvite: {
     badge: "Invito al viaggio",
@@ -3151,6 +3228,15 @@ export const it: Translation = {
     searchPlaceholder: "Cerca una frase …",
     searchAria: "Cerca nell'aiuto linguistico",
     searchEmpty: "Nessuna frase trovata – prova con un'altra parola chiave.",
+    customTitle: "Le tue frasi",
+    customHint:
+      "Ciò che conta per TE in questo viaggio – salvato sul tuo account, disponibile offline. Le frasi appartengono alla lingua di destinazione scelta.",
+    customMeaningPlaceholder: "Nella tua lingua",
+    customTranslationPlaceholder: (langName: string) =>
+      `Traduzione (${langName})`,
+    customAdd: "Salva",
+    customFull: "Non più di 100 frasi personali – elimina prima le vecchie.",
+    customDeleteAria: (text: string) => `Elimina la frase «${text}»`,
     copyAria: (text: string) => `Copia «${text}»`,
     copied: "Frase copiata.",
     copyFailed: "La copia non è riuscita.",
@@ -4475,6 +4561,8 @@ export const it: Translation = {
     nightsLeft: (nights: number) =>
       nights === 1 ? "ancora 1 notte" : `ancora ${nights} notti`,
     departureToday: "Oggi si parte",
+    stageLine: (name: string, until: string) =>
+      `Tappa: ${name} \u00b7 fino al ${until}`,
     weather: "Meteo",
     menu: "Menu",
     shopping: "Lista della spesa",
@@ -4489,6 +4577,13 @@ export const it: Translation = {
       label ? `${min}–${max} °C · ${label}` : `${min}–${max} °C`,
     snowDepthLine: (cm: number) => `Altezza neve: circa ${cm} cm`,
     snowfallLine: (cm: number) => `Neve fresca oggi: circa ${cm} cm`,
+    expenseButton: "Registra spesa",
+    expenseHint: "Finisce nella cassa di questo viaggio con la data di oggi.",
+    expenseAmountLabel: "Importo",
+    expenseNotePlaceholder: "Per cosa? (facoltativo)",
+    expenseSave: "Salva",
+    expenseSaved: "Salvata nella cassa di viaggio",
+    expenseInvalid: "Inserisci un importo valido",
     choresTitle: "Turni di oggi",
     choresEmpty: "Per oggi non è assegnato nulla.",
     choresToggleAria: (title: string) => `Spunta ${title}`,
@@ -4742,6 +4837,14 @@ export const it: Translation = {
       unnamed: "Negozio di bici",
       empty: (radius: string) =>
         `Nel raggio di ${radius} non è registrato nessun negozio di bici.`,
+    },
+    indoor: {
+      title: "Giorno di pioggia: musei e piscine nei dintorni",
+      subtitle:
+        "Oggi si bagna – questo si può fare lo stesso. Da OpenStreetMap, senza garanzia.",
+      unnamed: "Meta al coperto",
+      empty: (radius: string) =>
+        `Nel raggio di ${radius} non c'è nulla di adatto registrato.`,
     },
     winterSpots: {
       title: "Impianti e piste di fondo vicini",
@@ -5207,6 +5310,16 @@ export const it: Translation = {
     summary: (distance: string, ascent: number, time: string) =>
       `${distance} · ↑${ascent} m · ${time}`,
     removeAria: (name: string) => `Elimina il percorso ${name}`,
+    offlineDownload: "Scarica mappa offline",
+    offlineDownloadAria: (name: string) =>
+      `Scarica la mappa offline per il percorso ${name}`,
+    offlineDelete: "Elimina mappa offline",
+    offlineDeleteAria: (name: string) =>
+      `Elimina la mappa offline del percorso ${name}`,
+    offlineSaved: (tiles: number, mb: string) =>
+      `${tiles} tessere \u00b7 ${mb} MB`,
+    offlineHint:
+      "\u00abScarica mappa offline\u00bb salva le tessere della mappa in un corridoio di 1 km lungo il percorso \u2013 per il cammino senza campo.",
   },
   trackProfile: {
     sectionAria: "Profilo altimetrico e tempi intermedi",
@@ -5838,6 +5951,9 @@ export const it: Translation = {
     printButton: "Stampa",
     shareButton: "Condividi",
     shareAria: "Condividi la lista della spesa tramite link",
+    copyTextButton: "Copia come testo",
+    copyTextDone: "Lista copiata – pronta da incollare",
+    copyTextFailed: "Copia non riuscita",
     shareTitle: "Condividi la lista della spesa",
     shareDescription:
       "Chiunque abbia questo link vede la tua lista della spesa e può spuntare le voci senza accedere.",
@@ -5971,6 +6087,8 @@ export const it: Translation = {
     printButton: "Stampa",
     autofillButton: "Riempi automaticamente",
     autofillNothing: "Nessuno slot dei pasti vuoto da riempire.",
+    autofillWeatherNote:
+      "Meteo considerato: niente ricette al fuoco nei giorni di pioggia, la griglia per prima nelle sere asciutte.",
     autofillDone: (n: number) =>
       n === 1
         ? "1 pasto pianificato automaticamente"
@@ -6498,6 +6616,8 @@ export const it: Translation = {
     titlePlaceholder: "p. es. idee per il Ticino",
     textLabel: "Nota",
     textPlaceholder: "Scrivi liberamente …",
+    checkboxHint:
+      "Suggerimento: una riga come «- [ ] cambiare la bombola del gas» diventa una casella da spuntare.",
     tagsLabel: "Parole chiave",
     tagsPlaceholder: "p. es. Ticino, estate, tenda",
     tagsHint: (max: number) =>
@@ -6678,6 +6798,19 @@ export const it: Translation = {
     spotCostsHint:
       "Prezzo per notte inclusa tassa di soggiorno e spese accessorie, la più conveniente in alto. I totali sono notti × prezzo e quindi solo una stima – quanto hai pagato davvero è nella cassa del viaggio corrispondente.",
     yearCompareTitle: "Notti per anno",
+    goalTitle: "Obiettivo annuale di notti",
+    goalHint:
+      "Datti un obiettivo – per esempio 30 notti all'aperto – e guarda la barra crescere durante l'anno.",
+    goalLine: (nights: number, goal: number, year: number) =>
+      `${nights} notti su ${goal} nel ${year}`,
+    goalAria: (pct: number) => `Obiettivo annuale: ${pct} per cento raggiunto`,
+    goalReached: "Obiettivo raggiunto – che annata!",
+    goalRemaining: (n: number) =>
+      n === 1
+        ? "Manca 1 notte all'obiettivo"
+        : `Mancano ${n} notti all'obiettivo`,
+    goalSet: "Imposta obiettivo",
+    goalRemove: "Rimuovi obiettivo",
     nightsCount: n => (n === 1 ? "1 notte" : `${n} notti`),
     milestonesTitle: "Traguardi",
     milestonesAchieved: (achieved, total) =>

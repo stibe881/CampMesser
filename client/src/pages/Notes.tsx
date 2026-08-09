@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from "react";
 import { fmtDate, fmtLong } from "@/lib/dateFormat";
 import { useConfirm } from "@/components/ConfirmDialog";
 import {
+  Check,
   ImagePlus,
   Loader2,
   NotebookPen,
@@ -43,7 +44,9 @@ import {
   noteHasTag,
   noteMatchesQuery,
   normalizeNoteTags,
+  parseNoteLines,
   parseNoteTags,
+  toggleNoteCheckbox,
 } from "@shared/notes";
 
 /** Foto-URL einer Notiz (#433) – ausgeliefert nur an den eigenen Account. */
@@ -132,6 +135,22 @@ export default function NotesPage() {
     },
     onError: e => toast.error(e.message || t.notes.deleteFailed),
   });
+
+  /** Häkchen-Zeile (#544) direkt in der Karte umschalten. */
+  const toggleLine = (
+    note: { id: number; text: string },
+    lineIndex: number
+  ) => {
+    const next = toggleNoteCheckbox(note.text, lineIndex);
+    if (next === note.text) return;
+    updateMutation.mutate(
+      { id: note.id, text: next },
+      {
+        onSuccess: () => void utils.notes.list.invalidate(),
+        onError: () => toast.error(t.notes.saveFailed),
+      }
+    );
+  };
 
   const startNew = () => {
     setDraft(EMPTY_DRAFT);
@@ -366,9 +385,50 @@ export default function NotesPage() {
                         <h2 className="font-semibold">
                           {note.title || t.notes.untitled}
                         </h2>
-                        <p className="mt-1 whitespace-pre-line break-words text-sm text-muted-foreground">
-                          {note.text}
-                        </p>
+                        {/* Abhakbare Zeilen (#544): «- [ ] …» wird zum
+                            antippbaren Kästchen, alles andere bleibt Text */}
+                        <div className="mt-1 break-words text-sm text-muted-foreground">
+                          {parseNoteLines(note.text).map((line, idx) =>
+                            line.kind === "checkbox" ? (
+                              <button
+                                key={idx}
+                                type="button"
+                                className="flex w-full items-start gap-2 py-0.5 text-left"
+                                disabled={updateMutation.isPending}
+                                onClick={() => toggleLine(note, idx)}
+                                aria-pressed={line.checked}
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  className={cn(
+                                    "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border",
+                                    line.checked
+                                      ? "border-primary bg-primary text-primary-foreground"
+                                      : "border-border bg-background"
+                                  )}
+                                >
+                                  {line.checked && (
+                                    <Check className="h-3 w-3" />
+                                  )}
+                                </span>
+                                <span
+                                  className={cn(
+                                    line.checked && "line-through opacity-60"
+                                  )}
+                                >
+                                  {line.text}
+                                </span>
+                              </button>
+                            ) : (
+                              <p
+                                key={idx}
+                                className="min-h-[1.25rem] whitespace-pre-wrap"
+                              >
+                                {line.text}
+                              </p>
+                            )
+                          )}
+                        </div>
                         {parseNoteTags(note.tags).length > 0 && (
                           <div className="mt-2 flex flex-wrap gap-1.5">
                             {parseNoteTags(note.tags).map(tag => (
@@ -490,6 +550,9 @@ export default function NotesPage() {
                 onChange={e => setDraft(d => ({ ...d, text: e.target.value }))}
                 placeholder={t.notes.textPlaceholder}
               />
+              <p className="mt-1 text-xs text-muted-foreground">
+                {t.notes.checkboxHint}
+              </p>
             </div>
             <div>
               <Label htmlFor="note-tags">{t.notes.tagsLabel}</Label>

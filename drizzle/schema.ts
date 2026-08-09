@@ -772,6 +772,34 @@ export const homeLocations = mysqlTable(
 export type HomeLocation = typeof homeLocations.$inferSelect;
 export type InsertHomeLocation = typeof homeLocations.$inferInsert;
 
+/**
+ * Merkorte (#537): Wunschziele von der Karte – «da wollen wir mal hin».
+ * Bewusst LEICHTER als ein campSpots-Favorit: nur Name, Notiz und
+ * Pin-Farbe (Schlüssel aus shared/savedPlaces.ts), kein Dossier, keine
+ * Fotos. Beim Reise-Anlegen dienen sie als Orts-Vorschlag mit
+ * Koordinaten.
+ */
+export const savedPlaces = mysqlTable(
+  "savedPlaces",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    name: varchar("name", { length: 120 }).notNull(),
+    latitude: double("latitude").notNull(),
+    longitude: double("longitude").notNull(),
+    /** Kurze Notiz («vom Nachbarn empfohlen»); null = keine */
+    note: varchar("note", { length: 240 }),
+    /** Pin-Farbe: red | orange | green | blue | purple */
+    color: varchar("color", { length: 12 }).notNull().default("red"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  table => [index("savedPlaces_userId").on(table.userId)]
+);
+
+export type SavedPlace = typeof savedPlaces.$inferSelect;
+export type InsertSavedPlace = typeof savedPlaces.$inferInsert;
+
 /** Web-Push-Abos für Unwetter-Warnungen an gespeicherten Zeltplätzen. */
 export const pushSubscriptions = mysqlTable(
   "pushSubscriptions",
@@ -1062,6 +1090,11 @@ export const tripExpenses = mysqlTable(
     day: date("day", { mode: "string" }).notNull(),
     /** Wer bezahlt hat – freier Name, Grundlage für «wer schuldet wem» */
     paidBy: varchar("paidBy", { length: 80 }).notNull(),
+    /**
+     * Beleg-Foto (#540): Dateiname unter uploads/expenses/; null = keins.
+     * Genau EIN Foto pro Ausgabe – die Quittung, nicht ein Album.
+     */
+    photoFileName: varchar("photoFileName", { length: 60 }),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   },
@@ -1073,6 +1106,36 @@ export const tripExpenses = mysqlTable(
 
 export type TripExpense = typeof tripExpenses.$inferSelect;
 export type InsertTripExpense = typeof tripExpenses.$inferInsert;
+
+/**
+ * Etappen einer Reise (#536): Eine Rundreise besteht aus mehreren Orten
+ * mit je eigenem Von/Bis. Wie Journal und Reisekasse gehören die Etappen
+ * zur REISE – die Berechtigung prüft der Router via canAccessTrip, damit
+ * Mitreisende mitplanen dürfen. Koordinaten kommen aus der Ortssuche und
+ * dürfen fehlen (dann bleibt die Etappe ohne Wetter/Karte); die
+ * Obergrenze pro Reise steht in shared/tripStops.ts.
+ */
+export const tripStops = mysqlTable(
+  "tripStops",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    /** Verknüpfte Reise (tripLogs.id) */
+    tripId: int("tripId").notNull(),
+    name: varchar("name", { length: 140 }).notNull(),
+    latitude: double("latitude"),
+    longitude: double("longitude"),
+    /** Ankunft an dieser Etappe */
+    startDate: date("startDate", { mode: "string" }).notNull(),
+    /** Weiterreise – am Wechseltag gilt die neu angetretene Etappe */
+    endDate: date("endDate", { mode: "string" }).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  table => [index("tripStops_tripId").on(table.tripId)]
+);
+
+export type TripStop = typeof tripStops.$inferSelect;
+export type InsertTripStop = typeof tripStops.$inferInsert;
 
 /**
  * Pinnwand einer Reise (#245): kurze Zurufe an die Mitreisenden

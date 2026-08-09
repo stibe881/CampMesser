@@ -122,10 +122,10 @@ export const en: Translation = {
       evening: (name: string) => `Good evening, ${name}`,
     },
     tripArrivalAt: (time: string) => `Arrival ${time}`,
-    heroTitle1: "Everything for camp.",
+    heroTitle1: "All your travels.",
     heroTitle2: "In one app.",
     heroSubtitle:
-      "Planning, safety, energy and nature – over 40 smart tools for your next adventure.",
+      "Camping, hotel, cities, beach or hiking – planning, weather, packing lists and over 40 smart tools for the road.",
     sunInfo: (sunrise, sunset) =>
       `Today: sunrise ${sunrise} · sunset ${sunset}`,
     nextTripFallback: "Next trip",
@@ -342,6 +342,14 @@ export const en: Translation = {
     themeLight: "Light",
     themeDark: "Dark",
     themeAuto: "Automatic (system)",
+    fontScaleTitle: "Font size",
+    fontScaleLabels: {
+      normal: "Normal",
+      large: "Large",
+      xlarge: "Extra large",
+    },
+    fontScaleHint:
+      "Applies only on this device – your tablet may differ from your phone.",
     nameTitle: "Change name",
     nameAria: "Name",
     namePlaceholder: "Your name",
@@ -669,6 +677,9 @@ export const en: Translation = {
     personBudgetHint:
       "For example 23 kg of flight luggage – the load line highlights people over the limit. Leave empty for no limit.",
     personBudgetInfo: (limit: string) => `Limit: ${limit} per person`,
+    copyTextButton: "Copy as text",
+    copyTextDone: "List copied – ready to paste",
+    copyTextFailed: "Copying failed",
     uncheckAllButton: "Untick all",
     uncheckAllConfirm: (n: number) =>
       n === 1
@@ -1037,6 +1048,14 @@ export const en: Translation = {
       "Bars = rainfall (mm/h, left axis) · Line = rain probability (%, right axis).",
     forecast7: "7-day forecast",
     week2Title: "Week 2",
+    windowTitle: "Weather windows",
+    windowHint: "Which weekend is worth heading out?",
+    windowWeekend: (sa: string, so: string) => `Sat ${sa} – Sun ${so}`,
+    windowSummary: (temp: number, rain: number) =>
+      rain > 0
+        ? `up to ${temp} °C · ${rain} mm rain`
+        : `up to ${temp} °C · dry`,
+    windowVerdicts: { top: "Great", ok: "Decent", bad: "Rather not" },
     week2Hint: "Outlook – lower reliability",
     week2Aria: "Week 2 outlook",
     dayToggleAria: (day: string) => `Show or hide the hourly detail for ${day}`,
@@ -1444,6 +1463,7 @@ export const en: Translation = {
   roadRules: {
     plugTitle: "Sockets & adapters",
     tippingTitle: "Tipping",
+    paymentTitle: "Cash & cards",
     title: "Tolls, vignettes & rules",
     subtitle:
       "Briefing for your destination: tolls, speeds when towing, mandatory kit, emergency number.",
@@ -1960,6 +1980,20 @@ export const en: Translation = {
     createNamePlaceholder: "e.g. Camping Seeblick",
     createNameRequired: "Please enter a name first.",
     createConfirm: "Create favourite",
+    createKindAria: "What to create here",
+    createKindFavorite: "Campsite favourite",
+    createKindSavedPlace: "Saved place",
+    createSavedPlaceConfirm: "Save place",
+    createNoteLabel: "Note (optional)",
+    createNotePlaceholder: "e.g. recommended by a neighbour",
+    createColorLabel: "Pin colour",
+    layerSavedPlaces: "Saved places",
+    savedPlaceKind: "Saved place \u2013 wish-list destination",
+    savedPlaceLegend: (n: number) => `${n} saved place${n === 1 ? "" : "s"}`,
+    savedPlaceDelete: "Remove place",
+    savedPlaceDeleted: "Place removed",
+    savedPlaceCreatedToast: (name: string) =>
+      `Saved place \u201c${name}\u201d stored`,
     createdToast: (name: string) => `“${name}” created as favourite`,
     createdToastAction: "Open dossier",
     sightingKind: "Nature sighting",
@@ -2446,6 +2480,8 @@ export const en: Translation = {
     readinessAbroadHint: (country: string) =>
       `This trip goes to ${country} – remember vignette, tolls and mandatory equipment.`,
     readinessAbroadLink: "Open country factsheet",
+    readinessHolidaysTitle: "Public holiday at your destination:",
+    readinessHolidaysHint: "– shops are often closed then.",
     whoAlongTitle: "Who’s along?",
     whoAlongHint:
       "Tapped means along. The passport stamps come from this – the family stamp only when everyone is along.",
@@ -2546,6 +2582,7 @@ export const en: Translation = {
     locationSearchButton: "Find place",
     locationSearchFailed: "Place search unavailable",
     locationSearchNoResults: "No place found – try another spelling?",
+    savedPlacesSuggestTitle: "Saved places",
     locationCoordsSet: "Coordinates set",
     locationCoordsClearAria: "Remove coordinates",
     dayLabel: "Date",
@@ -2913,6 +2950,44 @@ export const en: Translation = {
     paidByLine: (name: string) => `paid by ${name}`,
     byLine: (name: string) => `recorded by ${name}`,
     untitled: "No description",
+    photoLabel: "Receipt photo (optional)",
+    photoAdd: "Photograph receipt",
+    photoChange: "Replace receipt",
+    photoRemove: "Remove receipt",
+    photoHint:
+      "A photo of the receipt for this expense \u2013 handy for settling up at home.",
+    photoViewAria: (label: string) => `View receipt for ${label}`,
+    photoTooLarge: "The photo is too large.",
+    photoUploadFailed: "Receipt could not be uploaded",
+    photoRemoveFailed: "Receipt could not be removed",
+    photoReadFailed: "Photo could not be read",
+    photoHeic: "HEIC photos are not supported \u2013 please choose a JPG.",
+  },
+  tripStops: {
+    title: "Stages",
+    hint: "Road trip? Several places with their own dates \u2013 weather and surroundings in the Today view follow the current stage.",
+    empty: "No stages yet \u2013 add the first stop of your round trip.",
+    toggleAria: (trip: string) => `Show or hide stages of ${trip}`,
+    addButton: "Add stage",
+    newTitle: "New stage",
+    editTitle: "Edit stage",
+    nameLabel: "Place",
+    namePlaceholder: "e.g. Lake Como",
+    fromLabel: "Arrival",
+    toLabel: "Moving on",
+    saved: "Stage saved",
+    updated: "Stage updated",
+    deleted: "Stage removed",
+    deleteConfirm: (name: string) => `Really remove stage \u201c${name}\u201d?`,
+    deleteAria: (name: string) => `Remove stage ${name}`,
+    editAria: (name: string) => `Edit stage ${name}`,
+    nameRequired: "Give the stage a place.",
+    currentBadge: "here now",
+    noCoordsNote:
+      "Stages without a place-search match do not appear on the map.",
+    noCoordsShort: "no coordinates",
+    mapAria: "Map of the stages",
+    maxReached: (n: number) => `At most ${n} stages`,
   },
   tripInvite: {
     badge: "Trip invitation",
@@ -3079,6 +3154,15 @@ export const en: Translation = {
     searchPlaceholder: "Search for a phrase …",
     searchAria: "Search the phrasebook",
     searchEmpty: "No phrase found – try another keyword.",
+    customTitle: "Your own phrases",
+    customHint:
+      "What matters to YOU on this trip – stored with your account, available offline. Phrases belong to the selected target language.",
+    customMeaningPlaceholder: "In your language",
+    customTranslationPlaceholder: (langName: string) =>
+      `Translation (${langName})`,
+    customAdd: "Save",
+    customFull: "No more than 100 own phrases – delete old ones first.",
+    customDeleteAria: (text: string) => `Delete own phrase “${text}”`,
     copyAria: (text: string) => `Copy “${text}”`,
     copied: "Phrase copied.",
     copyFailed: "Copying did not work.",
@@ -4385,6 +4469,8 @@ export const en: Translation = {
     nightsLeft: (nights: number) =>
       nights === 1 ? "1 night left" : `${nights} nights left`,
     departureToday: "Departure day",
+    stageLine: (name: string, until: string) =>
+      `Stage: ${name} \u00b7 until ${until}`,
     weather: "Weather",
     menu: "Meal plan",
     shopping: "Shopping list",
@@ -4399,6 +4485,13 @@ export const en: Translation = {
       label ? `${min}–${max} °C · ${label}` : `${min}–${max} °C`,
     snowDepthLine: (cm: number) => `Snow depth: about ${cm} cm`,
     snowfallLine: (cm: number) => `Fresh snow today: around ${cm} cm`,
+    expenseButton: "Add expense",
+    expenseHint: "Goes into this trip's wallet with today's date.",
+    expenseAmountLabel: "Amount",
+    expenseNotePlaceholder: "What for? (optional)",
+    expenseSave: "Save",
+    expenseSaved: "Saved to the trip wallet",
+    expenseInvalid: "Enter a valid amount",
     choresTitle: "Chores today",
     choresEmpty: "Nothing assigned for today.",
     choresToggleAria: (title: string) => `Tick off ${title}`,
@@ -4647,6 +4740,13 @@ export const en: Translation = {
       subtitle: "From OpenStreetMap – “Service” means repair is recorded.",
       unnamed: "Bike shop",
       empty: (radius: string) => `No bike shop recorded within ${radius}.`,
+    },
+    indoor: {
+      title: "Rainy day: museums & pools nearby",
+      subtitle:
+        "It's getting wet today – these still work. From OpenStreetMap, no guarantee.",
+      unnamed: "Indoor spot",
+      empty: (radius: string) => `Nothing suitable is mapped within ${radius}.`,
     },
     winterSpots: {
       title: "Lifts & cross-country trails nearby",
@@ -5104,6 +5204,15 @@ export const en: Translation = {
     summary: (distance: string, ascent: number, time: string) =>
       `${distance} · ↑${ascent} m · ${time}`,
     removeAria: (name: string) => `Delete route ${name}`,
+    offlineDownload: "Download offline map",
+    offlineDownloadAria: (name: string) =>
+      `Download offline map for route ${name}`,
+    offlineDelete: "Delete offline map",
+    offlineDeleteAria: (name: string) => `Delete offline map of route ${name}`,
+    offlineSaved: (tiles: number, mb: string) =>
+      `${tiles} tiles \u00b7 ${mb} MB`,
+    offlineHint:
+      "\u201cDownload offline map\u201d stores the map tiles in a 1 km corridor along the route on this device \u2013 for the trail without reception.",
   },
   trackProfile: {
     sectionAria: "Elevation profile and splits",
@@ -5722,6 +5831,9 @@ export const en: Translation = {
     printButton: "Print",
     shareButton: "Share",
     shareAria: "Share the shopping list via link",
+    copyTextButton: "Copy as text",
+    copyTextDone: "List copied – ready to paste",
+    copyTextFailed: "Copying failed",
     shareTitle: "Share shopping list",
     shareDescription:
       "Anyone with this link can see your shopping list and tick items off without signing in.",
@@ -5853,6 +5965,8 @@ export const en: Translation = {
     printButton: "Print",
     autofillButton: "Fill automatically",
     autofillNothing: "No empty meal slots to fill.",
+    autofillWeatherNote:
+      "Weather considered: no fire recipes on rainy days, the grill first on dry evenings.",
     autofillDone: (n: number) =>
       n === 1
         ? "1 meal planned automatically"
@@ -6369,6 +6483,8 @@ export const en: Translation = {
     titlePlaceholder: "e.g. ideas for Ticino",
     textLabel: "Note",
     textPlaceholder: "Just start writing …",
+    checkboxHint:
+      "Tip: a line like “- [ ] swap the gas bottle” becomes a tickable checkbox.",
     tagsLabel: "Keywords",
     tagsPlaceholder: "e.g. Ticino, summer, tent",
     tagsHint: (max: number) =>
@@ -6546,6 +6662,17 @@ export const en: Translation = {
     spotCostsHint:
       "Price per night including tourist tax and extras, cheapest at the top. The totals are nights × price and therefore only an estimate – what you actually paid is in the trip kitty of the stay in question.",
     yearCompareTitle: "Nights per year",
+    goalTitle: "Yearly nights goal",
+    goalHint:
+      "Set yourself a goal – say 30 nights outdoors – and watch the bar grow over the year.",
+    goalLine: (nights: number, goal: number, year: number) =>
+      `${nights} of ${goal} nights in ${year}`,
+    goalAria: (pct: number) => `Yearly goal: ${pct} percent reached`,
+    goalReached: "Goal reached – a fine year!",
+    goalRemaining: (n: number) =>
+      n === 1 ? "1 night to go" : `${n} nights to go`,
+    goalSet: "Set goal",
+    goalRemove: "Remove goal",
     nightsCount: n => (n === 1 ? "1 night" : `${n} nights`),
     milestonesTitle: "Milestones",
     milestonesAchieved: (achieved, total) =>

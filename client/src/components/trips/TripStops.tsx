@@ -1,0 +1,522 @@
+/**
+ * Etappen einer Reise (#536): Rundreisen bestehen aus mehreren Orten mit
+ * je eigenem Von/Bis. Der Abschnitt ist aufklappbar wie die Reisekasse –
+ * die Etappen werden erst beim Öffnen geladen.
+ *
+ * DIE KARTE VERBINDET: Etappen mit Koordinaten stehen als nummerierte
+ * Punkte auf einer Mini-Karte, eine Linie zeigt die Reihenfolge. Die
+ * Koordinaten kommen aus derselben Ortssuche wie im Reise-Formular
+ * (#465) – ohne gewählten Treffer bleibt die Etappe ohne Punkt, und die
+ * Ansicht sagt das.
+ *
+ * WETTER JE ETAPPE: Die Heute-Ansicht nimmt während der Reise die
+ * Koordinaten der AKTUELLEN Etappe (shared/tripStops.ts) – Wetter,
+ * Umgebung und Karten wandern automatisch mit.
+ */
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  ChevronDown,
+  MapPin,
+  Pencil,
+  Plus,
+  Route,
+  Search,
+  Trash2,
+  X,
+} from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useConfirm } from "@/components/ConfirmDialog";
+import { trpc } from "@/lib/trpc";
+import { useI18n } from "@/i18n";
+import { fmtShort } from "@/lib/dateFormat";
+import { useTodayIso } from "@/lib/useTodayIso";
+import { searchPlaces, type PlaceResult } from "@/lib/placeSearch";
+import { loadMapLayer } from "@/lib/mapLayers";
+import {
+  createMap,
+  divIcon,
+  latLngBounds,
+  type LatLngTuple,
+  type LayerGroupObject,
+  type MapEngine,
+} from "@/lib/mapEngine";
+import { useMapConfig } from "@/hooks/useMapConfig";
+import {
+  MAX_TRIP_STOPS,
+  TRIP_STOP_NAME_MAX_LENGTH,
+  currentTripStop,
+} from "@shared/tripStops";
+import { cn } from "@/lib/utils";
+
+/** Nummerierter Etappen-Punkt – gleiche divIcon-Technik wie die Karte. */
+function stopIcon(index: number, active: boolean) {
+  const fill = active ? "#16a34a" : "#2563eb";
+  return divIcon({
+    className: "",
+    html: `<div style="width:26px;height:26px;border-radius:9999px;background:${fill};color:#fff;border:2.5px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;">${index}</div>`,
+    iconSize: [26, 26],
+    iconAnchor: [13, 13],
+    popupAnchor: [0, -14],
+  });
+}
+
+export default function TripStops({
+  tripId,
+  tripName,
+  startDate,
+  endDate,
+}: {
+  tripId: number;
+  tripName: string;
+  startDate: string;
+  endDate: string;
+}) {
+  const { lang, t } = useI18n();
+  const ts = t.tripStops;
+  const ask = useConfirm();
+  const utils = trpc.useUtils();
+  const today = useTodayIso();
+  const [open, setOpen] = useState(false);
+
+  const query = trpc.trips.stops.list.useQuery({ tripId }, { enabled: open });
+  const stops = useMemo(() => query.data ?? [], [query.data]);
+  const current = useMemo(() => currentTripStop(stops, today), [stops, today]);
+
+  /** null = Formular zu, "neu" = neue Etappe, sonst die Id der bearbeiteten. */
+  const [editing, setEditing] = useState<number | "neu" | null>(null);
+  const [name, setName] = useState("");
+  const [from, setFrom] = useState(startDate);
+  const [to, setTo] = useState(endDate);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
+    null
+  );
+  const [placeResults, setPlaceResults] = useState<PlaceResult[] | null>(null);
+  const [placeSearching, setPlaceSearching] = useState(false);
+
+  const invalidate = () => utils.trips.stops.list.invalidate({ tripId });
+
+  const closeForm = () => {
+    setEditing(null);
+    setName("");
+    setCoords(null);
+    setPlaceResults(null);
+  };
+
+  const addMutation = trpc.trips.stops.add.useMutation({
+    onSuccess: () => {
+      invalidate();
+      closeForm();
+      toast.success(ts.saved);
+    },
+    onError: e => toast.error(e.message || t.common.saveFailed),
+  });
+  const updateMutation = trpc.trips.stops.update.useMutation({
+    onSuccess: () => {
+      invalidate();
+      closeForm();
+      toast.success(ts.updated);
+    },
+    onError: e => toast.error(e.message || t.common.saveFailed),
+  });
+  const removeMutation = trpc.trips.stops.remove.useMutation({
+    onSuccess: () => {
+      invalidate();
+      toast.success(ts.deleted);
+    },
+    onError: () => toast.error(t.common.actionFailed),
+  });
+
+  const startNew = () => {
+    setEditing("neu");
+    setName("");
+    // Sinnvoller Vorschlag: die neue Etappe beginnt, wo die letzte endet
+    const last = stops[stops.length - 1];
+    setFrom(last ? last.endDate : startDate);
+    setTo(endDate);
+    setCoords(null);
+    setPlaceResults(null);
+  };
+
+  const startEdit = (stop: (typeof stops)[number]) => {
+    setEditing(stop.id);
+    setName(stop.name);
+    setFrom(stop.startDate);
+    setTo(stop.endDate);
+    setCoords(
+      stop.latitude != null && stop.longitude != null
+        ? { lat: stop.latitude, lng: stop.longitude }
+        : null
+    );
+    setPlaceResults(null);
+  };
+
+  /** Ortssuche (#465): Treffer zur getippten Eingabe holen. */
+  const runPlaceSearch = async () => {
+    const search = name.trim();
+    if (!search) return;
+    setPlaceSearching(true);
+    try {
+      setPlaceResults(await searchPlaces(search, lang));
+    } catch {
+      toast.error(t.trips.locationSearchFailed);
+    } finally {
+      setPlaceSearching(false);
+    }
+  };
+
+  const pickPlace = (place: PlaceResult) => {
+    setName(place.name);
+    setCoords({ lat: place.latitude, lng: place.longitude });
+    setPlaceResults(null);
+  };
+
+  const submit = () => {
+    const trimmed = name.trim();
+    if (!trimmed) {
+      toast.error(ts.nameRequired);
+      return;
+    }
+    const payload = {
+      name: trimmed.slice(0, TRIP_STOP_NAME_MAX_LENGTH),
+      latitude: coords?.lat ?? null,
+      longitude: coords?.lng ?? null,
+      startDate: from,
+      endDate: to,
+    };
+    if (editing === "neu") addMutation.mutate({ tripId, ...payload });
+    else if (typeof editing === "number")
+      updateMutation.mutate({ id: editing, ...payload });
+  };
+
+  const busy = addMutation.isPending || updateMutation.isPending;
+  const fmtDay = (iso: string) => fmtShort(new Date(`${iso}T00:00:00`), lang);
+
+  // ── Mini-Karte: Etappen als nummerierte Punkte, Linie in Reihenfolge ──
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const engineRef = useRef<MapEngine | null>(null);
+  const layerRef = useRef<LayerGroupObject | null>(null);
+  const [mapReady, setMapReady] = useState(false);
+  const maps = useMapConfig();
+  const mapStops = useMemo(
+    () =>
+      stops.filter(
+        (
+          stop
+        ): stop is (typeof stops)[number] & {
+          latitude: number;
+          longitude: number;
+        } => stop.latitude != null && stop.longitude != null
+      ),
+    [stops]
+  );
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!open || !container || engineRef.current || !maps.ready) return;
+    if (mapStops.length === 0) return;
+    let cancelled = false;
+    void createMap(container, {
+      center: [mapStops[0].latitude, mapStops[0].longitude],
+      zoom: 7,
+      baseKind: loadMapLayer(),
+      config: maps.config,
+      minimal: true,
+    })
+      .then(engine => {
+        if (cancelled) {
+          engine.destroy();
+          return;
+        }
+        engineRef.current = engine;
+        layerRef.current = engine.layerGroup();
+        setMapReady(true);
+      })
+      .catch(() => {
+        // Ohne Netz bleibt die Karte weg – die Liste sagt alles Nötige
+      });
+    return () => {
+      cancelled = true;
+      engineRef.current?.destroy();
+      engineRef.current = null;
+      layerRef.current = null;
+      setMapReady(false);
+    };
+    // mapStops.length nur als "gibt es überhaupt Punkte" – der Aufbau
+    // selbst passiert einmal, das Nachzeichnen unten.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, maps.ready, maps.config, mapStops.length > 0]);
+
+  useEffect(() => {
+    const engine = engineRef.current;
+    const layer = layerRef.current;
+    if (!engine || !layer || !mapReady) return;
+    layer.clear();
+    if (mapStops.length === 0) return;
+    const line: LatLngTuple[] = mapStops.map(stop => [
+      stop.latitude,
+      stop.longitude,
+    ]);
+    if (line.length > 1) {
+      engine.polyline(line, {
+        color: "#2563eb",
+        weight: 3,
+        opacity: 0.8,
+        dashArray: "6 6",
+        layer,
+      });
+    }
+    mapStops.forEach((stop, index) => {
+      engine.marker([stop.latitude, stop.longitude], {
+        icon: stopIcon(index + 1, current?.id === stop.id),
+        title: stop.name,
+        layer,
+      });
+    });
+    engine.fitBounds(latLngBounds(line), { padding: 30, maxZoom: 11 });
+  }, [mapReady, mapStops, current]);
+
+  return (
+    <div className="mt-2 rounded-lg border border-border bg-card">
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        aria-expanded={open}
+        aria-label={ts.toggleAria(tripName)}
+        className="flex w-full items-center gap-2 px-3 py-2 text-sm"
+      >
+        <Route className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+        <span className="min-w-0 flex-1 truncate text-left font-medium">
+          {ts.title}
+        </span>
+        {stops.length > 0 && (
+          <span className="shrink-0 rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground">
+            {stops.length}
+          </span>
+        )}
+        <ChevronDown
+          className={cn(
+            "h-4 w-4 shrink-0 text-muted-foreground transition-transform",
+            open && "rotate-180"
+          )}
+          aria-hidden="true"
+        />
+      </button>
+      {open && (
+        <div className="space-y-3 border-t border-border px-3 py-2.5">
+          <p className="text-xs text-muted-foreground">{ts.hint}</p>
+
+          {query.isLoading ? (
+            <Skeleton className="h-16 w-full rounded-lg" />
+          ) : (
+            <>
+              {mapStops.length > 0 && (
+                <div
+                  ref={containerRef}
+                  className="h-56 w-full overflow-hidden rounded-lg border border-border"
+                  aria-label={ts.mapAria}
+                />
+              )}
+              {stops.length > 0 && mapStops.length < stops.length && (
+                <p className="text-xs text-muted-foreground">
+                  {ts.noCoordsNote}
+                </p>
+              )}
+
+              {stops.length === 0 ? (
+                <p className="text-sm text-muted-foreground">{ts.empty}</p>
+              ) : (
+                <ol className="space-y-1">
+                  {stops.map((stop, index) => (
+                    <li
+                      key={stop.id}
+                      className="flex items-start gap-2 rounded-lg bg-muted/40 px-3 py-2"
+                    >
+                      <span
+                        className={cn(
+                          "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white",
+                          current?.id === stop.id
+                            ? "bg-green-600"
+                            : "bg-primary"
+                        )}
+                        aria-hidden="true"
+                      >
+                        {index + 1}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="flex flex-wrap items-center gap-x-2 text-sm font-medium">
+                          {stop.name}
+                          {current?.id === stop.id && (
+                            <span className="rounded-full bg-green-600/15 px-2 py-0.5 text-[11px] font-medium text-green-700 dark:text-green-400">
+                              {ts.currentBadge}
+                            </span>
+                          )}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {fmtDay(stop.startDate)} – {fmtDay(stop.endDate)}
+                          {stop.latitude == null && ` · ${ts.noCoordsShort}`}
+                        </p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 shrink-0 text-muted-foreground/60 hover:text-foreground"
+                        onClick={() => startEdit(stop)}
+                        aria-label={ts.editAria(stop.name)}
+                      >
+                        <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 shrink-0 text-muted-foreground/60 hover:text-destructive"
+                        onClick={async () => {
+                          if (await ask({ title: ts.deleteConfirm(stop.name) }))
+                            removeMutation.mutate({ id: stop.id });
+                        }}
+                        aria-label={ts.deleteAria(stop.name)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                      </Button>
+                    </li>
+                  ))}
+                </ol>
+              )}
+
+              {editing === null ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={startNew}
+                  disabled={stops.length >= MAX_TRIP_STOPS}
+                >
+                  <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                  {stops.length >= MAX_TRIP_STOPS
+                    ? ts.maxReached(MAX_TRIP_STOPS)
+                    : ts.addButton}
+                </Button>
+              ) : (
+                <div className="space-y-2 rounded-lg border border-border p-3">
+                  <p className="text-sm font-semibold">
+                    {editing === "neu" ? ts.newTitle : ts.editTitle}
+                  </p>
+                  <div>
+                    <Label htmlFor={`stop-name-${tripId}`}>
+                      {ts.nameLabel}
+                    </Label>
+                    <Input
+                      id={`stop-name-${tripId}`}
+                      className="mt-1"
+                      maxLength={TRIP_STOP_NAME_MAX_LENGTH}
+                      placeholder={ts.namePlaceholder}
+                      value={name}
+                      onChange={e => {
+                        // Von Hand geändert → alte Koordinaten gelten nicht
+                        setCoords(null);
+                        setName(e.target.value);
+                      }}
+                    />
+                    <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={!name.trim() || placeSearching}
+                        onClick={() => void runPlaceSearch()}
+                      >
+                        <Search
+                          className="mr-1.5 h-3.5 w-3.5"
+                          aria-hidden="true"
+                        />
+                        {t.trips.locationSearchButton}
+                      </Button>
+                      {coords && (
+                        <span className="flex items-center gap-1 rounded-full bg-accent px-2.5 py-1 text-xs font-medium text-accent-foreground">
+                          <MapPin className="h-3 w-3" aria-hidden="true" />
+                          {t.trips.locationCoordsSet}
+                          <button
+                            type="button"
+                            onClick={() => setCoords(null)}
+                            aria-label={t.trips.locationCoordsClearAria}
+                            className="ml-0.5 text-muted-foreground hover:text-destructive"
+                          >
+                            <X className="h-3 w-3" aria-hidden="true" />
+                          </button>
+                        </span>
+                      )}
+                    </div>
+                    {placeResults !== null &&
+                      (placeResults.length === 0 ? (
+                        <p className="mt-1.5 text-xs text-muted-foreground">
+                          {t.trips.locationSearchNoResults}
+                        </p>
+                      ) : (
+                        <div className="mt-1.5 flex flex-wrap gap-1.5">
+                          {placeResults.map(place => (
+                            <button
+                              key={place.id}
+                              type="button"
+                              onClick={() => pickPlace(place)}
+                              className="rounded-full bg-muted px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                            >
+                              {place.name}
+                              {place.region && (
+                                <span className="text-xs">
+                                  {" "}
+                                  · {place.region}
+                                </span>
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      ))}
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label htmlFor={`stop-from-${tripId}`}>
+                        {ts.fromLabel}
+                      </Label>
+                      <Input
+                        id={`stop-from-${tripId}`}
+                        className="mt-1"
+                        type="date"
+                        value={from}
+                        onChange={e => {
+                          const value = e.target.value;
+                          setFrom(value);
+                          setTo(current => (current < value ? value : current));
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor={`stop-to-${tripId}`}>{ts.toLabel}</Label>
+                      <Input
+                        id={`stop-to-${tripId}`}
+                        className="mt-1"
+                        type="date"
+                        min={from}
+                        value={to}
+                        onChange={e => setTo(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button size="sm" disabled={busy} onClick={submit}>
+                      {busy ? t.common.saving : t.common.save}
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={closeForm}>
+                      {t.common.cancel}
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}

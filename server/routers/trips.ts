@@ -10,8 +10,10 @@ import {
   EUR_RATE_MIN,
   toChfExpenses,
 } from "@shared/expenses";
+import { MAX_TRIP_STOPS, TRIP_STOP_NAME_MAX_LENGTH } from "@shared/tripStops";
 import { TRIP_KINDS, normalizeTripKind } from "@shared/tripKind";
 import { getEcbEurRate } from "../ecbRates";
+import { getHolidaysAbroad } from "../holidaysAbroad";
 import {
   BUDGET_MAX_RAPPEN,
   EXPENSE_CATEGORIES,
@@ -91,6 +93,21 @@ async function applyAbsences(
 
 export const tripsRouters = {
   trips: router({
+    /**
+     * Feiertage des Reiselands (#539) im Reisezeitraum – fürs Cockpit.
+     * Serverseitig gecacht (Nager.Date); null = Quelle nicht erreichbar.
+     */
+    holidaysAbroad: protectedProcedure
+      .input(
+        z.object({
+          country: z.string().regex(/^[A-Za-z]{2}$/),
+          from: z.string().regex(ISO_DAY),
+          to: z.string().regex(ISO_DAY),
+        })
+      )
+      .query(({ input }) =>
+        getHolidaysAbroad(input.country, input.from, input.to)
+      ),
     /** Buchungsbestätigung entfernen (#279) – Datei und Verweis. */
     removeReservation: protectedProcedure
       .input(z.object({ tripId: z.number().int().positive() }))
@@ -695,6 +712,8 @@ export const tripsRouters = {
         await db.deleteAllTripPhotosForTrip(input.id);
         // Reisekasse gehört zur Reise und wird mitgelöscht (#219)
         await db.deleteAllTripExpensesForTrip(input.id);
+        // Etappen (#536) ebenso
+        await db.deleteAllTripStopsForTrip(input.id);
         // Pinnwand (#245) gehört ebenfalls zur Reise
         await db.deleteAllTripBoardNotesForTrip(input.id);
         // Aufgezeichnete Wanderungen (#220) bleiben bestehen und verlieren
@@ -806,6 +825,131 @@ export const tripsRouters = {
             text ? "edit" : "remove",
             input.day
           );
+          return { success: true } as const;
+        }),
+    }),
+    /**
+     * Etappen (#536): Eine Rundreise besteht aus mehreren Orten mit je
+     * eigenem Von/Bis. Wie Journal und Reisekasse gehören sie zur REISE –
+     * Mitreisende dürfen mitplanen (canAccessTrip). Koordinaten kommen
+     * aus der Ortssuche des Clients und dürfen fehlen.
+     */
+    stops: router({
+      list: protectedProcedure
+        .input(z.object({ tripId: z.number().int().positive() }))
+        .query(async ({ ctx, input }) => {
+          const trip = await db.canAccessTrip(input.tripId, ctx.user.id);
+          if (!trip) {
+            return [] as Awaited<ReturnType<typeof db.getTripStops>>;
+          }
+          return db.getTripStops(input.tripId);
+        }),
+      add: protectedProcedure
+        .input(
+          z.object({
+            tripId: z.number().int().positive(),
+            name: z.string().trim().min(1).max(TRIP_STOP_NAME_MAX_LENGTH),
+            latitude: z.number().min(-90).max(90).nullish(),
+            longitude: z.number().min(-180).max(180).nullish(),
+            startDate: z.string().regex(ISO_DAY),
+            endDate: z.string().regex(ISO_DAY),
+          })
+        )
+        .mutation(async ({ ctx, input }) => {
+          const trip = await db.canAccessTrip(input.tripId, ctx.user.id);
+          if (!trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Aufenthalt nicht gefunden.",
+            });
+          }
+          if (input.endDate < input.startDate) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "Die Weiterreise liegt vor der Ankunft.",
+            });
+          }
+          const existing = await db.getTripStops(input.tripId);
+          if (existing.length >= MAX_TRIP_STOPS) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: `Höchstens ${MAX_TRIP_STOPS} Etappen pro Reise.`,
+            });
+          }
+          const id = await db.addTripStop({
+            tripId: input.tripId,
+            name: input.name.trim(),
+            latitude: input.latitude ?? null,
+            longitude: input.longitude ?? null,
+            startDate: input.startDate,
+            endDate: input.endDate,
+          });
+          return { id };
+        }),
+      update: protectedProcedure
+        .input(
+          z.object({
+            id: z.number().int().positive(),
+            name: z
+              .string()
+              .trim()
+              .min(1)
+              .max(TRIP_STOP_NAME_MAX_LENGTH)
+              .optional(),
+            latitude: z.number().min(-90).max(90).nullish(),
+            longitude: z.number().min(-180).max(180).nullish(),
+            startDate: z.string().regex(ISO_DAY).optional(),
+            endDate: z.string().regex(ISO_DAY).optional(),
+          })
+        )
+        .mutation(async ({ ctx, input }) => {
+          const stop = await db.getTripStopById(input.id);
+          const trip = stop
+            ? await db.canAccessTrip(stop.tripId, ctx.user.id)
+            : undefined;
+          if (!stop || !trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Etappe nicht gefunden.",
+            });
+          }
+          const startDate = input.startDate ?? stop.startDate;
+          const endDate = input.endDate ?? stop.endDate;
+          if (endDate < startDate) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "Die Weiterreise liegt vor der Ankunft.",
+            });
+          }
+          await db.updateTripStop(input.id, {
+            ...(input.name !== undefined ? { name: input.name.trim() } : {}),
+            ...(input.latitude !== undefined
+              ? { latitude: input.latitude ?? null }
+              : {}),
+            ...(input.longitude !== undefined
+              ? { longitude: input.longitude ?? null }
+              : {}),
+            ...(input.startDate !== undefined
+              ? { startDate: input.startDate }
+              : {}),
+            ...(input.endDate !== undefined ? { endDate: input.endDate } : {}),
+          });
+          return { success: true } as const;
+        }),
+      remove: protectedProcedure
+        .input(z.object({ id: z.number().int().positive() }))
+        .mutation(async ({ ctx, input }) => {
+          const stop = await db.getTripStopById(input.id);
+          const trip = stop
+            ? await db.canAccessTrip(stop.tripId, ctx.user.id)
+            : undefined;
+          if (!stop || !trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Etappe nicht gefunden.",
+            });
+          }
+          await db.deleteTripStop(input.id);
           return { success: true } as const;
         }),
     }),
@@ -1099,6 +1243,11 @@ export const tripsRouters = {
             });
           }
           await db.deleteTripExpense(input.id);
+          // Der Beleg (#540) hängt an der Ausgabe – ohne Zeile keine Datei.
+          if (expense.photoFileName) {
+            const { expensePhotoStorage } = await import("../photoStorage");
+            await expensePhotoStorage.deleteFiles([expense.photoFileName]);
+          }
           await noteTripChange(
             expense.tripId,
             ctx.user.id,
@@ -1106,6 +1255,31 @@ export const tripsRouters = {
             "remove",
             expense.description || expense.category
           );
+          return { success: true } as const;
+        }),
+      /**
+       * Beleg-Foto (#540) einer Ausgabe entfernen, ohne die Ausgabe zu
+       * löschen – der Upload läuft als Raw-POST über
+       * /api/trips/expenses/:id/photo (server/_core/index.ts).
+       */
+      removePhoto: protectedProcedure
+        .input(z.object({ id: z.number().int().positive() }))
+        .mutation(async ({ ctx, input }) => {
+          const expense = await db.getTripExpenseById(input.id);
+          const trip = expense
+            ? await db.canAccessTrip(expense.tripId, ctx.user.id)
+            : undefined;
+          if (!expense || !trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Ausgabe nicht gefunden.",
+            });
+          }
+          if (expense.photoFileName) {
+            await db.updateTripExpense(input.id, { photoFileName: null });
+            const { expensePhotoStorage } = await import("../photoStorage");
+            await expensePhotoStorage.deleteFiles([expense.photoFileName]);
+          }
           return { success: true } as const;
         }),
     }),

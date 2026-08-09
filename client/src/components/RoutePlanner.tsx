@@ -53,6 +53,14 @@ import {
   routeLengthM,
 } from "@shared/routing";
 import { fetchRoute } from "@/lib/routing";
+import RouteOfflinePack from "@/components/RouteOfflinePack";
+import {
+  deleteTiles,
+  forgetOfflineRoutePack,
+  loadOfflineRoutePacks,
+  tilesForCorridor,
+  zoomLevelsUpTo,
+} from "@/lib/mapTiles";
 import {
   MAX_ROUTE_WAYPOINTS,
   ROUTE_NAME_MAX_LENGTH,
@@ -339,6 +347,26 @@ export default function RoutePlanner({
     );
   };
 
+  /**
+   * Route löschen – ein dazu geladenes Offline-Paket (#552) räumt gleich
+   * mit ab, sonst lägen die Kacheln herrenlos im Cache.
+   */
+  const removeRoute = (route: { id: number; waypointsJson: string }) => {
+    const pack = loadOfflineRoutePacks()[String(route.id)];
+    if (pack) {
+      const points = parseWaypoints(route.waypointsJson).map(p => ({
+        lat: p.lat,
+        lon: p.lon,
+      }));
+      void deleteTiles(
+        tilesForCorridor(points, pack.radiusKm, zoomLevelsUpTo(pack.maxZoom)),
+        pack.layer
+      ).catch(() => {});
+      forgetOfflineRoutePack(route.id);
+    }
+    removeMutation.mutate({ id: route.id });
+  };
+
   const routes = routesQuery.data ?? [];
 
   return (
@@ -522,38 +550,45 @@ export default function RoutePlanner({
             {routes.map(route => (
               <li
                 key={route.id}
-                className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2"
+                className="rounded-lg border border-border bg-background px-3 py-2"
               >
-                <button
-                  type="button"
-                  className="flex-1 text-left"
-                  onClick={() => edit(route)}
-                >
-                  <span className="text-sm font-medium">{route.name}</span>
-                  <span className="mt-0.5 block text-xs tabular-nums text-muted-foreground">
-                    {rp.summary(
-                      formatDistance(route.distanceM, lang),
-                      route.ascentM,
-                      formatMinutes(route.minutes)
-                    )}
-                  </span>
-                </button>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-8 w-8"
-                  onClick={() => removeMutation.mutate({ id: route.id })}
-                  disabled={removeMutation.isPending}
-                  aria-label={rp.removeAria(route.name)}
-                >
-                  <Trash2
-                    className="h-4 w-4 text-destructive"
-                    aria-hidden="true"
-                  />
-                </Button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    className="flex-1 text-left"
+                    onClick={() => edit(route)}
+                  >
+                    <span className="text-sm font-medium">{route.name}</span>
+                    <span className="mt-0.5 block text-xs tabular-nums text-muted-foreground">
+                      {rp.summary(
+                        formatDistance(route.distanceM, lang),
+                        route.ascentM,
+                        formatMinutes(route.minutes)
+                      )}
+                    </span>
+                  </button>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-8 w-8"
+                    onClick={() => removeRoute(route)}
+                    disabled={removeMutation.isPending}
+                    aria-label={rp.removeAria(route.name)}
+                  >
+                    <Trash2
+                      className="h-4 w-4 text-destructive"
+                      aria-hidden="true"
+                    />
+                  </Button>
+                </div>
+                {/* Offline-Paket entlang der Route (#552) */}
+                <RouteOfflinePack route={route} />
               </li>
             ))}
           </ul>
+          <p className="mt-1.5 text-xs text-muted-foreground">
+            {rp.offlineHint}
+          </p>
         </div>
       )}
     </section>

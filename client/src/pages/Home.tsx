@@ -14,9 +14,7 @@ import {
   EyeOff,
   GripVertical,
   History as HistoryIcon,
-  Search,
   Wind,
-  X,
 } from "lucide-react";
 import { groupLabels, groups, modules } from "@/data/modules";
 import {
@@ -90,17 +88,6 @@ import {
 } from "@/lib/homeWidgets";
 import { usePointerDrag } from "@/lib/usePointerDrag";
 import { useSyncedSetting } from "@/lib/useSyncedSetting";
-import {
-  ensureKnowledgeIndex,
-  isKnowledgeIndexReady,
-  searchKnowledge,
-  searchOwnContent,
-} from "@/lib/globalSearch";
-import {
-  TARGETS_KEY,
-  sanitizeTargets,
-  type TentFinderTarget,
-} from "@/lib/tentFinderTargets";
 import {
   anniversaryTrips,
   currentTripDay,
@@ -446,6 +433,11 @@ export default function Home() {
               )}
             </p>
           )}
+          {/* Die Suche gehört ins Hero (Nutzerwunsch 09.08.2026): Sie ist
+              der schnellste Einstieg und stand bisher erst unter den
+              Widgets. Die Treffer-Liste klappt im Hero auf – der Abschnitt
+              wächst mit, nichts wird abgeschnitten. */}
+          <KnowledgeSearch className="mt-6 max-w-lg" />
         </div>
       </section>
 
@@ -473,7 +465,6 @@ export default function Home() {
             <TickBiteHint />
           </>
         )}
-        <KnowledgeSearch />
         {isWidgetVisible(hiddenWidgets, "recent") && (
           <RecentModules hidden={hidden} />
         )}
