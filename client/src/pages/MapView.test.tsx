@@ -105,4 +105,35 @@ describe("Karten-Seite", () => {
     await screen.findByText("Seealpsee");
     await expectNoA11yViolations(container);
   });
+
+  /**
+   * Farb-Legende mit Filter (#602, UI-Test aus #644): Ab zwei benutzten
+   * Pin-Farben erscheint die Legende, und ein Farb-Chip filtert die
+   * Liste. Der Befördern-Knopf (#600) steckt im Karten-Popup und ist in
+   * jsdom nicht erreichbar – die Karten-Maschine läuft dort nicht.
+   */
+  it("filtert die Merkorte-Liste über die Farb-Legende (#602)", async () => {
+    savedPlaces.length = 0;
+    savedPlaces.push(PLACE, {
+      ...PLACE,
+      id: 2,
+      name: "Gotthardpass",
+      color: "blue",
+    });
+    const { container } = await renderMapView();
+    await screen.findByText("Seealpsee");
+    const legend = screen.getByRole("group", {
+      name: /Filter saved places by colour/,
+    });
+    const { within } = await import("@testing-library/react");
+    const blueChip = within(legend)
+      .getAllByRole("button")
+      .find(button => /Blue/i.test(button.textContent ?? ""));
+    expect(blueChip).toBeDefined();
+    await userEvent.click(blueChip!);
+    // Nur der blaue Merkort bleibt in der Liste stehen
+    expect(screen.getByText("Gotthardpass")).toBeInTheDocument();
+    expect(screen.queryByText("Seealpsee")).toBeNull();
+    await expectNoA11yViolations(container);
+  });
 });

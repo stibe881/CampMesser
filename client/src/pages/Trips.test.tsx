@@ -163,4 +163,49 @@ describe("Meine Reisen", () => {
     await screen.findAllByText(/Lugano/);
     await expectNoA11yViolations(container);
   });
+
+  /**
+   * Jahr-Filter (#617, UI-Test aus #644): Ab zwei Jahren mit vergangenen
+   * Reisen erscheinen die Jahres-Chips; ein Jahr wählen blendet die
+   * Reisen der anderen Jahre aus.
+   */
+  it("filtert vergangene Reisen nach Jahr (#617)", async () => {
+    trips.length = 0;
+    trips.push(
+      {
+        ...PLANNED,
+        id: 10,
+        title: "Elba",
+        location: "Elba",
+        startDate: "2025-07-01",
+        endDate: "2025-07-08",
+      },
+      {
+        ...PLANNED,
+        id: 11,
+        title: "Ardèche",
+        location: "Ardèche",
+        startDate: "2024-07-01",
+        endDate: "2024-07-08",
+      }
+    );
+    const user = (await import("@testing-library/user-event")).default;
+    const { container } = await renderTrips();
+    const group = await screen.findByRole("group", {
+      name: /Filter trips by year/,
+    });
+    expect(group).toBeInTheDocument();
+    // Vorher stehen beide Reisen in der Liste (Links auf /tagebuch/<id>)
+    expect(
+      screen.getAllByRole("link", { name: /Elba/ }).length
+    ).toBeGreaterThan(0);
+    await user.click(screen.getByRole("button", { name: "2024" }));
+    // Nur 2024 bleibt: Ardèche ja, Elba (2025) verschwindet aus der
+    // Liste – der Name darf anderswo (Statistik) weiterhin auftauchen.
+    expect(
+      screen.getAllByRole("link", { name: /Ardèche/ }).length
+    ).toBeGreaterThan(0);
+    expect(screen.queryAllByRole("link", { name: /Elba/ })).toHaveLength(0);
+    await expectNoA11yViolations(container);
+  });
 });

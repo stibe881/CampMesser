@@ -4,6 +4,9 @@ import userEvent from "@testing-library/user-event";
 import { renderWithI18n } from "@/test/render";
 import { expectNoA11yViolations } from "@/test/a11y";
 import TripTemplatePicker from "@/components/TripTemplatePicker";
+// Seit den eigenen Vorlagen (#628) fragt der Dialog vor dem Löschen nach –
+// der Bestätigungs-Dialog braucht seinen Provider wie in App.tsx.
+import { ConfirmProvider } from "@/components/ConfirmDialog";
 
 /**
  * Reise-Vorlagen (#284/#463/#485, UI-Test #484).
@@ -18,7 +21,11 @@ import TripTemplatePicker from "@/components/TripTemplatePicker";
 const SPOTS = [{ id: 1, name: "Camping Waldheim" }];
 
 async function openDialog() {
-  const result = renderWithI18n(<TripTemplatePicker spots={SPOTS} />);
+  const result = renderWithI18n(
+    <ConfirmProvider>
+      <TripTemplatePicker spots={SPOTS} />
+    </ConfirmProvider>
+  );
   await userEvent.click(
     await screen.findByRole("button", { name: /From template/ })
   );
@@ -45,6 +52,20 @@ describe("Reise-Vorlagen", () => {
     // Städtereise schläft nicht auf dem Platz → nur der Freitext-Ort
     expect(screen.queryByLabelText("Pitch")).toBeNull();
     expect(screen.getByLabelText("Place")).toBeVisible();
+  });
+
+  /**
+   * Rundreise-Vorlage (#619, UI-Test aus #644): Die Vorlage «Road trip»
+   * steht im Dialog, nennt im Beschrieb die vorbereiteten Etappen und
+   * lässt sich wählen. Die Etappen selbst legt der Server an
+   * (trips.createFromTemplate) – das prüfen die Server-Tests.
+   */
+  it("bietet die Rundreise-Vorlage mit Etappen-Hinweis an (#619)", async () => {
+    await openDialog();
+    const tile = screen.getByRole("button", { name: /Road trip/ });
+    expect(tile).toHaveTextContent(/stages are set up/);
+    await userEvent.click(tile);
+    expect(tile).toHaveAttribute("aria-pressed", "true");
   });
 
   it("ist barrierefrei – mit offenem Dialog", async () => {
