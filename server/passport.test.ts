@@ -10,6 +10,7 @@ import {
   passportSummary,
   stampLook,
   tripCountForTraveller,
+  tripsForFamily,
   tripsForTraveller,
   wasAlong,
   absenceLookup,
@@ -219,6 +220,23 @@ describe("Kinder-Reisepass", () => {
       const summary = passportSummary(eigene);
       expect(summary.places).toBe(2);
       expect(summary.stamps.map(s => s.place)).toEqual(["Sarnen", "Chur"]);
+    });
+
+    it("stempelt den Familien-Pass nur bei voller Familie", () => {
+      // Kind 7 fehlte auf Reise 1: kein Familien-Stempel für Reise 1.
+      // Kind 9 zählt nicht zur Familie – sein Fehlen (Reise 2) ist egal.
+      const absences = [
+        { childId: 7, tripId: 1 },
+        { childId: 9, tripId: 2 },
+      ];
+      const familie = tripsForFamily(reisen, absences, [7, 8]);
+      expect(familie.map(r => r.id)).toEqual([2, 3]);
+    });
+
+    it("zählt ohne Familien-Personen alles", () => {
+      // Wer keine Personen angelegt hat, führt einfach ein Reisebuch
+      const alles = tripsForFamily(reisen, [{ childId: 7, tripId: 1 }], []);
+      expect(alles).toHaveLength(3);
     });
 
     it("lässt die Eingabeliste unangetastet", () => {

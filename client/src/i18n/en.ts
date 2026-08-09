@@ -2423,6 +2423,10 @@ export const en: Translation = {
       "Shared with ReiseKompass – your compass for holidays, camping and day trips.",
   },
   trips: {
+    whoAlongTitle: "Who’s along?",
+    whoAlongHint:
+      "Tapped means along. The passport stamps come from this – the family stamp only when everyone is along.",
+    whoAlongPersonAria: (name: string) => `${name} is along on this trip`,
     detailSubtitle: "A single stay in detail",
     backToList: "All stays",
     openDetailAria: (name: string) => `Open the stay ${name}`,
@@ -4277,6 +4281,19 @@ export const en: Translation = {
       `Official warnings: ${issuer}, via ${source}.`,
   },
   passport: {
+    personSection: "Person settings",
+    familyMemberToggle: (name: string) =>
+      `${name} counts towards the family passport`,
+    familyMemberHint:
+      "Unticked, this person doesn’t block the family stamp when absent – they keep their own passport.",
+    familyStrictHint:
+      "The family passport only stamps trips where everyone who counts as family was along. Who was along is set when editing the trip (“Who’s along?”).",
+    editAtTripHint:
+      "Who was along is set when editing the trip – section “Who’s along?”.",
+    familyEmpty:
+      "No trip yet with the whole family along – the family passport only stamps those. The individual passports still count.",
+    personEmpty: (person: string) =>
+      `${person} hasn’t been on any trip yet. Who was along is set when editing the trip.`,
     title: "Travel passport",
     intro:
       "A stamp for every site you have visited. The stamps come from your trips – recorded is recorded.",
@@ -4300,18 +4317,8 @@ export const en: Translation = {
     addPersonSave: "Create",
     addPersonHint:
       "These are the same people as in family mode – anyone already there shows up here too.",
-    whoWasThere: "Who came along?",
-    whoWasThereHint:
-      "Unchanged, every trip counts for everyone. Untick where someone was not there – for instance before a child was born.",
-    tripUnnamed: "No place name",
-    presenceAria: (place: string, person: string) =>
-      `${person} came along to “${place}”`,
-    noTrips: "No trips recorded yet.",
-    personEmpty: (person: string) =>
-      `${person} has not been on a trip yet. Tick the boxes below.`,
     noPlaceEmpty:
       "The trips count, but they have no place name – a stamp needs a place. Add a campsite or location to the trip and the stamp will appear.",
-    tripNoStamp: "No stamp – the trip has no campsite or location.",
     print: "Print the passport",
     note: "The stamps come from the trips in your journal; nothing is recorded twice. Each site gets the same shape, colour and tilt from its own name – identical on every device and after every reload.",
   },

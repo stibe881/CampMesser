@@ -187,8 +187,30 @@ export function wasAlong(
 }
 
 /**
- * Die Reisen einer Person. `childId === null` steht für den Familienpass:
- * dort zählt alles, ohne Abzug.
+ * Die Reisen des Familien-Passes: nur die, bei denen die GANZE Familie
+ * dabei war (Nutzer-Entscheid 09.08.2026 – vorher zählte alles).
+ *
+ * `familyChildIds` sind die Personen mit gesetztem `familyMember` –
+ * wer nicht zur Familie zählt (das Göttikind), kann fehlen, ohne den
+ * Familien-Stempel zu verhindern. Ohne Familien-Personen zählt alles:
+ * Wer keine Personen angelegt hat, führt einfach ein Reisebuch.
+ */
+export function tripsForFamily(
+  trips: readonly PassportTrip[],
+  absences: readonly PassportAbsence[],
+  familyChildIds: readonly number[]
+): PassportTrip[] {
+  if (familyChildIds.length === 0) return trips.slice();
+  const lookup = absenceLookup(absences);
+  return trips.filter(trip =>
+    familyChildIds.every(id => wasAlong(lookup, id, trip.id))
+  );
+}
+
+/**
+ * Die Reisen einer Person. `childId === null` steht für den Familienpass
+ * OHNE Streng-Regel – die Seite nutzt dafür `tripsForFamily`; der
+ * null-Zweig bleibt für Aufrufer, die schlicht alles wollen.
  */
 export function tripsForTraveller(
   trips: readonly PassportTrip[],

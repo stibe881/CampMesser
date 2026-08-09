@@ -1317,6 +1317,14 @@ export const familyChildren = mysqlTable(
      * Standard `true`, damit bestehende Profile bleiben, wie sie sind.
      */
     earnsPoints: boolean("earnsPoints").notNull().default(true),
+    /**
+     * Zählt diese Person zum Familien-Pass? Der Familien-Stempel gibt es
+     * nur, wenn ALLE Familien-Personen dabei waren – wer hier auf `false`
+     * steht (z. B. das Göttikind, das manchmal mitkommt), zählt beim
+     * Familien-Pass nicht mit, behält aber seinen eigenen Pass.
+     * Standard `true`, damit bestehende Profile Familie bleiben.
+     */
+    familyMember: boolean("familyMember").notNull().default(true),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
   table => [index("familyChildren_userId").on(table.userId)]

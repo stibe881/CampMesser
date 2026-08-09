@@ -688,6 +688,32 @@ export async function getPassportAbsences(userId: number) {
  * Zeile erzeugt – deshalb `ignore()` statt einer Vorab-Prüfung, die sich
  * zwei Geräte gegenseitig wegschnappen könnten.
  */
+/**
+ * Abwesenheiten EINER Reise komplett ersetzen – für das Reise-Formular,
+ * das «Wer ist dabei?» als Ganzes speichert. Erst leeren, dann die
+ * fehlenden Personen anlegen; `ignore()` schützt vor dem Doppelklick.
+ */
+export async function setPassportAbsencesForTrip(
+  userId: number,
+  tripId: number,
+  absentChildIds: readonly number[]
+) {
+  const db = requireDb(await getDb());
+  await db
+    .delete(passportAbsences)
+    .where(
+      and(
+        eq(passportAbsences.userId, userId),
+        eq(passportAbsences.tripId, tripId)
+      )
+    );
+  if (absentChildIds.length > 0) {
+    await db
+      .insert(passportAbsences)
+      .ignore()
+      .values(absentChildIds.map(childId => ({ userId, childId, tripId })));
+  }
+}
 export async function setPassportPresence(
   userId: number,
   childId: number,

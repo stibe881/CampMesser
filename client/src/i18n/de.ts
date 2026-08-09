@@ -2506,6 +2506,10 @@ export const de = {
       "Geteilt mit ReiseKompass – deinem Kompass für Ferien, Camping und Ausflüge.",
   },
   trips: {
+    whoAlongTitle: "Wer ist dabei?",
+    whoAlongHint:
+      "Angetippt heisst dabei. Daraus entstehen die Stempel im Reisepass – der Familien-Stempel nur, wenn alle dabei sind.",
+    whoAlongPersonAria: (name: string) => `${name} ist bei dieser Reise dabei`,
     detailSubtitle: "Ein Aufenthalt im Detail",
     backToList: "Alle Aufenthalte",
     openDetailAria: (name: string) => `Aufenthalt ${name} öffnen`,
@@ -4405,6 +4409,18 @@ export const de = {
       `Amtliche Warnungen: ${issuer}, bezogen über ${source}.`,
   },
   passport: {
+    personSection: "Einstellungen zur Person",
+    familyMemberToggle: (name: string) => `${name} zählt zum Familien-Pass`,
+    familyMemberHint:
+      "Ohne Haken verhindert diese Person den Familien-Stempel nicht, wenn sie fehlt – ihren eigenen Pass behält sie.",
+    familyStrictHint:
+      "Der Familien-Pass stempelt nur Reisen, bei denen alle dabei waren, die zur Familie zählen. Wer dabei war, legst du beim Bearbeiten der Reise fest («Wer ist dabei?»).",
+    editAtTripHint:
+      "Wer bei einer Reise dabei war, legst du beim Bearbeiten der Reise fest – Abschnitt «Wer ist dabei?».",
+    familyEmpty:
+      "Noch keine Reise, bei der die ganze Familie dabei war – der Familien-Pass stempelt nur solche. Die Einzel-Pässe der Personen zählen trotzdem.",
+    personEmpty: (person: string) =>
+      `${person} war noch auf keiner Reise dabei. Wer dabei war, legst du beim Bearbeiten der Reise fest.`,
     title: "Reisepass",
     intro:
       "Für jeden besuchten Platz ein Stempel. Die Stempel kommen aus deinen Reisen – eingetragen ist eingetragen.",
@@ -4428,18 +4444,8 @@ export const de = {
     addPersonSave: "Anlegen",
     addPersonHint:
       "Die Personen sind dieselben wie im Familien-Modus – wer dort schon angelegt ist, steht hier auch.",
-    whoWasThere: "Wer war dabei?",
-    whoWasThereHint:
-      "Ohne Änderung zählt jede Reise für alle. Nimm den Haken weg, wo jemand nicht dabei war – zum Beispiel bevor ein Kind auf der Welt war.",
-    tripUnnamed: "Ohne Platzname",
-    presenceAria: (place: string, person: string) =>
-      `${person} war bei «${place}» dabei`,
-    noTrips: "Noch keine Reisen eingetragen.",
-    personEmpty: (person: string) =>
-      `${person} war noch auf keiner Reise dabei. Setz unten die Haken.`,
     noPlaceEmpty:
       "Die Reisen zählen, aber ihnen fehlt der Platzname – ein Stempel braucht einen Ort. Trag bei der Reise einen Zeltplatz oder Ort ein, dann erscheint der Stempel.",
-    tripNoStamp: "Gibt keinen Stempel – der Reise fehlt Platz oder Ort.",
     print: "Pass drucken",
     note: "Die Stempel entstehen aus den Reisen im Tagebuch; nichts wird doppelt erfasst. Jeder Platz bekommt aus seinem Namen dieselbe Form, Farbe und Schräglage – auf jedem Gerät und nach jedem Neuladen gleich.",
   },

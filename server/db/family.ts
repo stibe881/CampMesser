@@ -70,6 +70,21 @@ export async function setFamilyChildEarnsPoints(
     .set({ earnsPoints })
     .where(and(eq(familyChildren.id, id), eq(familyChildren.userId, userId)));
 }
+/**
+ * Familien-Schalter einer Person setzen: Wer nicht zur Familie zählt,
+ * verhindert den Familien-Stempel nicht, wenn er fehlt.
+ */
+export async function setFamilyChildFamilyMember(
+  id: number,
+  userId: number,
+  familyMember: boolean
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(familyChildren)
+    .set({ familyMember })
+    .where(and(eq(familyChildren.id, id), eq(familyChildren.userId, userId)));
+}
 export async function renameFamilyChild(
   id: number,
   userId: number,

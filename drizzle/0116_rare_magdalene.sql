@@ -1,0 +1,1 @@
+ALTER TABLE `familyChildren` ADD `familyMember` boolean DEFAULT true NOT NULL;

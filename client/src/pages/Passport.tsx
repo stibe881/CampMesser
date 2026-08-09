@@ -13,11 +13,12 @@
  * Abzeichen wieder. Zwei Personenlisten in derselben App wären eine zu
  * viel.
  *
- * WER WAR DABEI: Ohne Eintrag zählt jede Reise für alle – eine Familie
- * fährt zusammen weg. Wer nicht dabei war, wird abgehakt; gespeichert
- * wird also die Abwesenheit (Begründung in shared/passport.ts). Das
- * Verzeichnis dafür steht am Fuss der Seite und ist nur sichtbar, wenn
- * eine Person gewählt ist.
+ * WER WAR DABEI wird bei der REISE erfasst (Reise-Formular, Abschnitt
+ * «Wer ist dabei?») – der Pass leitet alles nur noch ab; gespeichert
+ * wird die Abwesenheit (Begründung in shared/passport.ts). Der
+ * FAMILIEN-Pass ist streng (Nutzer-Entscheid 09.08.2026): Er stempelt
+ * nur Reisen, bei denen die ganze Familie dabei war – und wer zur
+ * Familie zählt, steht als Schalter bei der jeweiligen Person.
  *
  * Der Pass ist zum Herzeigen gedacht, deshalb ist er auch druckbar.
  */
@@ -35,10 +36,9 @@ import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
 import {
-  absenceLookup,
   passportSummary,
+  tripsForFamily,
   tripsForTraveller,
-  wasAlong,
   type PassportStamp,
   type PassportTrip,
 } from "@shared/passport";
@@ -145,8 +145,8 @@ export default function PassportPage() {
       void utils.family.children.list.invalidate();
     },
   });
-  const setPresence = trpc.family.passport.setPresence.useMutation({
-    onSuccess: () => void utils.family.passport.absences.invalidate(),
+  const setFamilyMember = trpc.family.children.setFamilyMember.useMutation({
+    onSuccess: () => void utils.family.children.list.invalidate(),
   });
 
   const people = peopleQuery.data ?? [];
@@ -179,16 +179,23 @@ export default function PassportPage() {
     [tripsQuery.data]
   );
 
+  /** Ids der Personen, die zum Familien-Pass zählen. */
+  const familyIds = useMemo(
+    () => people.filter(p => p.familyMember).map(p => p.id),
+    [people]
+  );
   const travellerTrips = useMemo(
-    () => tripsForTraveller(trips, absences, personId),
-    [trips, absences, personId]
+    () =>
+      personId === null
+        ? tripsForFamily(trips, absences, familyIds)
+        : tripsForTraveller(trips, absences, personId),
+    [trips, absences, personId, familyIds]
   );
   const summary = useMemo(
     () => passportSummary(travellerTrips),
     [travellerTrips]
   );
 
-  const lookup = useMemo(() => absenceLookup(absences), [absences]);
   const person = people.find(p => p.id === personId) ?? null;
   const personName = person ? person.name : pp.family;
 
@@ -326,7 +333,9 @@ export default function PassportPage() {
             ? pp.empty
             : person && travellerTrips.length === 0
               ? pp.personEmpty(person.name)
-              : pp.noPlaceEmpty}
+              : personId === null && travellerTrips.length === 0
+                ? pp.familyEmpty
+                : pp.noPlaceEmpty}
         </p>
       ) : (
         <ul className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -362,55 +371,36 @@ export default function PassportPage() {
         </Button>
       )}
 
-      {/* «Wer war dabei» – nur für eine Person, beim Familienpass sinnlos */}
+      {/* Wer dabei war, steht an der REISE (Formular-Abschnitt «Wer ist
+          dabei?») – hier gibt es nur noch den Familien-Schalter der
+          gewählten Person und den Wegweiser dorthin. */}
       {person && (
-        <section className="mt-8 print:hidden" aria-label={pp.whoWasThere}>
-          <h2 className="font-serif text-lg font-semibold">{pp.whoWasThere}</h2>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {pp.whoWasThereHint}
-          </p>
-          {trips.length === 0 ? (
-            <p className="mt-3 text-sm text-muted-foreground">{pp.noTrips}</p>
-          ) : (
-            <ul className="mt-3 space-y-1.5">
-              {trips.map(trip => {
-                const along = wasAlong(lookup, person.id, trip.id);
-                const place = trip.placeName?.trim() || pp.tripUnnamed;
-                return (
-                  <li key={trip.id}>
-                    <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-border/70 bg-background px-3 py-2 text-sm">
-                      <input
-                        type="checkbox"
-                        checked={along}
-                        onChange={() =>
-                          setPresence.mutate({
-                            childId: person.id,
-                            tripId: trip.id,
-                            present: !along,
-                          })
-                        }
-                        className="h-4 w-4 shrink-0 accent-primary"
-                        aria-label={pp.presenceAria(place, person.name)}
-                      />
-                      <span className="min-w-0 flex-1 truncate">
-                        {place}
-                        {!trip.placeName?.trim() && (
-                          <span className="block truncate text-xs text-muted-foreground">
-                            {pp.tripNoStamp}
-                          </span>
-                        )}
-                      </span>
-                      <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
-                        {fmtPlain(new Date(trip.startDate), lang)}
-                      </span>
-                    </label>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
+        <section className="mt-8 print:hidden" aria-label={pp.personSection}>
+          <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-border/70 bg-background px-3 py-2 text-sm">
+            <input
+              type="checkbox"
+              checked={person.familyMember}
+              disabled={setFamilyMember.isPending}
+              onChange={() =>
+                setFamilyMember.mutate({
+                  id: person.id,
+                  familyMember: !person.familyMember,
+                })
+              }
+              className="h-4 w-4 shrink-0 accent-primary"
+            />
+            <span className="min-w-0 flex-1">
+              {pp.familyMemberToggle(person.name)}
+              <span className="block text-xs text-muted-foreground">
+                {pp.familyMemberHint}
+              </span>
+            </span>
+          </label>
         </section>
       )}
+      <p className="mt-4 text-xs text-muted-foreground print:hidden">
+        {personId === null ? pp.familyStrictHint : pp.editAtTripHint}
+      </p>
 
       <p className="mt-6 text-xs text-muted-foreground print:hidden">
         {pp.note}

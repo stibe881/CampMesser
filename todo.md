@@ -1,5 +1,10 @@
 # CampMesser – Projekt TODO
 
+## Nachbesserungen (09.08.2026)
+
+- [x] Reisepass-Fix: `trips.list` lieferte für eigene Reisen keinen Platznamen (spotName fest null) – Stempel blieben aus, obwohl ein Zeltplatz verknüpft war. getTripLogs joint den Namen jetzt mit. Gemergt (main `abcff98`).
+- [x] Reisepass-Umbau (Nutzer-Entscheid): «Wer ist dabei?» wird im Reise-Formular erfasst (Personen-Chips, gespeichert als Abwesenheit – bestehende Haken bleiben gültig). Familien-Pass NEU streng: Stempel nur, wenn alle Familien-Personen dabei; pro Person Schalter «zählt zum Familien-Pass» (familyChildren.familyMember, Migration 0116 – Server pendent). Häkchenliste im Pass entfernt, dafür Familien-Schalter + Wegweiser. Alte i18n-Schlüssel (whoWasThere u. a.) in allen vier Sprachen entfernt.
+
 ## Dreissig Vorschläge (08.08.2026, Runde 52)
 
 - [x] Heute-Ansicht bei Städtereise/Hotel mit Sehenswürdigkeiten (#486): Die OSM-Liste (#479) an den Reise-Koordinaten (#465) – vier neue Preset-Flags (sights/beaches/transit/excursions) in shared/tripKind.ts steuern, was die Heute-Ansicht pro Art zeigt.
