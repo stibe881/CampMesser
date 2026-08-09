@@ -1436,6 +1436,8 @@ export const en: Translation = {
     levelLink: "spirit level",
   },
   roadRules: {
+    plugTitle: "Sockets & adapters",
+    tippingTitle: "Tipping",
     title: "Tolls, vignettes & rules",
     subtitle:
       "Briefing for your destination: tolls, speeds when towing, mandatory kit, emergency number.",

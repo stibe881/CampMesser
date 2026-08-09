@@ -1486,6 +1486,8 @@ export const de = {
     levelLink: "Wasserwaage",
   },
   roadRules: {
+    plugTitle: "Steckdosen & Adapter",
+    tippingTitle: "Trinkgeld",
     title: "Maut, Vignette & Regeln",
     subtitle:
       "Kurzinfo fürs Zielland: Maut, Tempo mit Anhänger, Pflichtausrüstung, Notruf.",

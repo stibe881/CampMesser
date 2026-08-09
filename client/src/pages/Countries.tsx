@@ -9,6 +9,8 @@ import {
   Moon,
   ShieldCheck,
   Wine,
+  HandCoins,
+  Plug,
 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
@@ -199,6 +201,24 @@ export default function CountriesPage() {
       >
         <p className="text-sm leading-relaxed text-muted-foreground">
           {text(country.zones)}
+        </p>
+      </RuleCard>
+
+      <RuleCard
+        icon={<Plug className="h-4 w-4 text-primary" aria-hidden="true" />}
+        title={t.roadRules.plugTitle}
+      >
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          {text(country.plug)}
+        </p>
+      </RuleCard>
+
+      <RuleCard
+        icon={<HandCoins className="h-4 w-4 text-primary" aria-hidden="true" />}
+        title={t.roadRules.tippingTitle}
+      >
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          {text(country.tipping)}
         </p>
       </RuleCard>
 

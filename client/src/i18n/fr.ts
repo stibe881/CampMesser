@@ -1488,6 +1488,8 @@ export const fr: Translation = {
     levelLink: "niveau à bulle",
   },
   roadRules: {
+    plugTitle: "Prises & adaptateurs",
+    tippingTitle: "Pourboire",
     title: "Péage, vignette & règles",
     subtitle:
       "Fiche pour le pays de destination : péage, vitesse avec remorque, équipement obligatoire, urgences.",
