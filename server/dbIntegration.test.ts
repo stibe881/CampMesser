@@ -829,7 +829,7 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
     const trashNote = await authed.notes.add({
       title: "CI-Papierkorb",
       text: "Diese Notiz wird gelöscht und zurückgeholt.",
-      tags: "ci",
+      tags: ["ci"],
     });
     const trashListId = (
       await authed.packing.createList({
@@ -879,7 +879,9 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
     expect(restoredList?.name).toBe("CI-Papierkorb-Liste");
     // Die Kinder kommen mit
     expect(
-      (await authed.packing.items({ listId: trashListId })).map(i => i.name)
+      (await authed.packing.items({ listId: trashListId })).items.map(
+        i => i.name
+      )
     ).toEqual(["Zelthering"]);
     // Nach dem Wiederherstellen ist der Papierkorb wieder leer
     expect(await authed.trash.list()).toHaveLength(0);
