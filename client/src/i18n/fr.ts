@@ -6483,7 +6483,8 @@ export const fr: Translation = {
   whatsNew: {
     title: "Quoi de neuf",
     startIntro: "Voici ce qui a changé depuis ta dernière visite :",
-    allIntro: "Toutes les nouveautés en un coup d'œil :",
+    allIntro: "Les dernières nouveautés en un coup d'œil :",
+    showOlder: "Afficher les plus anciennes",
     confirm: "Compris",
   },
   shareTarget: {

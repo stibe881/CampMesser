@@ -6481,7 +6481,8 @@ export const de = {
   whatsNew: {
     title: "Was ist neu",
     startIntro: "Das hat sich seit deinem letzten Besuch getan:",
-    allIntro: "Alle bisherigen Neuerungen im Überblick:",
+    allIntro: "Die letzten Neuerungen im Überblick:",
+    showOlder: "Ältere anzeigen",
     confirm: "Verstanden",
   },
   shareTarget: {

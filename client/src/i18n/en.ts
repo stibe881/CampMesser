@@ -6308,7 +6308,8 @@ export const en: Translation = {
   whatsNew: {
     title: "What's new",
     startIntro: "Here is what has changed since your last visit:",
-    allIntro: "All improvements at a glance:",
+    allIntro: "The latest improvements at a glance:",
+    showOlder: "Show older",
     confirm: "Got it",
   },
   shareTarget: {
