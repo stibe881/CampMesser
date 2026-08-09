@@ -6891,6 +6891,10 @@ export const fr: Translation = {
     favoriteLabel: "Emplacement préféré",
     avgRatingLabel: "Note moyenne",
     hikeYearsTitle: "Bilan annuel des randonnées",
+    stageKmTitle: "Kilom\u00e8tres des circuits",
+    stageKmLine: (km: string) => `\u2248 ${km} km`,
+    stageKmHint:
+      "\u00c0 vol d\u2019oiseau entre les \u00e9tapes \u2013 les temps de route r\u00e9els figurent sur le voyage.",
     hikeYearsLink: "Vers les randonnées",
     hikeYearsLine: (tours: number, km: string, ascent: string) =>
       tours === 1

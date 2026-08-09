@@ -6883,6 +6883,10 @@ export const de = {
     favoriteLabel: "Lieblingsplatz",
     avgRatingLabel: "Ø Bewertung",
     hikeYearsTitle: "Wander-Jahresbilanz",
+    stageKmTitle: "Rundreise-Kilometer",
+    stageKmLine: (km: string) => `\u2248 ${km} km`,
+    stageKmHint:
+      "Luftlinie zwischen den Etappen \u2013 die echten Fahrzeiten stehen an der Reise.",
     hikeYearsLink: "Zu den Wanderungen",
     hikeYearsLine: (tours: number, km: string, ascent: string) =>
       tours === 1

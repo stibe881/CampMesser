@@ -6696,6 +6696,10 @@ export const en: Translation = {
     favoriteLabel: "Favourite pitch",
     avgRatingLabel: "Avg. rating",
     hikeYearsTitle: "Hiking year totals",
+    stageKmTitle: "Round-trip kilometres",
+    stageKmLine: (km: string) => `\u2248 ${km} km`,
+    stageKmHint:
+      "As the crow flies between stages \u2013 real driving times live on the trip.",
     hikeYearsLink: "To your hikes",
     hikeYearsLine: (tours: number, km: string, ascent: string) =>
       tours === 1

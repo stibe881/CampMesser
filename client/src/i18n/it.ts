@@ -6837,6 +6837,10 @@ export const it: Translation = {
     favoriteLabel: "Piazzola preferita",
     avgRatingLabel: "Valutazione media",
     hikeYearsTitle: "Bilancio annuale delle escursioni",
+    stageKmTitle: "Chilometri dei giri",
+    stageKmLine: (km: string) => `\u2248 ${km} km`,
+    stageKmHint:
+      "In linea d\u2019aria tra le tappe \u2013 i tempi di guida reali stanno sul viaggio.",
     hikeYearsLink: "Alle escursioni",
     hikeYearsLine: (tours: number, km: string, ascent: string) =>
       tours === 1

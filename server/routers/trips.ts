@@ -882,6 +882,9 @@ export const tripsRouters = {
           name: stop.name,
           startDate: stop.startDate,
           endDate: stop.endDate,
+          // Koordinaten für die Rundreise-Kilometer (#580)
+          latitude: stop.latitude,
+          longitude: stop.longitude,
         }));
       }),
       add: protectedProcedure
