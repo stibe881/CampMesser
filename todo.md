@@ -13,7 +13,7 @@
 - [x] #544 Abhakbare Checkboxen in Notizen («- [ ] Text» wird antippbar; parseNoteLines/toggleNoteCheckbox in shared/notes.ts, 4 Tests; Hinweis unterm Textfeld)
 - [ ] #545 Eigene Sätze in der Sprachhilfe
 - [x] #546 Schriftgrösse-Einstellung (3 Stufen im Profil unter dem Design; Wurzel-Schriftgrösse 100/112.5/125 %, nur pro Gerät gespeichert – lib/fontScale.ts, angewendet beim App-Start)
-- [ ] #547 Notfall-Koordinaten (LV95) im SOS
+- [x] #547 GRÖSSTENTEILS EXISTIERTE BEREITS: LV95-Anzeige im SOS und der Vorlese-Satz (#448) waren da. Neu hängt der Satz in der Schweiz die LV95-Koordinaten an («Schweizer Koordinaten: 2'600'123 / 1'199'456») – die Zahlen, mit denen die Einsatzzentrale arbeitet (formatLv95 + 3 Tests)
 - [ ] #548 Regenwetter-Karte in Heute (Museen/Hallenbäder)
 - [ ] #549 Menüplan-Autofüllen kennt das Wetter
 - [ ] #550 Bargeld & Kartenzahlung pro Land
