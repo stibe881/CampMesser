@@ -1303,14 +1303,34 @@ export const tripsRouters = {
           },
           { converted: [] }
         );
-        return expenseStats(
-          trips.map(trip => ({
-            id: trip.id,
-            startDate: trip.startDate,
-            endDate: trip.endDate,
+        // Reisekosten nach Land (#643): CHF-Summe je Reise mitliefern –
+        // das Land rät der Client mit derselben Logik wie die
+        // Länder-Statistik (#510/#606, shared/countryGuess).
+        const perTripMap = new Map<number, number>();
+        converted.forEach(expense => {
+          const amount =
+            Number.isFinite(expense.amountRappen) && expense.amountRappen > 0
+              ? Math.round(expense.amountRappen)
+              : 0;
+          perTripMap.set(
+            expense.tripId,
+            (perTripMap.get(expense.tripId) ?? 0) + amount
+          );
+        });
+        return {
+          ...expenseStats(
+            trips.map(trip => ({
+              id: trip.id,
+              startDate: trip.startDate,
+              endDate: trip.endDate,
+            })),
+            converted
+          ),
+          perTrip: Array.from(perTripMap, ([tripId, rappen]) => ({
+            tripId,
+            rappen,
           })),
-          converted
-        );
+        };
       }),
       /**
        * Nur die Summe je Reise (#345) – für das Zeichen am ZUGEKLAPPTEN

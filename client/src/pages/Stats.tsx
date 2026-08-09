@@ -34,6 +34,7 @@ import { estimateRoadDistanceM } from "@shared/routing";
 import { tripKindRows } from "@shared/tripKindStats";
 import { tripKindLabel } from "@shared/tripKind";
 import { visitedCountryRows } from "@/lib/tripCountries";
+import { findCountryRules, guessCountryCode } from "@/data/roadRules";
 import { inventoryValue } from "@shared/inventoryValue";
 import { estimatedTotalRappen, spotCostComparison } from "@shared/spotCosts";
 import { EXPENSE_CATEGORY_LABELS } from "@shared/expenses";
@@ -348,6 +349,53 @@ export default function Stats() {
     }
     return points;
   }, [trips, spots, allStopsQuery.data, today]);
+
+  /**
+   * Reisekosten nach Land (#643): CHF-Summe je Reise (vom Server) auf
+   * das geratene Reiseland verteilt – gleiche Länder-Logik wie die
+   * Länder-Statistik (#510/#606). Ohne erkanntes Land landet der Betrag
+   * ehrlich unter «ohne Angabe» statt im falschen Topf.
+   */
+  const countryCosts = useMemo(() => {
+    const perTrip = expenseStatsQuery.data?.perTrip ?? [];
+    if (perTrip.length === 0) {
+      return { rows: [] as { code: string; rappen: number }[], unassigned: 0 };
+    }
+    const spotNames = new Map(
+      (spotsQuery.data ?? []).map(spot => [spot.id, spot.name])
+    );
+    const stopNamesByTrip = new Map<number, string>();
+    for (const stop of allStopsQuery.data ?? []) {
+      stopNamesByTrip.set(
+        stop.tripId,
+        `${stopNamesByTrip.get(stop.tripId) ?? ""} ${stop.name}`
+      );
+    }
+    const byCode = new Map<string, number>();
+    let unassigned = 0;
+    for (const entry of perTrip) {
+      if (entry.rappen <= 0) continue;
+      const trip = trips.find(t => t.id === entry.tripId);
+      const spotName =
+        trip?.spotId != null ? (spotNames.get(trip.spotId) ?? "") : "";
+      const code = trip
+        ? guessCountryCode(
+            `${trip.title ?? ""} ${trip.location ?? ""} ${spotName} ${
+              stopNamesByTrip.get(trip.id) ?? ""
+            }`
+          )
+        : null;
+      if (!code) {
+        unassigned += entry.rappen;
+        continue;
+      }
+      byCode.set(code, (byCode.get(code) ?? 0) + entry.rappen);
+    }
+    const rows = Array.from(byCode, ([code, rappen]) => ({ code, rappen }))
+      .filter(row => findCountryRules(row.code) !== null)
+      .sort((a, b) => b.rappen - a.rappen);
+    return { rows, unassigned };
+  }, [expenseStatsQuery.data, trips, spotsQuery.data, allStopsQuery.data]);
 
   const countryStats = useMemo(() => {
     const spotNames = new Map(
@@ -1058,6 +1106,39 @@ export default function Stats() {
               <p className="mt-2 text-xs text-muted-foreground">
                 {ts.countriesUnassigned(countryStats.unassigned)}
               </p>
+            )}
+            {/* Reisekosten nach Land (#643): CHF-Summen aus der
+                Reisekasse, dem geratenen Reiseland zugeordnet. */}
+            {countryCosts.rows.length > 0 && (
+              <div className="mt-4 border-t border-border/60 pt-3">
+                <p className="mb-2 text-sm font-semibold">
+                  {ts.countryCostsTitle}
+                </p>
+                <ul className="space-y-2">
+                  {countryCosts.rows.map(row => {
+                    const country = findCountryRules(row.code);
+                    if (!country) return null;
+                    return (
+                      <li
+                        key={row.code}
+                        className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 border-b border-border/60 pb-2 last:border-0 last:pb-0"
+                      >
+                        <span className="text-sm">
+                          {country.flag} {pick(country.name, lang)}
+                        </span>
+                        <span className="text-sm tabular-nums text-muted-foreground">
+                          {fmtChf(row.rappen)}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+                {countryCosts.unassigned > 0 && (
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {ts.countryCostsUnassigned(fmtChf(countryCosts.unassigned))}
+                  </p>
+                )}
+              </div>
             )}
           </CardContent>
         </Card>

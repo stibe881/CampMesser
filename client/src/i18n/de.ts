@@ -7015,6 +7015,9 @@ export const de = {
       n === 1
         ? "1 Reise ohne erkennbares Land (Ort nennt keins)."
         : `${n} Reisen ohne erkennbares Land (Ort nennt keins).`,
+    countryCostsTitle: "Reisekosten nach Land",
+    countryCostsUnassigned: (amount: string) =>
+      `${amount} ohne erkennbares Land.`,
     inventoryValueTitle: "Inventar-Wert",
     inventoryLink: "Zum Inventar",
     inventoryValueHint: (n: number) =>

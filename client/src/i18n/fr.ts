@@ -7028,6 +7028,9 @@ export const fr: Translation = {
       n === 1
         ? "1 voyage sans pays reconnaissable (le lieu n'en nomme aucun)."
         : `${n} voyages sans pays reconnaissable (le lieu n'en nomme aucun).`,
+    countryCostsTitle: "Frais de voyage par pays",
+    countryCostsUnassigned: (amount: string) =>
+      `${amount} sans pays identifiable.`,
     inventoryValueTitle: "Valeur de l'inventaire",
     inventoryLink: "Vers l'inventaire",
     inventoryValueHint: (n: number) =>

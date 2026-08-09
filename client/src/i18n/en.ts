@@ -6818,6 +6818,9 @@ export const en: Translation = {
       n === 1
         ? "1 trip without a recognisable country (the place names none)."
         : `${n} trips without a recognisable country (the place names none).`,
+    countryCostsTitle: "Travel costs by country",
+    countryCostsUnassigned: (amount: string) =>
+      `${amount} without a recognisable country.`,
     inventoryValueTitle: "Inventory value",
     inventoryLink: "To the inventory",
     inventoryValueHint: (n: number) =>
