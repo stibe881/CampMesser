@@ -120,6 +120,11 @@ export default function KnowledgeSearch({
   const fuelLogQuery = trpc.fuelLog.list.useQuery(undefined, queryOpts);
   // Merkorte (#564): «Ossiacher See» tippen → Sprung auf die Karte
   const savedPlacesQuery = trpc.savedPlaces.list.useQuery(undefined, queryOpts);
+  // Etappen (#591): «Verona» tippen findet die Rundreise mit Halt dort
+  const tripStopsQuery = trpc.trips.stops.listAll.useQuery(
+    undefined,
+    queryOpts
+  );
   // Der geschriebene Inhalt der Reisen (#349): Journal, Pinnwand,
   // Gästebuch. Wie alle Listen hier erst beim Antippen des Suchfelds –
   // es sind alle Journal-Texte auf einmal, und wer nie sucht, holt nichts.
@@ -226,6 +231,17 @@ export default function KnowledgeSearch({
             documents: documentsQuery.data,
             fuelFills: fuelLogQuery.data,
             savedPlaces: savedPlacesQuery.data,
+            tripStops: tripStopsQuery.data?.map(stop => {
+              const trip = (searchTripsQuery.data ?? []).find(
+                tr => tr.id === stop.tripId
+              );
+              return {
+                id: stop.id,
+                tripId: stop.tripId,
+                name: stop.name,
+                tripName: trip ? tripDisplayName(trip, lang) : "",
+              };
+            }),
           },
           6,
           lang

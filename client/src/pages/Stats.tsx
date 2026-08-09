@@ -289,13 +289,30 @@ export default function Stats() {
   // Reisen nach Art (#467) – erst ab zwei Arten interessant: eine
   // Tabelle mit einer einzigen Zeile «Camping» sagt niemandem etwas.
   const kindRows = useMemo(() => tripKindRows(trips), [trips]);
-  /** Länder-Statistik (#510): Land aus Ort/Titel/Platzname geraten. */
+  /**
+   * Länder-Statistik (#510): Land aus Ort/Titel/Platzname geraten –
+   * seit #592 helfen auch die Etappen-Namen mit: Die Rundreise durch
+   * drei Länder zählt drei, mit den Nächten der jeweiligen Etappe.
+   */
+  const allStopsQuery = trpc.trips.stops.listAll.useQuery(undefined, {
+    enabled: isAuthenticated,
+    staleTime: 5 * 60_000,
+  });
   const countryStats = useMemo(() => {
     const spotNames = new Map(
       (spotsQuery.data ?? []).map(spot => [spot.id, spot.name])
     );
-    return visitedCountryRows(trips, spotNames);
-  }, [trips, spotsQuery.data]);
+    const stopsByTrip = new Map<
+      number,
+      { name: string; startDate: string; endDate: string }[]
+    >();
+    for (const stop of allStopsQuery.data ?? []) {
+      const list = stopsByTrip.get(stop.tripId) ?? [];
+      list.push(stop);
+      stopsByTrip.set(stop.tripId, list);
+    }
+    return visitedCountryRows(trips, spotNames, stopsByTrip);
+  }, [trips, spotsQuery.data, allStopsQuery.data]);
   /** Inventar-Gesamtwert (#511) aus den erfassten Kaufpreisen. */
   const inventoryWorth = useMemo(
     () => inventoryValue(inventoryQuery.data ?? []),
