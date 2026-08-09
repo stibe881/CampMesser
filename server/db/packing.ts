@@ -262,16 +262,25 @@ export async function getPackTemplateByToken(token: string) {
   // Abgelaufene Teil-Links verhalten sich wie unbekannte Tokens
   return row && !isShareExpired(row.shareExpiresAt) ? row : undefined;
 }
-/** Gewichts-Budget in Gramm setzen oder mit null entfernen (nur eigene Liste). */
+/**
+ * Gewichts-Budget in Gramm setzen oder mit null entfernen (nur eigene Liste).
+ * personGrams ist die Limite PRO PERSON (#518); undefined lässt sie unberührt.
+ */
 export async function setPackListWeightBudget(
   id: number,
   userId: number,
-  grams: number | null
+  grams: number | null,
+  personGrams?: number | null
 ) {
   const db = requireDb(await getDb());
   await db
     .update(packLists)
-    .set({ weightBudgetGrams: grams })
+    .set({
+      weightBudgetGrams: grams,
+      ...(personGrams !== undefined
+        ? { personWeightBudgetGrams: personGrams }
+        : {}),
+    })
     .where(and(eq(packLists.id, id), eq(packLists.userId, userId)));
 }
 /** Personen-Bereiche (JSON-Array von Namen) setzen; null entfernt sie. */

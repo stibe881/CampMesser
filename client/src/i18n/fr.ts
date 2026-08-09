@@ -690,6 +690,11 @@ export const fr: Translation = {
     budgetRemoved: "Budget de poids supprimé",
     budgetSaveFailed: "Le budget n'a pas pu être enregistré",
     budgetInvalid: "Indique un poids entre 0,1 et 500 kg",
+    personBudgetLabel: "Limite par personne (kg)",
+    personBudgetPlaceholder: "p. ex. 23",
+    personBudgetHint:
+      "Par exemple 23 kg de bagages en avion – la ligne de charge met en évidence les personnes au-dessus de la limite. Laisser vide pour aucune limite.",
+    personBudgetInfo: (limit: string) => `Limite : ${limit} par personne`,
     uncheckAllButton: "Décocher tout",
     uncheckAllConfirm: (n: number) =>
       n === 1
@@ -1004,6 +1009,7 @@ export const fr: Translation = {
     portalLink: "Aperçu officiel des cantons",
   },
   weather: {
+    tripPlaceSuggest: (name: string) => `Retenir le lieu du voyage « ${name} »`,
     mosquitoTitle: "Moustiques ce soir",
     mosquitoAria: "Indice moustiques pour la soirée",
     mosquitoBarAria: (score: number) => `Indice moustiques ${score} sur 100`,
@@ -1488,6 +1494,8 @@ export const fr: Translation = {
     levelLink: "niveau à bulle",
   },
   roadRules: {
+    plugTitle: "Prises & adaptateurs",
+    tippingTitle: "Pourboire",
     title: "Péage, vignette & règles",
     subtitle:
       "Fiche pour le pays de destination : péage, vitesse avec remorque, équipement obligatoire, urgences.",
@@ -1513,6 +1521,10 @@ export const fr: Translation = {
       `${country} : état au ${date}. Valeurs en km/h ; sans garantie.`,
   },
   sos: {
+    tripCountryTitle: (country: string) =>
+      `Urgences pour ton voyage : ${country}`,
+    tripCountryHint:
+      "Ton voyage en cours se trouve dans ce pays – ces numéros y sont valables.",
     title: "SOS & tableau de bord d'urgence",
     subtitle:
       "Ta position et tous les numéros d'urgence importants – au cas où.",
@@ -2501,6 +2513,17 @@ export const fr: Translation = {
       "Partagé avec ReiseKompass – ta boussole pour les vacances, le camping et les excursions.",
   },
   trips: {
+    hotelSectionTitle: "Chambre & hébergement",
+    hotelSectionHint:
+      "Pour ce séjour – numéro de chambre, Wi-Fi et notes (p. ex. horaires du petit-déjeuner).",
+    hotelRoomLabel: "Chambre / étage",
+    hotelRoomPlaceholder: "p. ex. chambre 204, 2e étage",
+    templateSuggest: (name: string) =>
+      `Reprendre le modèle « ${name} » comme liste de bagages`,
+    templateListCreated: "Liste créée à partir du modèle et liée.",
+    readinessAbroadHint: (country: string) =>
+      `Ce voyage mène en ${country} – pense à la vignette, aux péages et aux équipements obligatoires.`,
+    readinessAbroadLink: "Ouvrir la fiche pays",
     whoAlongTitle: "Qui vient ?",
     whoAlongHint:
       "Touché = présent. Les tampons du passeport en découlent – le tampon familial seulement si tout le monde est là.",
@@ -2920,6 +2943,9 @@ export const fr: Translation = {
     eurRateRemove: "Supprimer le taux",
     eurRateHint:
       "S'applique au total, au budget et à « qui doit à qui » de ce voyage. Les justificatifs restent enregistrés en euros.",
+    ecbRateLine: (rate: string, date: string) =>
+      `Cours de référence BCE du ${date} : 1 € = ${rate} CHF`,
+    ecbRateApply: "Reprendre",
     eurConvertedNote: (eur: string, rate: string) =>
       `dont ${eur}, convertis au taux ${rate}`,
     eurUnconvertedNote: (eur: string) =>
@@ -4491,6 +4517,7 @@ export const fr: Translation = {
     weatherLine: (min: number, max: number, label: string) =>
       label ? `${min}–${max} °C · ${label}` : `${min}–${max} °C`,
     snowDepthLine: (cm: number) => `Hauteur de neige : environ ${cm} cm`,
+    snowfallLine: (cm: number) => `Neige fraîche aujourd’hui : env. ${cm} cm`,
     choresTitle: "Tâches du jour",
     choresEmpty: "Rien n’est réparti pour aujourd’hui.",
     choresToggleAria: (title: string) => `Cocher ${title}`,
@@ -4721,6 +4748,37 @@ export const fr: Translation = {
     source: "Source : transport.opendata.ch – sans garantie.",
   },
   poi: {
+    pharmacies: {
+      title: "Pharmacies à proximité",
+      subtitle: "Depuis OpenStreetMap – horaires si renseignés, sans garantie.",
+      unnamed: "Pharmacie",
+      empty: (radius: string) =>
+        `Aucune pharmacie répertoriée dans un rayon de ${radius}.`,
+    },
+    laundry: {
+      title: "Laveries à proximité",
+      subtitle:
+        "Laveries et pressings d’OpenStreetMap – pour le jour de lessive en voyage.",
+      unnamed: "Laverie",
+      empty: (radius: string) =>
+        `Aucune laverie répertoriée dans un rayon de ${radius}.`,
+    },
+    bikeShops: {
+      title: "Magasins & ateliers vélo",
+      subtitle:
+        "Depuis OpenStreetMap – « Service » signifie que la réparation est renseignée.",
+      unnamed: "Magasin de vélos",
+      empty: (radius: string) =>
+        `Aucun magasin de vélos répertorié dans un rayon de ${radius}.`,
+    },
+    winterSpots: {
+      title: "Remontées & pistes de fond à proximité",
+      subtitle:
+        "Remontées mécaniques et pistes de fond nommées d’OpenStreetMap – le départ de la journée de neige.",
+      unnamed: "Remontée",
+      empty: (radius: string) =>
+        `Aucune remontée ni piste de fond répertoriée dans un rayon de ${radius}.`,
+    },
     radiusLabel: "Rayon :",
     radiusGroupAria: "Choisir le rayon de recherche",
     loading: "Recherche en cours …",
@@ -6425,7 +6483,8 @@ export const fr: Translation = {
   whatsNew: {
     title: "Quoi de neuf",
     startIntro: "Voici ce qui a changé depuis ta dernière visite :",
-    allIntro: "Toutes les nouveautés en un coup d'œil :",
+    allIntro: "Les dernières nouveautés en un coup d'œil :",
+    showOlder: "Afficher les plus anciennes",
     confirm: "Compris",
   },
   shareTarget: {

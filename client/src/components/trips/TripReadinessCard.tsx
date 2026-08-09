@@ -47,6 +47,7 @@ import { Link, useRoute, useSearch } from "wouter";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
 import { useI18n, useT } from "@/i18n";
+import { findCountryRules, guessCountryCode } from "@/data/roadRules";
 import { LOCALE_TAGS, pick, type Language } from "@shared/i18n";
 import {
   COLLAGE_LAYOUTS,
@@ -121,12 +122,26 @@ export default function TripReadinessCard({
     spotId: number | null;
     arrivalTime: string | null;
     shared?: boolean;
+    /** Für den Auslands-Hinweis (#524): Land aus Ort/Titel/Platz raten. */
+    location?: string | null;
+    title?: string | null;
+    spotName?: string | null;
   };
   tripName: string;
   onEdit: () => void;
 }) {
   const t = useT();
+  const { lang } = useI18n();
   const [open, setOpen] = useState(false);
+  // Auslands-Hinweis (#524): Vignette/Maut nicht erst an der Grenze
+  // entdecken – der Hinweis zeigt aufs Länder-Merkblatt.
+  const abroad = useMemo(() => {
+    const code = guessCountryCode(
+      [trip.location, trip.title, trip.spotName].filter(Boolean).join(" ")
+    );
+    if (!code || code === "CH") return null;
+    return findCountryRules(code);
+  }, [trip.location, trip.title, trip.spotName]);
 
   const packQuery = trpc.packing.progress.useQuery(
     { listId: trip.packListId ?? 0 },
@@ -376,6 +391,17 @@ export default function TripReadinessCard({
                 );
               })}
             </ul>
+          )}
+          {abroad && (
+            <p className="mt-3 text-xs text-muted-foreground">
+              {t.trips.readinessAbroadHint(pick(abroad.name, lang))}{" "}
+              <Link
+                href={`/laender?land=${abroad.code}`}
+                className="font-medium text-primary hover:underline"
+              >
+                {t.trips.readinessAbroadLink}
+              </Link>
+            </p>
           )}
         </div>
       )}

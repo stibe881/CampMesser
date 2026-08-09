@@ -1,7 +1,8 @@
 import { useEffect } from "react";
 import { useParams } from "wouter";
-import { ArrowLeft, Loader2, Printer } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import PrintButton from "@/components/PrintButton";
 import { scavengerHunts } from "@/data/familyActivities";
 import { pick } from "@shared/i18n";
 import { useI18n } from "@/i18n";
@@ -89,19 +90,7 @@ export default function HuntPrintPage() {
           <ArrowLeft className="mr-1.5 h-4 w-4" aria-hidden="true" />
           {t.common.back}
         </Button>
-        <Button
-          size="sm"
-          onClick={() => {
-            if (standalone) {
-              window.open(window.location.href, "_blank", "noopener");
-            } else {
-              window.print();
-            }
-          }}
-        >
-          <Printer className="mr-1.5 h-4 w-4" aria-hidden="true" />
-          {t.huntPrint.printButton}
-        </Button>
+        <PrintButton label={t.huntPrint.printButton} />
       </div>
       {standalone && (
         <p className="mb-6 text-xs text-muted-foreground print:hidden">

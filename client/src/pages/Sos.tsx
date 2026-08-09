@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useConfirm } from "@/components/ConfirmDialog";
 import {
   Phone,
@@ -21,9 +21,17 @@ import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
 import { formatDMS, wgs84ToLV95 } from "@/lib/sun";
 import { EMERGENCY_COUNTRIES } from "@shared/emergencyNumbers";
+import { guessCountryCode } from "@/data/roadRules";
+import { isTripActiveOn } from "@shared/trips";
+import { useTodayIso } from "@/lib/useTodayIso";
 import NearbyPoints from "@/components/NearbyPoints";
-import { defibrillatorsQuery, parseDefibrillators } from "@/lib/overpass";
-import { HeartPulse } from "lucide-react";
+import {
+  defibrillatorsQuery,
+  parseDefibrillators,
+  parsePharmacies,
+  pharmaciesQuery,
+} from "@/lib/overpass";
+import { HeartPulse, Pill } from "lucide-react";
 import { LANGUAGES, LANGUAGE_LABELS, LOCALE_TAGS, pick } from "@shared/i18n";
 import { emergencyPhrase } from "@shared/emergencyPhrase";
 import {
@@ -341,6 +349,28 @@ function LocationShareCard() {
 export default function SosPage() {
   const { lang, t } = useI18n();
   const [geo, setGeo] = useState<GeoState>({ status: "loading" });
+  // Reiseland (#521): Läuft gerade eine Auslandsreise, gehören deren
+  // Notrufnummern nach oben – im Notfall klappt niemand Länder auf.
+  const { isAuthenticated } = useAuth();
+  const todayIso = useTodayIso();
+  const tripsQuery = trpc.trips.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+  const tripCountry = useMemo(() => {
+    for (const trip of tripsQuery.data ?? []) {
+      if (!isTripActiveOn(trip, todayIso)) continue;
+      const code = guessCountryCode(
+        [trip.location, trip.title, trip.spotName].filter(Boolean).join(" ")
+      );
+      if (code && code !== "CH") {
+        const entry = EMERGENCY_COUNTRIES.find(
+          c => c.code === code.toLowerCase()
+        );
+        if (entry) return entry;
+      }
+    }
+    return null;
+  }, [tripsQuery.data, todayIso]);
 
   const locate = () => {
     if (!navigator.geolocation) {
@@ -581,6 +611,26 @@ export default function SosPage() {
           />
         )}
 
+      {/* Apotheken (#529): nach den Defis – das zweithäufigste «wo ist
+          das nächste …?» im Ernstfall. */}
+      {geo.status === "ok" &&
+        geo.lat !== undefined &&
+        geo.lng !== undefined && (
+          <NearbyPoints
+            latitude={geo.lat}
+            longitude={geo.lng}
+            icon={Pill}
+            texts={t.poi.pharmacies}
+            query={pharmaciesQuery}
+            parse={parsePharmacies}
+            radii={[1000, 2000, 5000]}
+            defaultRadiusM={2000}
+            profile="foot"
+            sectionId="sos-pharmacies"
+            className="mb-6"
+          />
+        )}
+
       {/* Rega-Hinweis */}
       <Card className="mb-6 bg-accent/50">
         <CardContent className="pt-6">
@@ -603,6 +653,38 @@ export default function SosPage() {
           </a>
         </CardContent>
       </Card>
+
+      {/* Reiseland (#521): laufende Auslandsreise → Nummern prominent */}
+      {tripCountry && (
+        <div className="mb-6 rounded-xl border-2 border-destructive/40 bg-card p-4">
+          <p className="font-semibold">
+            <span aria-hidden="true">{flagEmoji(tripCountry.code)}</span>{" "}
+            {t.sos.tripCountryTitle(pick(tripCountry.name, lang))}
+          </p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            {t.sos.tripCountryHint}
+          </p>
+          <div className="mt-2.5 flex flex-wrap gap-2">
+            {tripCountry.numbers.map(entry => (
+              <a
+                key={`${tripCountry.code}-${entry.number}-${entry.label.de}`}
+                href={`tel:${entry.number}`}
+                className="flex items-center gap-2 rounded-lg border border-border bg-muted/50 px-3 py-2 transition-colors hover:border-destructive/30"
+                aria-label={t.sos.callAria(pick(entry.label, lang))}
+              >
+                <Phone
+                  className="h-3.5 w-3.5 text-destructive"
+                  aria-hidden="true"
+                />
+                <span className="text-sm">{pick(entry.label, lang)}</span>
+                <span className="font-mono text-sm font-bold">
+                  {entry.number}
+                </span>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Notrufnummern im Ausland (#432) – die Schweiz steht schon oben */}
       <h2 className="mb-3 font-serif text-lg font-semibold">

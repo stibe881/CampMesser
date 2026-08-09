@@ -647,12 +647,23 @@ export const packingRouters = {
         }
         await db.deletePackItem(input.id);
       }),
-    /** Gewichts-Budget in Gramm setzen; null entfernt es wieder. */
+    /**
+     * Gewichts-Budget in Gramm setzen; null entfernt es wieder.
+     * personGrams (#518) ist die Limite pro Person – optional, damit alte
+     * Clients das Listen-Budget weiter allein setzen können.
+     */
     setWeightBudget: protectedProcedure
       .input(
         z.object({
           listId: z.number(),
           grams: z.number().int().min(1).max(500000).nullable(),
+          personGrams: z
+            .number()
+            .int()
+            .min(1)
+            .max(500000)
+            .nullable()
+            .optional(),
         })
       )
       .mutation(async ({ ctx, input }) => {
@@ -665,7 +676,8 @@ export const packingRouters = {
         await db.setPackListWeightBudget(
           input.listId,
           ctx.user.id,
-          input.grams
+          input.grams,
+          input.personGrams
         );
         return { success: true } as const;
       }),

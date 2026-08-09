@@ -707,6 +707,7 @@ export default function ProfilePage() {
         onOpenChange={setWhatsNewOpen}
         blocks={changelogBlocks}
         intro={t.whatsNew.allIntro}
+        withArchive
       />
 
       {/* Absturzmeldungen (#352) – nur für Admin-Konten sichtbar */}

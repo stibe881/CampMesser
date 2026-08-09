@@ -179,11 +179,11 @@ describe("tripBoardCounts", () => {
   });
 
   it("zählt unbekannte Arten als Nachricht", () => {
-    expect(
-      tripBoardCounts([
-        { id: 1, kind: "quatsch", done: true, createdAt: "2026-08-01" },
-      ])
-    ).toEqual({ messages: 1, openTasks: 0, doneTasks: 0 });
+    expect(tripBoardCounts([{ kind: "quatsch", done: true }])).toEqual({
+      messages: 1,
+      openTasks: 0,
+      doneTasks: 0,
+    });
   });
 
   it("liefert für eine leere Pinnwand lauter Nullen", () => {

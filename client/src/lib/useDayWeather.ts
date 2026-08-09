@@ -39,6 +39,8 @@ export interface DayWeather {
    * nichts liefert. Die Heute-Ansicht zeigt sie nur bei Wintersport.
    */
   snowDepthCm: number | null;
+  /** Neuschnee heute in cm (#525); null ohne Messwert. */
+  snowfallTodayCm: number | null;
 }
 
 export function useDayWeather(
@@ -59,7 +61,7 @@ export function useDayWeather(
       timezone: "auto",
       forecast_days: "2",
       daily:
-        "temperature_2m_max,temperature_2m_min,weather_code,wind_gusts_10m_max,precipitation_sum",
+        "temperature_2m_max,temperature_2m_min,weather_code,wind_gusts_10m_max,precipitation_sum,snowfall_sum",
       // Schneehöhe (#470) für die Wintersport-Zeile – gleicher Abruf.
       current: "snow_depth",
     });
@@ -106,6 +108,10 @@ export function useDayWeather(
           snowDepthCm:
             typeof json?.current?.snow_depth === "number"
               ? Math.round(json.current.snow_depth * 100)
+              : null,
+          snowfallTodayCm:
+            typeof json?.daily?.snowfall_sum?.[0] === "number"
+              ? Math.round(json.daily.snowfall_sum[0])
               : null,
         });
       })

@@ -24,7 +24,7 @@
  */
 import { useMemo, useState } from "react";
 import { fmtPlain } from "@/lib/dateFormat";
-import { Check, Plus, Printer, Stamp, Users } from "lucide-react";
+import { Check, Plus, Stamp, Users } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Button } from "@/components/ui/button";
@@ -34,6 +34,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { trpc } from "@/lib/trpc";
 import { isStandaloneApp } from "@/lib/standalone";
+import PrintButton from "@/components/PrintButton";
 import { cn } from "@/lib/utils";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
 import {
@@ -363,23 +364,12 @@ export default function PassportPage() {
 
       {summary.stamps.length > 0 && (
         <>
-          <Button
+          <PrintButton
+            label={pp.print}
+            size="default"
             variant="outline"
             className="mt-6 w-full print:hidden"
-            onClick={() => {
-              // In der installierten App ist window.print() wirkungslos –
-              // dieselbe Adresse im Browser-Tab öffnen, wie bei allen
-              // Druckseiten (Muster aus PackListPrint).
-              if (isStandaloneApp()) {
-                window.open(window.location.href, "_blank", "noopener");
-              } else {
-                window.print();
-              }
-            }}
-          >
-            <Printer className="mr-2 h-4 w-4" aria-hidden="true" />
-            {pp.print}
-          </Button>
+          />
           {isStandaloneApp() && (
             <p className="mt-1.5 text-xs text-muted-foreground print:hidden">
               {t.packListPrint.printBrowserHint}

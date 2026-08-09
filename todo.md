@@ -1,5 +1,30 @@
 # CampMesser – Projekt TODO
 
+## Zwanzig Vorschläge (09.08.2026, Runde 53)
+
+- [x] #516 Packvorlagen für Reisearten – NUR Hotelferien + Velotour neu; Städtereise/Strand/Wintersport EXISTIERTEN BEREITS
+- [x] #517 Vorlagen-Vorschlag im Reise-Formular (Ein-Klick-Liste, ohne Camping/Tagesausflug)
+- [x] #518 Gepäck-Limite pro Person (personWeightBudgetGrams, Migration 0118 – Server pendent; Traglast-Zeile mit Ampel, zweites kg-Feld im Budget-Dialog)
+- [x] #519 Reisekasse in Fremdwährung – Euro-Ausgaben samt Kurs EXISTIERTEN BEREITS (#441, manueller Kurs pro Reise); neu ist der EZB-Referenzkurs als Ein-Klick-Übernahme im Kurs-Kasten (serverseitig 12 h gecacht, bei EZB-Ausfall der letzte bekannte Kurs mit ehrlichem Datum, offline über den persistierten Query-Cache). BEWUSST KEINE weiteren Währungen: CHF ist daheim, EUR rundherum – ein dritter Währungsknopf im Erfassen-Formular für Kronen oder Zloty stünde 95 % der Reisen im Weg (dokumentierte Entscheidung in shared/expenses.ts)
+- [x] #520 Aufenthalts-Details je Reiseart: Übernachtungs-Arten ohne Platz (Hotel, Städte, Strand, Wintersport) zeigen «Zimmer & Unterkunft» mit Hotel-Beschriftung – gleiche Spalten, keine Migration. Altbekannte Randnotiz: trips.add nimmt die Detail-Felder (wie schon immer) erst beim Bearbeiten an
+- [x] #521 SOS kennt das Reiseland – Katalog EXISTIERTE (#432), neu ist die Automatik bei laufender Auslandsreise
+- [x] #522 Steckdosen & Adapter pro Land (9 Länder)
+- [x] #523 Trinkgeld-Knigge pro Land (9 Länder)
+- [x] #524 Auslands-Hinweis im Reise-Cockpit (Link ?land=…; Push-Teil bewusst weggelassen – Push bleibt kurz)
+- [x] #525 Schneehöhe EXISTIERTE BEREITS (#470) – neu ist nur die Neuschnee-Angabe (snowfall_sum) in derselben Zeile
+- [x] #526 Bahnen & Loipen in der Nähe (Heute-Ansicht, Wintersport; aerialway + piste:type=nordic)
+- [x] #527 Velo-Läden & Werkstätten (Heute-Ansicht, neues Preset-Flag bike)
+- [x] #528 Waschsalons im Platz-Dossier (shop=laundry/dry_cleaning)
+- [x] #529 Apotheken im SOS (amenity=pharmacy, Öffnungszeiten als Detail)
+- [x] #530 Sprachhilfe «Stadt & Hotel» EXISTIERTE BEREITS (#474, 10 Phrasen) – neu nur 4 Hotel-Sätze (späte Anreise, ruhigeres Zimmer, Defekt, Late-Checkout)
+- [x] #531 EXISTIERTE BEREITS (tripKindRows/kindStatsTitle in der Statistik) – kein Code
+- [x] #532 EXISTIERTE BEREITS (trackYearRows in der Statistik) – kein Code
+- [x] #533 Reise-Ort als Wetter-Ort: Vorschlags-Chip für Freitext-Reisen mit Ortssuche-Koordinaten (Zeltplätze hatten schon eigene Chips)
+- [x] #534 Tests in die Typprüfung: das `**/*.test.ts`-Exclude in tsconfig.json entfernt (die Wurzel der CI-Altlasten aus den Runden zuvor – .test.ts-Dateien sah nur vitest, nie tsc) und die neun aufgelaufenen Typ-Fehler bereinigt (fehlende User-/Vehicle-/PushPrefs-/Tariff-Felder in Fixtures, zwei Iterator-Spreads, ein überzähliges Feld, ein möglicherweise-undefined)
+- [x] #535 Changelog-Chunk entlastet: `changelog.ts` (366 kB) zweigeteilt in den aktuellen Teil (~6 kB, höchstens drei Blöcke – Test wacht darüber) und `changelogArchive.ts` (~360 kB), das erst auf «Ältere anzeigen» im Profil-Dialog geladen wird. ABWEICHUNG vom Vorschlagstext «älter als ein Jahr»: kein Block ist älter als eine Woche – der Jahres-Schnitt hätte heute NICHTS bewegt; der Schnitt bei drei Blöcken bewegt 98 % der Datei (der Block vom 04.08. trägt allein die ganze frühe App-Geschichte mit 276 kB)
+- Druck-Fix vorgezogen: PrintButton mit echtem _blank-Link für alle 9 Druckseiten (iOS-PWA verschluckte window.open)
+- Runde abgeschlossen (Changelog-Block 2026-08-09.3). Serverseitig pendent bis zum nächsten Deploy: Migration **0118** (packLists.personWeightBudgetGrams)
+
 ## Nachbesserungen (09.08.2026)
 
 - [x] Reisepass-Fix: `trips.list` lieferte für eigene Reisen keinen Platznamen (spotName fest null) – Stempel blieben aus, obwohl ein Zeltplatz verknüpft war. getTripLogs joint den Namen jetzt mit. Gemergt (main `abcff98`).

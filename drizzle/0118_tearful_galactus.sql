@@ -1,0 +1,1 @@
+ALTER TABLE `packLists` ADD `personWeightBudgetGrams` int;

@@ -42,6 +42,10 @@ export interface CountryRules {
   equipment: L4;
   /** Umweltzonen und Einfahrtsbeschränkungen. */
   zones: L4;
+  /** Steckdosen-Typ und was der Schweizer Stecker braucht (#522). */
+  plug: L4;
+  /** Trinkgeld-Gepflogenheiten, aus Schweizer Sicht (#523). */
+  tipping: L4;
   /** Wichtigste Notrufnummer. */
   emergency: string;
   emergencyNote: L4;
@@ -94,6 +98,18 @@ export const roadRules: CountryRules[] = [
       "Pas de zones environnementales. En cas de forte pollution, Genève peut activer la zone « Stick'AIR » – seuls les véhicules avec la vignette de couleur correspondante circulent alors.",
       "Nessuna zona ambientale. In caso di forte inquinamento Ginevra può attivare la zona «Stick'AIR» – circolano allora solo i veicoli con il bollino colorato giusto.",
       "No low emission zones. When air pollution is high, Geneva can activate its “Stick'AIR” zone – only vehicles with the matching colour sticker may then drive."
+    ),
+    plug: l4(
+      "Typ J (dreipolig). Der Eurostecker passt; deutsche Schuko-Stecker (Typ F) passen NICHT ohne Adapter.",
+      "Type J (trois broches). L’europlug passe ; les fiches Schuko allemandes (type F) ne passent PAS sans adaptateur.",
+      "Tipo J (tre poli). L’europlug passa; le spine Schuko tedesche (tipo F) NON passano senza adattatore.",
+      "Type J (three-pin). Europlugs fit; German Schuko plugs (type F) do NOT fit without an adapter."
+    ),
+    tipping: l4(
+      "Bedienung ist inbegriffen. Aufrunden ist üblich und reicht – Trinkgeld ist Anerkennung, keine Pflicht.",
+      "Le service est compris. Arrondir est courant et suffit – le pourboire est une reconnaissance, pas une obligation.",
+      "Il servizio è incluso. Arrotondare è consueto e basta – la mancia è un riconoscimento, non un obbligo.",
+      "Service is included. Rounding up is common and enough – a tip is appreciation, not an obligation."
     ),
     emergency: "112",
     emergencyNote: l4(
@@ -166,6 +182,18 @@ export const roadRules: CountryRules[] = [
       "Molte città hanno zone ambientali: senza il bollino verde sul parabrezza non si entra – il bollino esiste anche per i veicoli stranieri. Alcune città escludono inoltre i diesel vecchi.",
       "Many cities have low emission zones: without the green particulate sticker on the windscreen you may not enter – the sticker is available for foreign vehicles too. Some cities additionally ban older diesels."
     ),
+    plug: l4(
+      "Typ F (Schuko) und Typ C. Der Schweizer Dreipol-Stecker braucht einen Adapter; zweipolige Gerätestecker passen als Eurostecker.",
+      "Type F (Schuko) et type C. La fiche suisse à trois broches nécessite un adaptateur ; les fiches plates à deux broches passent comme europlug.",
+      "Tipo F (Schuko) e tipo C. La spina svizzera a tre poli richiede un adattatore; le spine a due poli passano come europlug.",
+      "Type F (Schuko) and type C. The Swiss three-pin plug needs an adapter; two-pin europlugs fit."
+    ),
+    tipping: l4(
+      "5–10 % sind üblich; beim Bezahlen den Gesamtbetrag nennen («Machen Sie 27»).",
+      "5–10 % sont d’usage ; au moment de payer, annonce le montant total (« faites 27 »).",
+      "Il 5–10 % è consueto; al momento di pagare indica l’importo totale («faccia 27»).",
+      "5–10% is customary; when paying, state the total (“make it 27”)."
+    ),
     emergency: "112",
     emergencyNote: l4(
       "112 für Feuerwehr und Rettung, 110 für die Polizei.",
@@ -237,6 +265,18 @@ export const roadRules: CountryRules[] = [
       "Le zone ambientali (IG-L) riguardano soprattutto i camion. In Tirolo valgono divieti settoriali e divieti di uscita dall'autostrada, a Vienna e Graz divieti per i camion vecchi.",
       "Low emission zones (IG-L) mainly affect lorries. Tyrol has sectoral driving bans and bans on leaving the motorway, Vienna and Graz ban older lorries."
     ),
+    plug: l4(
+      "Typ F (Schuko) und Typ C. Der Schweizer Dreipol-Stecker braucht einen Adapter; zweipolige Gerätestecker passen als Eurostecker.",
+      "Type F (Schuko) et type C. La fiche suisse à trois broches nécessite un adaptateur ; les fiches plates à deux broches passent comme europlug.",
+      "Tipo F (Schuko) e tipo C. La spina svizzera a tre poli richiede un adattatore; le spine a due poli passano come europlug.",
+      "Type F (Schuko) and type C. The Swiss three-pin plug needs an adapter; two-pin europlugs fit."
+    ),
+    tipping: l4(
+      "5–10 % üblich, beim Zahlen dazusagen. In Hütten und Cafés genügt Aufrunden.",
+      "5–10 % d’usage, à annoncer en payant. Dans les refuges et cafés, arrondir suffit.",
+      "5–10 % consueto, da dire pagando. In rifugi e caffè basta arrotondare.",
+      "5–10% customary, said when paying. In huts and cafés rounding up is fine."
+    ),
     emergency: "112",
     emergencyNote: l4(
       "112 europaweit, 133 Polizei, 144 Rettung, 140 Bergrettung.",
@@ -305,6 +345,18 @@ export const roadRules: CountryRules[] = [
       "Presque chaque vieille ville a une ZTL (zone à trafic limité) : des caméras filment chaque entrée, les amendes arrivent des mois plus tard par la poste. Dans la plaine du Pô, des zones environnementales excluent en plus les vieux diesels en hiver.",
       "Quasi ogni centro storico ha una ZTL: le telecamere registrano ogni ingresso e le multe arrivano mesi dopo per posta. Nella Pianura Padana in inverno le zone ambientali escludono inoltre i diesel vecchi.",
       "Almost every old town has a ZTL (limited traffic zone): cameras record every entry and fines arrive by post months later. In the Po Valley low emission zones additionally ban older diesels in winter."
+    ),
+    plug: l4(
+      "Typ L (drei Stifte in Reihe), oft auch Typ F. Eurostecker passt; der Schweizer Dreipol-Stecker braucht einen Adapter.",
+      "Type L (trois broches alignées), souvent aussi type F. L’europlug passe ; la fiche suisse à trois broches nécessite un adaptateur.",
+      "Tipo L (tre poli in linea), spesso anche tipo F. L’europlug passa; la spina svizzera a tre poli richiede un adattatore.",
+      "Type L (three pins in a row), often type F too. Europlugs fit; the Swiss three-pin plug needs an adapter."
+    ),
+    tipping: l4(
+      "Kein Muss: Oft steht «coperto» (Gedeck) auf der Rechnung. Aufrunden oder ein paar Euro für guten Service.",
+      "Pas obligatoire : la note comporte souvent un « coperto » (couvert). Arrondir ou laisser quelques euros pour un bon service.",
+      "Non obbligatoria: spesso in conto c’è il «coperto». Arrotonda o lascia qualche euro per un buon servizio.",
+      "Not a must: the bill often includes a “coperto” (cover charge). Round up or leave a few euros for good service."
     ),
     emergency: "112",
     emergencyNote: l4(
@@ -381,6 +433,18 @@ export const roadRules: CountryRules[] = [
       "Zone a basse emissioni (ZFE) a Parigi, Lione, Grenoble, Strasburgo, Marsiglia, Tolosa e altre città – si entra solo con il bollino Crit'Air giusto sul parabrezza.",
       "Low emission zones (ZFE) in Paris, Lyon, Grenoble, Strasbourg, Marseille, Toulouse and other cities – entry only with the matching Crit'Air sticker on the windscreen."
     ),
+    plug: l4(
+      "Typ E (Buchse mit Erdungsstift). Eurostecker passt; der Schweizer Dreipol-Stecker braucht einen Adapter.",
+      "Type E (prise avec broche de terre). L’europlug passe ; la fiche suisse à trois broches nécessite un adaptateur.",
+      "Tipo E (presa con spinotto di terra). L’europlug passa; la spina svizzera a tre poli richiede un adattatore.",
+      "Type E (socket with earth pin). Europlugs fit; the Swiss three-pin plug needs an adapter."
+    ),
+    tipping: l4(
+      "«Service compris» – Bedienung ist inbegriffen. Kleingeld dazulassen ist eine nette Geste, mehr nicht.",
+      "« Service compris ». Laisser la petite monnaie est un geste apprécié, sans plus.",
+      "«Service compris» – il servizio è incluso. Lasciare gli spiccioli è un gesto gentile, niente di più.",
+      "“Service compris” – service is included. Leaving small change is a nice gesture, nothing more."
+    ),
     emergency: "112",
     emergencyNote: l4(
       "112 europaweit, 15 Rettungsdienst, 17 Polizei, 18 Feuerwehr.",
@@ -455,6 +519,18 @@ export const roadRules: CountryRules[] = [
       "Nessuna zona ambientale nazionale; il centro storico di Lubiana è in gran parte senza auto.",
       "No nationwide low emission zones; the old town of Ljubljana is largely car-free."
     ),
+    plug: l4(
+      "Typ F (Schuko) und Typ C. Der Schweizer Dreipol-Stecker braucht einen Adapter; zweipolige Gerätestecker passen als Eurostecker.",
+      "Type F (Schuko) et type C. La fiche suisse à trois broches nécessite un adaptateur ; les fiches plates à deux broches passent comme europlug.",
+      "Tipo F (Schuko) e tipo C. La spina svizzera a tre poli richiede un adattatore; le spine a due poli passano come europlug.",
+      "Type F (Schuko) and type C. The Swiss three-pin plug needs an adapter; two-pin europlugs fit."
+    ),
+    tipping: l4(
+      "Aufrunden ist üblich; im Restaurant sind bis 10 % gern gesehen, aber keine Pflicht.",
+      "Arrondir est courant ; au restaurant, jusqu’à 10 % sont appréciés, sans obligation.",
+      "Arrotondare è consueto; al ristorante fino al 10 % è gradito, ma non obbligatorio.",
+      "Rounding up is common; in restaurants up to 10% is appreciated but not required."
+    ),
     emergency: "112",
     emergencyNote: l4(
       "112 für Rettung und Feuerwehr, 113 für die Polizei.",
@@ -520,6 +596,18 @@ export const roadRules: CountryRules[] = [
       "Zones environnementales (milieuzones) dans de nombreuses villes, contrôlées par caméras de plaques ; elles visent surtout les vieux diesels et les utilitaires. Dans les centres s'ajoutent des zones de livraison zéro émission.",
       "Zone ambientali (milieuzones) in molte città, controllate con telecamere sulle targhe; colpiscono soprattutto diesel vecchi e furgoni. Nei centri si aggiungono zone di consegna a zero emissioni.",
       "Low emission zones (milieuzones) in many cities, monitored by number plate cameras; they mainly affect older diesels and vans. City centres are adding zero-emission delivery zones."
+    ),
+    plug: l4(
+      "Typ F (Schuko) und Typ C. Der Schweizer Dreipol-Stecker braucht einen Adapter; zweipolige Gerätestecker passen als Eurostecker.",
+      "Type F (Schuko) et type C. La fiche suisse à trois broches nécessite un adaptateur ; les fiches plates à deux broches passent comme europlug.",
+      "Tipo F (Schuko) e tipo C. La spina svizzera a tre poli richiede un adattatore; le spine a due poli passano come europlug.",
+      "Type F (Schuko) and type C. The Swiss three-pin plug needs an adapter; two-pin europlugs fit."
+    ),
+    tipping: l4(
+      "Bedienung ist inbegriffen; Aufrunden oder 5–10 % bei gutem Service.",
+      "Le service est compris ; arrondis ou laisse 5–10 % pour un bon service.",
+      "Il servizio è incluso; arrotonda o lascia il 5–10 % per un buon servizio.",
+      "Service is included; round up or leave 5–10% for good service."
     ),
     emergency: "112",
     emergencyNote: l4(
@@ -587,6 +675,18 @@ export const roadRules: CountryRules[] = [
       "Pas de zones environnementales.",
       "Nessuna zona ambientale.",
       "No low emission zones."
+    ),
+    plug: l4(
+      "Typ F (Schuko) und Typ C. Der Schweizer Dreipol-Stecker braucht einen Adapter; zweipolige Gerätestecker passen als Eurostecker.",
+      "Type F (Schuko) et type C. La fiche suisse à trois broches nécessite un adaptateur ; les fiches plates à deux broches passent comme europlug.",
+      "Tipo F (Schuko) e tipo C. La spina svizzera a tre poli richiede un adattatore; le spine a due poli passano come europlug.",
+      "Type F (Schuko) and type C. The Swiss three-pin plug needs an adapter; two-pin europlugs fit."
+    ),
+    tipping: l4(
+      "Im Restaurant sind 5–10 % üblich, im Café reicht Aufrunden – am besten bar, auf der Karte lässt sich selten Trinkgeld geben.",
+      "Au restaurant, 5–10 % sont d’usage, au café arrondir suffit – de préférence en espèces, la carte permet rarement le pourboire.",
+      "Al ristorante il 5–10 % è consueto, al bar basta arrotondare – meglio in contanti, con la carta la mancia è raramente possibile.",
+      "In restaurants 5–10% is customary, in cafés rounding up is fine – best in cash, cards rarely allow tips."
     ),
     emergency: "112",
     emergencyNote: l4(
@@ -656,6 +756,18 @@ export const roadRules: CountryRules[] = [
       "Les villes de plus de 50 000 habitants mettent en place des zones à faibles émissions (ZBE), par exemple Madrid et Barcelone. Les véhicules étrangers doivent parfois s'enregistrer à l'avance.",
       "Le città con più di 50 000 abitanti istituiscono zone a basse emissioni (ZBE), per esempio Madrid e Barcellona. I veicoli stranieri devono a volte registrarsi in anticipo.",
       "Cities with more than 50,000 inhabitants are setting up low emission zones (ZBE), for example Madrid and Barcelona. Foreign vehicles sometimes have to register in advance."
+    ),
+    plug: l4(
+      "Typ F (Schuko) und Typ C. Der Schweizer Dreipol-Stecker braucht einen Adapter; zweipolige Gerätestecker passen als Eurostecker.",
+      "Type F (Schuko) et type C. La fiche suisse à trois broches nécessite un adaptateur ; les fiches plates à deux broches passent comme europlug.",
+      "Tipo F (Schuko) e tipo C. La spina svizzera a tre poli richiede un adattatore; le spine a due poli passano come europlug.",
+      "Type F (Schuko) and type C. The Swiss three-pin plug needs an adapter; two-pin europlugs fit."
+    ),
+    tipping: l4(
+      "Keine Pflicht: Aufrunden reicht, im Restaurant sind 5–10 % grosszügig.",
+      "Pas d’obligation : arrondir suffit, au restaurant 5–10 % sont généreux.",
+      "Nessun obbligo: arrotondare basta, al ristorante il 5–10 % è generoso.",
+      "No obligation: rounding up is fine; in restaurants 5–10% is generous."
     ),
     emergency: "112",
     emergencyNote: l4(

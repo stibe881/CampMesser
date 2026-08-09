@@ -11,6 +11,7 @@ import {
   toChfExpenses,
 } from "@shared/expenses";
 import { TRIP_KINDS, normalizeTripKind } from "@shared/tripKind";
+import { getEcbEurRate } from "../ecbRates";
 import {
   BUDGET_MAX_RAPPEN,
   EXPENSE_CATEGORIES,
@@ -963,6 +964,12 @@ export const tripsRouters = {
           await db.setTripEurRate(input.tripId, input.eurRateX10000);
           return { success: true } as const;
         }),
+      /**
+       * EZB-Referenzkurs CHF/EUR (#519) als Vorschlag für den Kurs-Dialog.
+       * Serverseitig gecacht; bei EZB-Ausfall kommt der letzte bekannte
+       * Kurs (sein Datum sagt, wie alt er ist), sonst null.
+       */
+      ecbRate: protectedProcedure.query(() => getEcbEurRate()),
       list: protectedProcedure
         .input(z.object({ tripId: z.number().int().positive() }))
         .query(async ({ ctx, input }) => {

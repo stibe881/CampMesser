@@ -1,8 +1,9 @@
 import { useEffect, useMemo } from "react";
 import { fmtLong, fmtWeekdayShort } from "@/lib/dateFormat";
 import { useParams } from "wouter";
-import { ArrowLeft, Loader2, Printer } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import PrintButton from "@/components/PrintButton";
 import LoginPrompt from "@/components/LoginPrompt";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
@@ -141,19 +142,7 @@ export default function MenuPlanPrintPage() {
           <ArrowLeft className="mr-1.5 h-4 w-4" aria-hidden="true" />
           {t.common.back}
         </Button>
-        <Button
-          size="sm"
-          onClick={() => {
-            if (standalone) {
-              window.open(window.location.href, "_blank", "noopener");
-            } else {
-              window.print();
-            }
-          }}
-        >
-          <Printer className="mr-1.5 h-4 w-4" aria-hidden="true" />
-          {t.menuPlanPrint.printButton}
-        </Button>
+        <PrintButton label={t.menuPlanPrint.printButton} />
       </div>
       {standalone && (
         <p className="mb-6 text-xs text-muted-foreground print:hidden">

@@ -43,6 +43,12 @@ interface WhatsNewDialogProps {
   blocks: ChangelogBlock[];
   /** Einleitungssatz unter dem Titel (Start- vs. Profil-Kontext). */
   intro: string;
+  /**
+   * Bietet «Ältere anzeigen» an (#535): holt das Changelog-Archiv erst auf
+   * Klick – die App-Geschichte wiegt ein Vielfaches des aktuellen Teils.
+   * Nur der Profil-Dialog setzt das; der Start-Dialog zeigt Ungesehenes.
+   */
+  withArchive?: boolean;
 }
 
 /** Präsentation: Blöcke mit Datum und Aufzählung, «Verstanden» schliesst. */
@@ -51,8 +57,22 @@ export function WhatsNewDialog({
   onOpenChange,
   blocks,
   intro,
+  withArchive = false,
 }: WhatsNewDialogProps) {
   const { lang, t } = useI18n();
+  /** Archiv-Blöcke, sobald geholt; null = noch nicht geladen. */
+  const [olderBlocks, setOlderBlocks] = useState<ChangelogBlock[] | null>(null);
+  const [loadingOlder, setLoadingOlder] = useState(false);
+  const loadOlder = () => {
+    setLoadingOlder(true);
+    void import("@/data/changelogArchive")
+      .then(({ changelogArchive }) => setOlderBlocks(changelogArchive))
+      .catch(() => {
+        /* Offline und nicht im Cache: der Knopf bleibt einfach stehen */
+      })
+      .finally(() => setLoadingOlder(false));
+  };
+  const shownBlocks = olderBlocks ? [...blocks, ...olderBlocks] : blocks;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -65,7 +85,7 @@ export function WhatsNewDialog({
           <DialogDescription>{intro}</DialogDescription>
         </DialogHeader>
         <div className="grid gap-4">
-          {blocks.map(block => (
+          {shownBlocks.map(block => (
             <section key={block.id}>
               <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 {fmtLong(new Date(block.date), lang)}
@@ -86,6 +106,17 @@ export function WhatsNewDialog({
               </ul>
             </section>
           ))}
+          {withArchive && olderBlocks === null && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={loadingOlder}
+              onClick={loadOlder}
+            >
+              {t.whatsNew.showOlder}
+            </Button>
+          )}
         </div>
         <DialogFooter>
           <Button type="button" onClick={() => onOpenChange(false)}>

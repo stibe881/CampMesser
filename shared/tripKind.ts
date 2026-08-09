@@ -127,6 +127,8 @@ export interface TripKindPreset {
    * (#489)? Beim Tagesausflug IST der Ausflug die Reise.
    */
   excursions: boolean;
+  /** Velo-Läden & -Werkstätten in der Heute-Ansicht zeigen (#527). */
+  bike: boolean;
 }
 
 export const TRIP_KIND_PRESETS: Record<TripKind, TripKindPreset> = {
@@ -141,6 +143,7 @@ export const TRIP_KIND_PRESETS: Record<TripKind, TripKindPreset> = {
     beaches: false,
     transit: false,
     excursions: false,
+    bike: false,
   },
   strand: {
     // Baderegeln & Flaggen (#473) gehören an den Strand-Schnellzugriff
@@ -154,6 +157,7 @@ export const TRIP_KIND_PRESETS: Record<TripKind, TripKindPreset> = {
     beaches: true,
     transit: false,
     excursions: false,
+    bike: false,
   },
   hotel: {
     quickModules: ["/ausweise", "/sprachhilfe"],
@@ -165,6 +169,7 @@ export const TRIP_KIND_PRESETS: Record<TripKind, TripKindPreset> = {
     beaches: false,
     transit: true,
     excursions: false,
+    bike: false,
   },
   staedte: {
     quickModules: ["/ausweise", "/sprachhilfe"],
@@ -176,6 +181,7 @@ export const TRIP_KIND_PRESETS: Record<TripKind, TripKindPreset> = {
     beaches: false,
     transit: true,
     excursions: false,
+    bike: false,
   },
   wandern: {
     quickModules: ["/wanderung", "/erste-hilfe"],
@@ -187,6 +193,7 @@ export const TRIP_KIND_PRESETS: Record<TripKind, TripKindPreset> = {
     beaches: false,
     transit: false,
     excursions: false,
+    bike: false,
   },
   velo: {
     quickModules: ["/wanderung", "/reparatur"],
@@ -198,6 +205,7 @@ export const TRIP_KIND_PRESETS: Record<TripKind, TripKindPreset> = {
     beaches: false,
     transit: false,
     excursions: false,
+    bike: true,
   },
   wintersport: {
     // «Pisten & Lawinen» (#472) zuerst – das schlägt man am Berg nach
@@ -210,6 +218,7 @@ export const TRIP_KIND_PRESETS: Record<TripKind, TripKindPreset> = {
     beaches: false,
     transit: false,
     excursions: false,
+    bike: false,
   },
   tagesausflug: {
     quickModules: ["/lunchbox", "/regentag"],
@@ -221,6 +230,7 @@ export const TRIP_KIND_PRESETS: Record<TripKind, TripKindPreset> = {
     beaches: false,
     transit: true,
     excursions: true,
+    bike: false,
   },
 };
 
@@ -250,6 +260,13 @@ export interface TripKindFormPreset {
    */
   pitchDetails: boolean;
   /**
+   * Unterkunfts-Details mit Hotel-Beschriftung zeigen (#520): dieselben
+   * Felder wie die Stellplatz-Details (Nummer, WLAN, Notizen), aber als
+   * «Zimmer & Unterkunft» – gespeichert wird in denselben Spalten, damit
+   * kein zweiter Satz Felder entsteht.
+   */
+  hotelDetails: boolean;
+  /**
    * Ein-Tages-Reise: nur EIN Datum abfragen, Abreise = Anreise. Ein
    * Tagesausflug mit getrennter «Abreise» wäre eine Fangfrage.
    */
@@ -257,15 +274,55 @@ export interface TripKindFormPreset {
 }
 
 export const TRIP_KIND_FORMS: Record<TripKind, TripKindFormPreset> = {
-  camping: { spotSelect: true, pitchDetails: true, singleDay: false },
-  strand: { spotSelect: false, pitchDetails: false, singleDay: false },
-  hotel: { spotSelect: false, pitchDetails: false, singleDay: false },
-  staedte: { spotSelect: false, pitchDetails: false, singleDay: false },
+  camping: {
+    spotSelect: true,
+    pitchDetails: true,
+    hotelDetails: false,
+    singleDay: false,
+  },
+  strand: {
+    spotSelect: false,
+    pitchDetails: false,
+    hotelDetails: true,
+    singleDay: false,
+  },
+  hotel: {
+    spotSelect: false,
+    pitchDetails: false,
+    hotelDetails: true,
+    singleDay: false,
+  },
+  staedte: {
+    spotSelect: false,
+    pitchDetails: false,
+    hotelDetails: true,
+    singleDay: false,
+  },
   // Mehrtages-Touren übernachten oft auf Plätzen – Zeltplatz erlaubt
-  wandern: { spotSelect: true, pitchDetails: true, singleDay: false },
-  velo: { spotSelect: true, pitchDetails: true, singleDay: false },
-  wintersport: { spotSelect: false, pitchDetails: false, singleDay: false },
-  tagesausflug: { spotSelect: false, pitchDetails: false, singleDay: true },
+  wandern: {
+    spotSelect: true,
+    pitchDetails: true,
+    hotelDetails: false,
+    singleDay: false,
+  },
+  velo: {
+    spotSelect: true,
+    pitchDetails: true,
+    hotelDetails: false,
+    singleDay: false,
+  },
+  wintersport: {
+    spotSelect: false,
+    pitchDetails: false,
+    hotelDetails: true,
+    singleDay: false,
+  },
+  tagesausflug: {
+    spotSelect: false,
+    pitchDetails: false,
+    hotelDetails: false,
+    singleDay: true,
+  },
 };
 
 /** Formular-Preset einer (auch unbekannten) Art – nie undefined. */

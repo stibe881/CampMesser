@@ -199,6 +199,11 @@ export const packLists = mysqlTable(
     /** Gewichts-Budget in Gramm – null = kein Budget gesetzt. */
     weightBudgetGrams: int("weightBudgetGrams"),
     /**
+     * Limite PRO PERSON in Gramm (#518) – z. B. 23 kg Fluggepäck.
+     * Unabhängig vom Listen-Budget; null = keine Limite.
+     */
+    personWeightBudgetGrams: int("personWeightBudgetGrams"),
+    /**
      * Personen der Liste als JSON-Array von Namen (max. 10, je ≤ 80 Zeichen);
      * null = keine Personen-Bereiche. Parser in shared/packPersons.ts.
      */

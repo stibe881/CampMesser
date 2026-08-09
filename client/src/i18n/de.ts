@@ -697,6 +697,11 @@ export const de = {
     budgetRemoved: "Gewichts-Budget entfernt",
     budgetSaveFailed: "Budget konnte nicht gespeichert werden",
     budgetInvalid: "Gib ein Gewicht zwischen 0,1 und 500 kg ein",
+    personBudgetLabel: "Limite pro Person (kg)",
+    personBudgetPlaceholder: "z. B. 23",
+    personBudgetHint:
+      "Zum Beispiel 23 kg Fluggepäck – die Traglast-Zeile färbt Personen über der Limite ein. Leer lassen für keine Limite.",
+    personBudgetInfo: (limit: string) => `Limite: ${limit} pro Person`,
     uncheckAllButton: "Alle Haken lösen",
     uncheckAllConfirm: (n: number) =>
       n === 1
@@ -1002,6 +1007,7 @@ export const de = {
     portalLink: "Offizielle Übersicht der Kantone",
   },
   weather: {
+    tripPlaceSuggest: (name: string) => `Reise-Ort «${name}» merken`,
     mosquitoTitle: "Stechmücken heute Abend",
     mosquitoAria: "Stechmücken-Index für den Abend",
     mosquitoBarAria: (score: number) => `Stechmücken-Index ${score} von 100`,
@@ -1486,6 +1492,8 @@ export const de = {
     levelLink: "Wasserwaage",
   },
   roadRules: {
+    plugTitle: "Steckdosen & Adapter",
+    tippingTitle: "Trinkgeld",
     title: "Maut, Vignette & Regeln",
     subtitle:
       "Kurzinfo fürs Zielland: Maut, Tempo mit Anhänger, Pflichtausrüstung, Notruf.",
@@ -1511,6 +1519,9 @@ export const de = {
       `${country}: Stand ${date}. Angaben in km/h; ohne Gewähr.`,
   },
   sos: {
+    tripCountryTitle: (country: string) => `Notruf für deine Reise: ${country}`,
+    tripCountryHint:
+      "Deine laufende Reise liegt in diesem Land – diese Nummern gelten dort.",
     title: "SOS & Notfall-Dashboard",
     subtitle:
       "Dein Standort und alle wichtigen Notfallnummern – für den Fall der Fälle.",
@@ -2506,6 +2517,17 @@ export const de = {
       "Geteilt mit ReiseKompass – deinem Kompass für Ferien, Camping und Ausflüge.",
   },
   trips: {
+    hotelSectionTitle: "Zimmer & Unterkunft",
+    hotelSectionHint:
+      "Gilt für diesen Aufenthalt – Zimmernummer, WLAN und Notizen (z. B. Frühstückszeiten).",
+    hotelRoomLabel: "Zimmer / Etage",
+    hotelRoomPlaceholder: "z. B. Zimmer 204, 2. Stock",
+    templateSuggest: (name: string) =>
+      `Vorlage «${name}» als Packliste übernehmen`,
+    templateListCreated: "Packliste aus der Vorlage erstellt und verknüpft.",
+    readinessAbroadHint: (country: string) =>
+      `Diese Reise führt nach ${country} – denk an Vignette, Maut und Mitführpflichten.`,
+    readinessAbroadLink: "Länder-Merkblatt öffnen",
     whoAlongTitle: "Wer ist dabei?",
     whoAlongHint:
       "Angetippt heisst dabei. Daraus entstehen die Stempel im Reisepass – der Familien-Stempel nur, wenn alle dabei sind.",
@@ -2930,6 +2952,9 @@ export const de = {
     eurRateRemove: "Kurs entfernen",
     eurRateHint:
       "Gilt für Summe, Budget und «Wer schuldet wem» dieser Reise. Die Belege bleiben in Euro gespeichert.",
+    ecbRateLine: (rate: string, date: string) =>
+      `EZB-Referenzkurs vom ${date}: 1 € = ${rate} CHF`,
+    ecbRateApply: "Übernehmen",
     eurConvertedNote: (eur: string, rate: string) =>
       `davon ${eur}, umgerechnet zum Kurs ${rate}`,
     eurUnconvertedNote: (eur: string) =>
@@ -4501,6 +4526,7 @@ export const de = {
     weatherLine: (min: number, max: number, label: string) =>
       label ? `${min}–${max} °C · ${label}` : `${min}–${max} °C`,
     snowDepthLine: (cm: number) => `Schneehöhe: rund ${cm} cm`,
+    snowfallLine: (cm: number) => `Neuschnee heute: rund ${cm} cm`,
     choresTitle: "Ämtli heute",
     choresEmpty: "Für heute ist nichts verteilt.",
     choresToggleAria: (title: string) => `${title} abhaken`,
@@ -4732,6 +4758,38 @@ export const de = {
     source: "Quelle: transport.opendata.ch – ohne Gewähr.",
   },
   poi: {
+    pharmacies: {
+      title: "Apotheken in der Nähe",
+      subtitle:
+        "Aus OpenStreetMap – Öffnungszeiten, soweit eingetragen, ohne Gewähr.",
+      unnamed: "Apotheke",
+      empty: (radius: string) =>
+        `Im Umkreis von ${radius} ist keine Apotheke eingetragen.`,
+    },
+    laundry: {
+      title: "Waschsalons in der Nähe",
+      subtitle:
+        "Waschsalons und Textilreinigungen aus OpenStreetMap – für den Waschtag unterwegs.",
+      unnamed: "Waschsalon",
+      empty: (radius: string) =>
+        `Im Umkreis von ${radius} ist kein Waschsalon eingetragen.`,
+    },
+    bikeShops: {
+      title: "Velo-Läden & Werkstätten",
+      subtitle:
+        "Aus OpenStreetMap – «Service» heisst: Reparatur ist eingetragen.",
+      unnamed: "Velo-Laden",
+      empty: (radius: string) =>
+        `Im Umkreis von ${radius} ist kein Velo-Laden eingetragen.`,
+    },
+    winterSpots: {
+      title: "Bahnen & Loipen in der Nähe",
+      subtitle:
+        "Aufstiegshilfen und benannte Loipen aus OpenStreetMap – der Einstieg in den Schneetag.",
+      unnamed: "Bahn",
+      empty: (radius: string) =>
+        `Im Umkreis von ${radius} ist keine Bahn und keine Loipe eingetragen.`,
+    },
     radiusLabel: "Umkreis:",
     radiusGroupAria: "Suchradius wählen",
     loading: "Suche läuft …",
@@ -6423,7 +6481,8 @@ export const de = {
   whatsNew: {
     title: "Was ist neu",
     startIntro: "Das hat sich seit deinem letzten Besuch getan:",
-    allIntro: "Alle bisherigen Neuerungen im Überblick:",
+    allIntro: "Die letzten Neuerungen im Überblick:",
+    showOlder: "Ältere anzeigen",
     confirm: "Verstanden",
   },
   shareTarget: {

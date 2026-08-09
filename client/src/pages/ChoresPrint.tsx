@@ -6,8 +6,9 @@
  * App (rotateAssignments, #270) – nachrechenbar, ohne Zufall.
  */
 import { useEffect } from "react";
-import { ArrowLeft, Loader2, Printer } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import PrintButton from "@/components/PrintButton";
 import LoginPrompt from "@/components/LoginPrompt";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
@@ -82,19 +83,7 @@ export default function ChoresPrintPage() {
           <ArrowLeft className="mr-1.5 h-4 w-4" aria-hidden="true" />
           {t.common.back}
         </Button>
-        <Button
-          size="sm"
-          onClick={() => {
-            if (standalone) {
-              window.open(window.location.href, "_blank", "noopener");
-            } else {
-              window.print();
-            }
-          }}
-        >
-          <Printer className="mr-1.5 h-4 w-4" aria-hidden="true" />
-          {t.packListPrint.printButton}
-        </Button>
+        <PrintButton label={t.packListPrint.printButton} />
       </div>
       {standalone && (
         <p className="mb-6 text-xs text-muted-foreground print:hidden">

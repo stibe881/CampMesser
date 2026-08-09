@@ -108,6 +108,7 @@ describe("emptyCounts", () => {
     // Zahl übersieht man und nimmt sie falsch ins Budget.
     const counts = emptyCounts({
       name: "Hauptsaison",
+      currency: "CHF",
       rows: [
         { label: "Erwachsene", priceRappen: 1600 },
         { label: "Kind", priceRappen: 800 },
