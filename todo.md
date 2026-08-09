@@ -1153,3 +1153,28 @@ EHRLICH (Runde 56): Nichts davon wurde am Bildschirm verifiziert (kein Browser-Z
 - [x] #625 prefers-reduced-motion: Animationen/Übergänge praktisch sofort, Lade-Spinner drehen ruhig weiter (bleiben als «lädt» erkennbar), sanftes Scrollen wird zu Springen
 
 EHRLICH (Runde 57): Nichts davon wurde am Bildschirm verifiziert (kein Browser-Zugriff auf die laufende App). Keine neuen Migrationen – #608/#613 kommen ohne Schema-Change aus (JSON-Spalte bzw. Papierkorb-Snapshots). Vier Punkte existierten bereits vollständig (#597→#560, #603→#551/#570, #605→#571/#583, #621→#389) und wurden NICHT doppelt gebaut; bei #610/#611/#617/#623 wurde nur der tatsächlich fehlende Teil ergänzt.
+
+## Zwanzig Punkte (09.08.2026, Runde 58)
+
+- [x] #626 Reise-Zeitachse: Journal, Tages-Fotos, Ausgaben und Etappen-Ankünfte chronologisch gemischt, aufklappbar in der Reise (Daten laden erst beim Öffnen; Fotos ehrlich nach Upload-Zeitpunkt datiert)
+- [x] #627 Etappen-Reihenfolge optimieren: «Kürzeste Runde» in den Etappen – OSRM-Distanzmatrix, Nearest-Neighbour + 2-opt (shared/routing.ts, 5 Tests); Etappe 1 bleibt Start, jede behält ihre Nächte, die Daten werden neu verkettet; nur wenn ALLE Etappen Koordinaten haben
+- [x] #628 Eigene Reise als Vorlage (Muster #78): Merkzeichen-Knopf an jeder eigenen Reise speichert Dauer, Art, Ort und Etappen mit relativer Nächtezahl (Tabelle tripTemplatesCustom, Migration 0125, max. 20); «Anwenden» im Vorlagen-Dialog verkettet die Etappen ab dem gewählten Anreisetag
+- [x] #629 Reise-Bericht teilen: /bericht/:token als schreibgeschützte Erinnerungs-Seite (Titelbild, Etappen, Journal mit Fotos, Galerie) – derselbe Token wie der Hub, Fotos über /api/bericht/…-Routen, «Teilen beenden» macht alles ungültig; zweiter Link im Teilen-Dialog
+- [x] #630 Wetter am nächsten Etappenort im Vorabend-Push: Höchsttemperatur und Regen des Ankunftstags als Zusatz-Zeile im «Morgen weiter nach …»-Push (Open-Meteo, je Ziel gecacht; ohne Netz/Koordinaten schlicht ohne Wetter-Zeile; 2 neue Tests)
+- [x] #631 Ortssuche auf der grossen Karte: Suchfeld mit derselben Geocoding-Quelle wie das Reise-Formular (#465), Treffer-Chip fährt die Karte hin – von dort übernimmt der Karten-Klick (#115)
+- [x] #632 GPX/KML-Import für Merkorte: Wegpunkte aus GPX (<wpt>) und KML (<Placemark><Point>) werden zu Merkorten (max. 50, Tracks bewusst nicht; Parser mit 4 Tests)
+- [x] #633 «Wo waren wir schon»-Karte in der Statistik: besuchte Reisen, Zeltplätze und Etappen als Punkte auf einer lazy geladenen Mini-Karte, nahe Duplikate zusammengefasst
+- [x] #634 Barcode-Scan für Kühlbox & Vorrat: Foto des Strichcodes → native BarcodeDetector-API → Produktname von OpenFoodFacts ins Namensfeld; ohne API-Unterstützung (z. B. Firefox) erscheint der Knopf nicht
+- [x] #635 Koch-Notizen & «zuletzt gekocht» pro Rezept: privater Merkzettel + «Heute gekocht»-Knopf im Rezept-Detail, abgelegt wie die Favoriten (localStorage + Geräte-Sync, neuer Schlüssel recipeNotes)
+- [x] #636 Wocheneinkauf skaliert Portionen – EXISTIERTE BEREITS: Die Personenzahl im Menüplan (#231) skaliert Zutaten-Vorschau UND Einkaufslisten-Übernahme seit Commit c51b933; nichts doppelt gebaut
+- [x] #637 Fahrzeug-Service-Merker (Muster #124): zweiter Vorschlags-Katalog «Fahrzeug & Wohnwagen» in der Ausrüstungs-Pflege (Service/Öl, Reifen, Gasprüfung, Aufbaubatterie, Dichtungen, Wasseranlage) – gleiche Tabelle, gleiche Fälligkeits-Logik
+- [x] #638 Streckenmaut-Schätzung im Fahrtkosten-Rechner: Länder-Auswahl (FR/IT/ES/PT/HR/GR) mit groben Rappen-pro-km-Sätzen; Schätzung wandert mit in den Reisekassen-Eintrag («inkl. Maut-Schätzung»); Vignetten-Länder bewusst nicht (stehen in #228); 3 Tests
+- [x] #639 Ampere-Helfer am Platz: Säulen-Sicherung (4–16 A) + Geräte-Chips → hält die Sicherung? (230 V, typische Nennleistungen; shared/ampereHelper.ts, 4 Tests) – neuer Abschnitt im Strom-Budget
+- [x] #640 Frisch-/Grauwasser-Tracker: Tankgrössen + Füllstände im Trinkwasser-Rechner, der Tagesbedarf von oben rechnet «reicht noch X Tage» und «Grauwasser voll in Y Tagen» (pro Gerät im localStorage)
+- [x] #641 Sprachhilfe vorlesen – EXISTIERTE BEREITS: Der Vorlese-Knopf (useSpeech, Stimme passend zur Zielsprache) kam schon mit #211; nichts doppelt gebaut
+- [x] #642 Länder-Quiz für Kinder (Muster #185): Flaggen-Fragen frisch gewürfelt aus dem Länder-Nachschlagewerk (#228), Flagge→Land und Land→Flagge im Wechsel, gleicher Quiz-Player samt Duell und Abzeichen (Generator mit 3 Tests)
+- [x] #643 Reisekosten nach Land: Ausgaben-Statistik liefert die CHF-Summe je Reise mit; die Statistik-Seite verteilt sie mit der Länder-Logik aus #510/#606 aufs geratene Reiseland – nicht Zuordenbares steht ehrlich als «ohne erkennbares Land»
+- [x] #644 UI-Tests Runde 57: Farb-Legende mit Filter (#602), Jahr-Filter (#617), Rundreise-Vorlage im Dialog (#619), Vignetten-Knopf → Reisekasse (#604) – je mit axe; der Befördern-Knopf (#600) steckt im Karten-Popup und ist in jsdom ehrlich nicht erreichbar; TripTemplatePicker-Tests brauchten neu den ConfirmProvider (#628)
+- [x] #645 Offline-Persistenz erweitert: prefetchTripCore lädt neu Etappen, Journal und Merkorte vor – wirkt für «Offline stellen» (#387) UND die Auto-Auffrischung (#411)
+
+EHRLICH (Runde 58): Nichts davon wurde am Bildschirm verifiziert (kein Browser-Zugriff auf die laufende App); Barcode-Scan (#634) und GPX-Import (#632) sind nur gegen Tests bzw. API-Verträge geprüft, die Maut-Sätze (#638) sind bewusst grobe Näherungen. Neue Migration dieser Runde: 0125 (tripTemplatesCustom) – läuft beim nächsten Deploy. Zwei Punkte existierten bereits vollständig (#636→#231, #641→#211) und wurden NICHT doppelt gebaut.
