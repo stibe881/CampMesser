@@ -42,6 +42,7 @@ import {
   pushLog,
   pushSubscriptions,
   tripLogs,
+  tripStops,
 } from "../drizzle/schema";
 import {
   isShowerActive,
@@ -58,6 +59,7 @@ import { heatAdvice } from "../shared/heatCare";
 import { pick } from "../shared/i18n";
 import { getMoonInfo } from "../shared/moon";
 import { daysUntilTrip, isTripActiveOn } from "../shared/trips";
+import { currentTripStop } from "../shared/tripStops";
 import { distanceMeters } from "../shared/geo";
 import {
   ATTRIBUTION,
@@ -1488,13 +1490,47 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
    * Ferien auf Balkonien sind auch Ferien.
    */
   const activeTrips = allTrips.filter(trip => isTripActiveOn(trip, today));
-  const activeSpotIds = new Set(
-    activeTrips
-      .map(trip => trip.spotId)
-      .filter((id): id is number => id !== null)
-  );
-  /** Koordinaten einer Reise: verknüpfter Platz vor Freitext-Ort. */
+  /**
+   * Aktuelle Etappe je laufender Reise (#557): Bei einer Rundreise steht
+   * man heute nicht am Startort, sondern an der Etappe, deren Zeitraum
+   * den Tag abdeckt – gewarnt wird DORT. Nur Etappen mit Koordinaten
+   * zählen; ohne bleibt es ehrlich beim Platz bzw. Reise-Ort.
+   */
+  const stageByTrip = new Map<
+    number,
+    { name: string; latitude: number; longitude: number }
+  >();
+  if (activeTrips.length > 0) {
+    const stops = await db
+      .select()
+      .from(tripStops)
+      .where(
+        inArray(
+          tripStops.tripId,
+          activeTrips.map(trip => trip.id)
+        )
+      );
+    const stopsByTrip = new Map<number, typeof stops>();
+    for (const stop of stops) {
+      const list = stopsByTrip.get(stop.tripId) ?? [];
+      list.push(stop);
+      stopsByTrip.set(stop.tripId, list);
+    }
+    stopsByTrip.forEach((tripStopRows, tripId) => {
+      const current = currentTripStop(tripStopRows, today);
+      if (current && current.latitude != null && current.longitude != null) {
+        stageByTrip.set(tripId, {
+          name: current.name,
+          latitude: current.latitude,
+          longitude: current.longitude,
+        });
+      }
+    });
+  }
+  /** Koordinaten einer Reise: aktuelle Etappe vor Platz vor Freitext-Ort. */
   const tripCoords = (trip: (typeof allTrips)[number]) => {
+    const stage = stageByTrip.get(trip.id);
+    if (stage) return { latitude: stage.latitude, longitude: stage.longitude };
     const spot = trip.spotId !== null ? spotById.get(trip.spotId) : undefined;
     if (spot) return { latitude: spot.latitude, longitude: spot.longitude };
     if (trip.latitude != null && trip.longitude != null) {
@@ -1502,6 +1538,14 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
     }
     return null;
   };
+  // Reisen, die heute an einer Etappe MIT Koordinaten stehen, werden dort
+  // gewarnt – ihr Platz/Startort fällt für diesen Lauf weg.
+  const activeSpotIds = new Set(
+    activeTrips
+      .filter(trip => !stageByTrip.has(trip.id))
+      .map(trip => trip.spotId)
+      .filter((id): id is number => id !== null)
+  );
   for (const spot of spots) {
     if (!activeSpotIds.has(spot.id)) continue;
     const hourly = await cachedHourly(spot.latitude, spot.longitude);
@@ -1515,10 +1559,27 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
       longitude: spot.longitude,
     });
   }
+  // Aktuelle Etappen (#557): ein Warn-Punkt an der Etappe, benannt nach
+  // ihr («Bologna»), Dedup-Schlüssel bleibt an der Reise.
+  for (const trip of activeTrips) {
+    const stage = stageByTrip.get(trip.id);
+    if (!stage) continue;
+    const hourly = await cachedHourly(stage.latitude, stage.longitude);
+    if (!hourly) continue;
+    weatherPoints.push({
+      userId: trip.userId,
+      name: stage.name,
+      keyPrefix: `trip:${trip.id}`,
+      hourly,
+      latitude: stage.latitude,
+      longitude: stage.longitude,
+    });
+  }
   // Laufende Reisen ohne Platz, aber mit Koordinaten (#465): Hotel-,
   // Strand- und Städtereisen sollen dieselbe Warnung bekommen wie ein
   // verknüpfter Zeltplatz.
   for (const trip of activeTrips) {
+    if (stageByTrip.has(trip.id)) continue;
     if (trip.spotId !== null || trip.latitude == null || trip.longitude == null)
       continue;
     const hourly = await cachedHourly(trip.latitude, trip.longitude);
