@@ -54,6 +54,11 @@ export default function TripPrintPage() {
     { tripId },
     { enabled: isAuthenticated && validId }
   );
+  // Etappen (#556): die Rundreise gehört in den Bericht
+  const stopsQuery = trpc.trips.stops.list.useQuery(
+    { tripId },
+    { enabled: isAuthenticated && validId }
+  );
   const customQuery = trpc.recipes.list.useQuery(undefined, {
     enabled: isAuthenticated,
   });
@@ -260,6 +265,48 @@ export default function TripPrintPage() {
               {t.tripPrint.notesTitle}
             </h2>
             <p className="whitespace-pre-line text-sm">{trip.notes}</p>
+          </section>
+        )}
+
+        {/* Etappen der Rundreise (#556): Ort, Ankunft, Weiterreise, Nächte */}
+        {(stopsQuery.data ?? []).length > 0 && (
+          <section className="mb-6">
+            <h2 className="mb-2 border-b border-foreground/30 pb-1 text-sm font-bold uppercase tracking-wide">
+              {t.tripStops.title}
+            </h2>
+            <table className="w-full border-collapse text-sm">
+              <thead>
+                <tr>
+                  <th className="border border-foreground/40 px-2 py-1.5 text-left text-xs font-bold uppercase tracking-wide">
+                    {t.tripStops.nameLabel}
+                  </th>
+                  <th className="border border-foreground/40 px-2 py-1.5 text-left text-xs font-bold uppercase tracking-wide">
+                    {t.tripStops.fromLabel}
+                  </th>
+                  <th className="border border-foreground/40 px-2 py-1.5 text-left text-xs font-bold uppercase tracking-wide">
+                    {t.tripStops.toLabel}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {(stopsQuery.data ?? []).map((stop, index) => (
+                  <tr key={stop.id} className="print-station">
+                    <td className="border border-foreground/40 px-2 py-1.5 font-medium">
+                      {index + 1}. {stop.name}
+                    </td>
+                    <td className="border border-foreground/40 px-2 py-1.5">
+                      {fmtLong(stop.startDate, lang)}
+                    </td>
+                    <td className="border border-foreground/40 px-2 py-1.5">
+                      {fmtLong(stop.endDate, lang)} ·{" "}
+                      {t.trips.nightsCount(
+                        tripNights(stop.startDate, stop.endDate)
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </section>
         )}
 

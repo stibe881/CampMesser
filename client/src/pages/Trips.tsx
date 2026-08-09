@@ -489,15 +489,39 @@ export default function TripsPage() {
   };
 
   /**
-   * Kalender-Datei erzeugen und herunterladen – rein im Browser, offline
-   * (gleiches Blob-Muster wie der GPX-Export der Wanderungen).
+   * Kalender-Datei erzeugen und herunterladen (Blob-Muster wie der
+   * GPX-Export der Wanderungen). Vorher werden die Etappen jeder Reise
+   * geholt (#556) – jede bekommt ihr eigenes «Etappe: …»-Ereignis; ohne
+   * Netz fällt nur dieser Teil weg, die Reisen selbst bleiben drin.
    */
-  const downloadIcs = (list: (typeof allTrips)[number][], fileName: string) => {
+  const downloadIcs = async (
+    list: (typeof allTrips)[number][],
+    fileName: string
+  ) => {
     try {
-      const ics = buildTripIcs(list.map(toIcsTrip), {
-        dtstamp: new Date(),
-        lang,
-      });
+      const stopsByTrip = new Map<number, IcsTrip["stops"]>();
+      await Promise.all(
+        list.map(async trip => {
+          try {
+            const stops = await utils.trips.stops.list.fetch({
+              tripId: trip.id,
+            });
+            if (stops.length > 0) stopsByTrip.set(trip.id, stops);
+          } catch {
+            // Etappen nicht ladbar (offline) – Reise-Ereignis genügt
+          }
+        })
+      );
+      const ics = buildTripIcs(
+        list.map(trip => ({
+          ...toIcsTrip(trip),
+          stops: stopsByTrip.get(trip.id),
+        })),
+        {
+          dtstamp: new Date(),
+          lang,
+        }
+      );
       const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -515,7 +539,7 @@ export default function TripsPage() {
 
   /** Eine einzelne Reise als .ics herunterladen. */
   const downloadTripIcs = (trip: (typeof allTrips)[number]) => {
-    downloadIcs([trip], icsFileName(label(trip), trip.startDate));
+    void downloadIcs([trip], icsFileName(label(trip), trip.startDate));
   };
 
   /** Eintrag im Dialog zum Bearbeiten öffnen – den Rest macht der Dialog. */
@@ -915,7 +939,7 @@ export default function TripsPage() {
               variant="outline"
               size="sm"
               onClick={() =>
-                downloadIcs(
+                void downloadIcs(
                   plannedTrips,
                   icsFileName("campmesser-reisen", today, "reisen")
                 )

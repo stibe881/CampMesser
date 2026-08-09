@@ -292,6 +292,34 @@ describe("buildTripIcs", () => {
     expect(ics).toContain("UID:trip-13@campmesser.ch");
   });
 
+  it("legt je Etappe ein eigenes ganztägiges Ereignis an (#556)", () => {
+    const ics = buildTripIcs(
+      [
+        {
+          ...trip,
+          stops: [
+            {
+              id: 5,
+              name: "Bologna",
+              startDate: "2026-08-12",
+              endDate: "2026-08-14",
+            },
+            // Kaputte Etappe fällt still raus, wie kaputte Reisen
+            { id: 6, name: "Rimini", startDate: "kaputt", endDate: "kaputt" },
+          ],
+        },
+      ],
+      { dtstamp: DTSTAMP }
+    );
+    expect(ics.split("BEGIN:VEVENT").length - 1).toBe(2);
+    expect(ics).toContain("UID:trip-12-stop-5@campmesser.ch");
+    expect(ics).toContain("SUMMARY:Etappe: Bologna");
+    expect(ics).toContain("DTSTART;VALUE=DATE:20260812");
+    // DTEND exklusiv: Weiterreisetag + 1
+    expect(ics).toContain("DTEND;VALUE=DATE:20260815");
+    expect(ics).not.toContain("Rimini");
+  });
+
   it("überspringt kaputte Reisen, statt die Datei zu verderben", () => {
     const ics = buildTripIcs([trip, { ...trip, id: 99, startDate: "kaputt" }], {
       dtstamp: DTSTAMP,

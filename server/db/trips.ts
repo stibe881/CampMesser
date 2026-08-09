@@ -1196,6 +1196,19 @@ export async function getTripStops(tripId: number) {
     .where(eq(tripStops.tripId, tripId))
     .orderBy(asc(tripStops.startDate), asc(tripStops.id));
 }
+/**
+ * Etappen MEHRERER Reisen auf einmal (#556, Kalender-Abo): eine Abfrage
+ * statt einer je Reise – der Feed baut alle Reisen eines Kontos zusammen.
+ */
+export async function getTripStopsForTrips(tripIds: number[]) {
+  if (tripIds.length === 0) return [];
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(tripStops)
+    .where(inArray(tripStops.tripId, tripIds))
+    .orderBy(asc(tripStops.startDate), asc(tripStops.id));
+}
 /** Einzelne Etappe laden (für die Zugriffsprüfung über ihre tripId). */
 export async function getTripStopById(id: number) {
   const db = requireDb(await getDb());

@@ -387,6 +387,15 @@ async function startServer() {
         (await import("../db/spots")).getCampSpots(owner.id),
       ]);
       const spotById = new Map(spots.map(spot => [spot.id, spot]));
+      // Etappen (#556): je ein eigenes «Etappe: …»-Ereignis im Abo –
+      // eine Sammelabfrage für alle Reisen statt einer je Reise.
+      const allStops = await db.getTripStopsForTrips(trips.map(t => t.id));
+      const stopsByTrip = new Map<number, typeof allStops>();
+      for (const stop of allStops) {
+        const list = stopsByTrip.get(stop.tripId) ?? [];
+        list.push(stop);
+        stopsByTrip.set(stop.tripId, list);
+      }
       const { buildTripIcs } = await import("@shared/ics");
       const { tripDisplayName } = await import("@shared/tripName");
       const ics = buildTripIcs(
@@ -402,6 +411,7 @@ async function startServer() {
             placeName: spot?.name ?? trip.location ?? null,
             latitude: spot?.latitude ?? null,
             longitude: spot?.longitude ?? null,
+            stops: stopsByTrip.get(trip.id),
           };
         }),
         { dtstamp: new Date() }
