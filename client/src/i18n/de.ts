@@ -1092,6 +1092,14 @@ export const de = {
       "Balken = Regenmenge (mm/h, linke Achse) · Linie = Regenwahrscheinlichkeit (%, rechte Achse).",
     forecast7: "7-Tage-Vorhersage",
     week2Title: "Woche 2",
+    windowTitle: "Wetterfenster",
+    windowHint: "Welches Wochenende taugt fürs Rausgehen?",
+    windowWeekend: (sa: string, so: string) => `Sa ${sa} – So ${so}`,
+    windowSummary: (temp: number, rain: number) =>
+      rain > 0
+        ? `bis ${temp} °C · ${rain} mm Regen`
+        : `bis ${temp} °C · trocken`,
+    windowVerdicts: { top: "Top", ok: "Passt", bad: "Eher nicht" },
     week2Hint: "Ausblick – geringere Zuverlässigkeit",
     week2Aria: "Ausblick auf Woche 2",
     dayToggleAria: (day: string) =>

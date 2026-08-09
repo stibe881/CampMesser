@@ -4,7 +4,7 @@
 
 - [ ] #536 Etappen-Reisen (Zwischenhalte)
 - [ ] #537 Merkorte (Wunschziele) auf der Karte
-- [ ] #538 Wetterfenster-Finder (bestes Wochenende)
+- [x] #538 Wetterfenster-Finder: bewertet alle Wochenenden der 16-Tage-Prognose (Regen wiegt am schwersten, dann Temperatur, dann Böen) und zeigt sie auf der Wetterseite als Ampel-Liste, bestes zuoberst (shared/weatherWindow.ts, 4 Tests)
 - [ ] #539 Feiertage des Reiselands
 - [ ] #540 Beleg-Foto pro Reisekassen-Ausgabe
 - [x] #541 Ausgabe aus der Heute-Ansicht erfassen (QuickExpense-Knopf in der Reise-Kopfzeile: Betrag mit CHF/EUR, Kategorie-Chips, optionale Notiz; heutiger Tag, eigenes Konto als Zahler)

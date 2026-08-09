@@ -4,7 +4,8 @@ import { useTodayIso } from "@/lib/useTodayIso";
 // Diagramme erst nach dem ersten Bild (#354): recharts ist 384 kB.
 const RainChart = lazy(() => import("@/components/charts/RainChart"));
 const DayHoursChart = lazy(() => import("@/components/charts/DayHoursChart"));
-import { fmtWeekdayDay } from "@/lib/dateFormat";
+import { fmtShort, fmtWeekdayDay } from "@/lib/dateFormat";
+import { weekendWindows } from "@shared/weatherWindow";
 import {
   AlertTriangle,
   ArrowLeftRight,
@@ -1311,6 +1312,74 @@ export default function WeatherPage() {
               })}
             </CardContent>
           </Card>
+
+          {/* Wetterfenster (#538): Welches Wochenende taugt fürs Rausgehen?
+              Bewertet aus der ohnehin geladenen 16-Tage-Prognose. */}
+          {(() => {
+            const windows = weekendWindows(data.daily, todayIsoForTrips);
+            if (windows.length === 0) return null;
+            return (
+              <section aria-label={t.weather.windowTitle} className="mt-6">
+                <div className="mb-2.5 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
+                  <h2 className="font-serif text-lg font-semibold">
+                    {t.weather.windowTitle}
+                  </h2>
+                  <p className="text-xs text-muted-foreground">
+                    {t.weather.windowHint}
+                  </p>
+                </div>
+                <Card>
+                  <CardContent className="divide-y divide-border/60 pt-2">
+                    {windows.map(w => (
+                      <div
+                        key={w.saturday.date}
+                        className="flex items-center gap-3 py-2.5"
+                      >
+                        <span
+                          aria-hidden="true"
+                          className={cn(
+                            "h-2.5 w-2.5 shrink-0 rounded-full",
+                            w.verdict === "top"
+                              ? "bg-primary"
+                              : w.verdict === "ok"
+                                ? "bg-amber-500"
+                                : "bg-destructive/70"
+                          )}
+                        />
+                        <span className="min-w-0 flex-1 text-sm font-medium">
+                          {t.weather.windowWeekend(
+                            fmtShort(
+                              new Date(`${w.saturday.date}T00:00:00`),
+                              lang
+                            ),
+                            fmtShort(
+                              new Date(`${w.sunday.date}T00:00:00`),
+                              lang
+                            )
+                          )}
+                        </span>
+                        <span className="shrink-0 text-xs text-muted-foreground">
+                          {t.weather.windowSummary(w.tempMaxC, w.rainMm)}
+                        </span>
+                        <span
+                          className={cn(
+                            "shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold",
+                            w.verdict === "top"
+                              ? "bg-primary/15 text-primary"
+                              : w.verdict === "ok"
+                                ? "bg-amber-500/15 text-amber-600 dark:text-amber-500"
+                                : "bg-destructive/10 text-destructive"
+                          )}
+                        >
+                          {t.weather.windowVerdicts[w.verdict]}
+                        </span>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </section>
+            );
+          })()}
 
           {/* Woche 2: kompakter Ausblick ohne Stunden-Detail – die Prognose
               ist so weit voraus deutlich unsicherer, daher der Hinweis. */}

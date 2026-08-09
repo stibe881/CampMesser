@@ -1072,6 +1072,14 @@ export const it: Translation = {
       "Barre = quantità di pioggia (mm/h, asse sinistro) · Linea = probabilità di pioggia (%, asse destro).",
     forecast7: "Previsioni a 7 giorni",
     week2Title: "Settimana 2",
+    windowTitle: "Finestre meteo",
+    windowHint: "Quale fine settimana vale l'uscita?",
+    windowWeekend: (sa: string, so: string) => `sa ${sa} – do ${so}`,
+    windowSummary: (temp: number, rain: number) =>
+      rain > 0
+        ? `fino a ${temp} °C · ${rain} mm di pioggia`
+        : `fino a ${temp} °C · asciutto`,
+    windowVerdicts: { top: "Top", ok: "Va bene", bad: "Meglio di no" },
     week2Hint: "Tendenza – affidabilità ridotta",
     week2Aria: "Tendenza per la settimana 2",
     dayToggleAria: (day: string) =>

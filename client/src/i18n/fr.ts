@@ -1093,6 +1093,14 @@ export const fr: Translation = {
       "Barres = quantité de pluie (mm/h, axe gauche) · Ligne = probabilité de pluie (%, axe droit).",
     forecast7: "Prévisions à 7 jours",
     week2Title: "Semaine 2",
+    windowTitle: "Fenêtres météo",
+    windowHint: "Quel week-end vaut la sortie ?",
+    windowWeekend: (sa: string, so: string) => `sa ${sa} – di ${so}`,
+    windowSummary: (temp: number, rain: number) =>
+      rain > 0
+        ? `jusqu'à ${temp} °C · ${rain} mm de pluie`
+        : `jusqu'à ${temp} °C · sec`,
+    windowVerdicts: { top: "Top", ok: "Correct", bad: "Plutôt non" },
     week2Hint: "Tendance – fiabilité réduite",
     week2Aria: "Tendance pour la semaine 2",
     dayToggleAria: (day: string) =>
