@@ -41,6 +41,8 @@ export interface DayWeather {
   snowDepthCm: number | null;
   /** Neuschnee heute in cm (#525); null ohne Messwert. */
   snowfallTodayCm: number | null;
+  /** Regensumme heute in mm (#548); null ohne Messwert. */
+  rainTodayMm: number | null;
 }
 
 export function useDayWeather(
@@ -112,6 +114,10 @@ export function useDayWeather(
           snowfallTodayCm:
             typeof json?.daily?.snowfall_sum?.[0] === "number"
               ? Math.round(json.daily.snowfall_sum[0])
+              : null,
+          rainTodayMm:
+            typeof json?.daily?.precipitation_sum?.[0] === "number"
+              ? json.daily.precipitation_sum[0]
               : null,
         });
       })

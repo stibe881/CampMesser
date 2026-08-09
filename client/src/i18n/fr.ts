@@ -4810,6 +4810,14 @@ export const fr: Translation = {
       empty: (radius: string) =>
         `Aucun magasin de vélos répertorié dans un rayon de ${radius}.`,
     },
+    indoor: {
+      title: "Jour de pluie : musées & piscines à proximité",
+      subtitle:
+        "Il va pleuvoir aujourd'hui – ceci reste possible. D'OpenStreetMap, sans garantie.",
+      unnamed: "Lieu couvert",
+      empty: (radius: string) =>
+        `Rien de convenable n'est répertorié dans un rayon de ${radius}.`,
+    },
     winterSpots: {
       title: "Remontées & pistes de fond à proximité",
       subtitle:

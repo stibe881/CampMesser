@@ -14,7 +14,7 @@
 - [x] #545 Eigene Sätze in der Sprachhilfe (Abschnitt «Eigene Sätze» mit eigener Übersetzung je Zielsprache, Vorlesen/Löschen; lokal + Konto-Sync über neuen Sync-Schlüssel phrasebookCustom, max. 100 Einträge)
 - [x] #546 Schriftgrösse-Einstellung (3 Stufen im Profil unter dem Design; Wurzel-Schriftgrösse 100/112.5/125 %, nur pro Gerät gespeichert – lib/fontScale.ts, angewendet beim App-Start)
 - [x] #547 GRÖSSTENTEILS EXISTIERTE BEREITS: LV95-Anzeige im SOS und der Vorlese-Satz (#448) waren da. Neu hängt der Satz in der Schweiz die LV95-Koordinaten an («Schweizer Koordinaten: 2'600'123 / 1'199'456») – die Zahlen, mit denen die Einsatzzentrale arbeitet (formatLv95 + 3 Tests)
-- [ ] #548 Regenwetter-Karte in Heute (Museen/Hallenbäder)
+- [x] #548 Regenwetter-Karte in der Heute-Ansicht: Ab 3 mm Tagesregen erscheint «Regentag: Museen & Bäder in der Nähe» (OSM: museum/gallery/aquarium, Aquaparks, Hallenbäder) – bei jeder Reise-Art, Suche wie üblich erst auf Klick
 - [ ] #549 Menüplan-Autofüllen kennt das Wetter
 - [x] #550 Bargeld & Kartenzahlung pro Land (neues Feld payment für alle 9 Länder, eigene Karte auf der Länder-Seite – inkl. NL-Falle «nur Debitkarten» und DE-Bargeld-Hinweis)
 - [x] #551 Drei neue Länder komplett: Portugal, Griechenland, Dänemark mit allen Feldern (Maut inkl. PT-Portal-Falle, Gespann-Tempi, Promille, Mitführpflichten wie GR-Feuerlöscher, Umweltzonen inkl. DK-miljøzoner-Registrierung, Steckdosen inkl. Typ K, Trinkgeld, Bargeld/Karte, Notruf, Camping-Regeln, Aliase). SOS-Katalog um PT und GR ergänzt (DK war schon drin)

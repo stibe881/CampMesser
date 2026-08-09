@@ -4781,6 +4781,14 @@ export const it: Translation = {
       empty: (radius: string) =>
         `Nel raggio di ${radius} non è registrato nessun negozio di bici.`,
     },
+    indoor: {
+      title: "Giorno di pioggia: musei e piscine nei dintorni",
+      subtitle:
+        "Oggi si bagna – questo si può fare lo stesso. Da OpenStreetMap, senza garanzia.",
+      unnamed: "Meta al coperto",
+      empty: (radius: string) =>
+        `Nel raggio di ${radius} non c'è nulla di adatto registrato.`,
+    },
     winterSpots: {
       title: "Impianti e piste di fondo vicini",
       subtitle:

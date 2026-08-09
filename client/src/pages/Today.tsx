@@ -86,12 +86,14 @@ import NearbyExcursions from "@/components/NearbyExcursions";
 import {
   beachesQuery,
   bikeShopsQuery,
+  indoorQuery,
   parseBeaches,
   parseBikeShops,
+  parseIndoor,
   parseWintersport,
   wintersportQuery,
 } from "@/lib/overpass";
-import { Umbrella } from "lucide-react";
+import { Landmark, Umbrella } from "lucide-react";
 import { modules } from "@/data/modules";
 import { tripKindPreset } from "@shared/tripKind";
 
@@ -518,6 +520,29 @@ export default function TodayPage() {
               />
             </LazySection>
           )}
+
+          {/* Regenwetter-Karte (#548): Regnet es heute spürbar, sind
+              Museen und Hallenbäder die ehrliche Antwort auf «was
+              machen wir?» – bei jeder Reise-Art. */}
+          {weather?.rainTodayMm != null &&
+            weather.rainTodayMm >= 3 &&
+            coords && (
+              <LazySection minHeight={120}>
+                <NearbyPoints
+                  className="mt-4"
+                  latitude={coords.latitude}
+                  longitude={coords.longitude}
+                  icon={Landmark}
+                  texts={t.poi.indoor}
+                  query={indoorQuery}
+                  parse={parseIndoor}
+                  radii={[5000, 10000, 20000]}
+                  defaultRadiusM={10000}
+                  profile="car"
+                  sectionId="today-indoor"
+                />
+              </LazySection>
+            )}
 
           {/* Sehenswürdigkeiten (#486): Bei Städtereise und Hotelferien
               ist «was gibt es hier?» der Kern des Tages – dieselbe

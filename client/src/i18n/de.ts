@@ -4820,6 +4820,14 @@ export const de = {
       empty: (radius: string) =>
         `Im Umkreis von ${radius} ist kein Velo-Laden eingetragen.`,
     },
+    indoor: {
+      title: "Regentag: Museen & Bäder in der Nähe",
+      subtitle:
+        "Heute wird es nass – das hier geht trotzdem. Aus OpenStreetMap, ohne Gewähr.",
+      unnamed: "Indoor-Ziel",
+      empty: (radius: string) =>
+        `Im Umkreis von ${radius} ist nichts Passendes eingetragen.`,
+    },
     winterSpots: {
       title: "Bahnen & Loipen in der Nähe",
       subtitle:

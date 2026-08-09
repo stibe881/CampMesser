@@ -4686,6 +4686,13 @@ export const en: Translation = {
       unnamed: "Bike shop",
       empty: (radius: string) => `No bike shop recorded within ${radius}.`,
     },
+    indoor: {
+      title: "Rainy day: museums & pools nearby",
+      subtitle:
+        "It's getting wet today – these still work. From OpenStreetMap, no guarantee.",
+      unnamed: "Indoor spot",
+      empty: (radius: string) => `Nothing suitable is mapped within ${radius}.`,
+    },
     winterSpots: {
       title: "Lifts & cross-country trails nearby",
       subtitle:
