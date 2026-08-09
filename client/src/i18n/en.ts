@@ -2632,6 +2632,13 @@ export const en: Translation = {
     menuPlanAria: (name: string) => `Open the meal plan for ${name}`,
     deletePlannedAria: name => `Delete planned stay ${name}`,
     deleteEntryAria: name => `Delete entry ${name}`,
+    archiveAria: (name: string) => `Archive ${name}`,
+    unarchiveAria: (name: string) => `Restore ${name} from the archive`,
+    archiveSection: (n: number) => `Archive (${n})`,
+    archiveHint:
+      "Archived stays still count for statistics and the passport \u2013 they are only cleared from the list.",
+    archivedToast: "Moved to the archive",
+    unarchivedToast: "Restored from the archive",
     dossierAria: (name: string) => `Open the dossier for ${name}`,
     entriesTitle: "Your stays",
     empty: "No entries yet – record your first camping stay with “New trip”.",

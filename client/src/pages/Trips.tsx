@@ -63,6 +63,8 @@ import {
   Users,
   UtensilsCrossed,
   Wallet,
+  Archive,
+  ArchiveRestore,
 } from "lucide-react";
 import { Link, useRoute, useSearch } from "wouter";
 import { toast } from "sonner";
@@ -413,11 +415,39 @@ export default function TripsPage() {
       focusId === null
         ? trips.filter(
             t =>
-              kindFilter === "alle" || normalizeTripKind(t.kind) === kindFilter
+              t.archivedAt == null &&
+              (kindFilter === "alle" ||
+                normalizeTripKind(t.kind) === kindFilter)
           )
         : trips.filter(t => t.id === focusId),
     [trips, focusId, kindFilter]
   );
+  /**
+   * Archivierte Aufenthalte (Nutzerwunsch 09.08.2026): aus der Liste
+   * geräumt, aber nicht weg – sie stehen unten im eingeklappten Archiv
+   * und zählen weiter für Statistik, Reisepass und Suche. Über die
+   * Detail-Adresse /tagebuch/<id> bleibt jede archivierte Reise voll
+   * erreichbar (shownTrips filtert bei Fokus bewusst nicht).
+   */
+  const archivedTrips = useMemo(
+    () =>
+      trips.filter(
+        t =>
+          t.archivedAt != null &&
+          (kindFilter === "alle" || normalizeTripKind(t.kind) === kindFilter)
+      ),
+    [trips, kindFilter]
+  );
+  const [archiveOpen, setArchiveOpen] = useState(false);
+  const archiveMutation = trpc.trips.setArchived.useMutation({
+    onSuccess: (_data, vars) => {
+      toast.success(
+        vars.archived ? t.trips.archivedToast : t.trips.unarchivedToast
+      );
+      void utils.trips.list.invalidate();
+    },
+    onError: () => toast.error(t.common.actionFailed),
+  });
   const shownPlanned = useMemo(
     () =>
       focusId === null
@@ -1444,6 +1474,12 @@ export default function TripsPage() {
                         }
                         onRemove={() => removeMutation.mutate({ id: trip.id })}
                         onIcs={() => downloadTripIcs(trip)}
+                        onArchive={() =>
+                          archiveMutation.mutate({
+                            id: trip.id,
+                            archived: true,
+                          })
+                        }
                         onLeave={() =>
                           leaveMutation.mutate({ tripId: trip.id })
                         }
@@ -1454,6 +1490,78 @@ export default function TripsPage() {
                 );
               })}
             </ul>
+          )}
+          {/* Archiv (Nutzerwunsch 09.08.2026): standardmässig zu – wer
+              es öffnet, sieht die geräumten Aufenthalte als schlanke
+              Zeilen mit dem Weg zurück (Muster Packlisten #194). */}
+          {focusId === null && archivedTrips.length > 0 && (
+            <div className="mt-4">
+              <button
+                type="button"
+                onClick={() => setArchiveOpen(o => !o)}
+                aria-expanded={archiveOpen}
+                className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <Archive className="h-4 w-4" aria-hidden="true" />
+                {t.trips.archiveSection(archivedTrips.length)}
+                <ChevronDown
+                  className={cn(
+                    "h-4 w-4 transition-transform",
+                    archiveOpen && "rotate-180"
+                  )}
+                  aria-hidden="true"
+                />
+              </button>
+              {archiveOpen && (
+                <>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {t.trips.archiveHint}
+                  </p>
+                  <ul className="mt-2 space-y-1.5">
+                    {archivedTrips.map(trip => (
+                      <li
+                        key={trip.id}
+                        className="flex items-center gap-2 rounded-lg bg-muted/40 px-3 py-2"
+                      >
+                        <Link
+                          href={`/tagebuch/${trip.id}`}
+                          className="min-w-0 flex-1 truncate text-sm hover:underline"
+                        >
+                          {label(trip)}
+                          <span className="ml-2 text-xs text-muted-foreground">
+                            {formatTripRange(
+                              trip.startDate,
+                              trip.endDate,
+                              lang
+                            )}
+                          </span>
+                        </Link>
+                        {trip.role === "owner" && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 shrink-0 text-muted-foreground/60 hover:text-foreground"
+                            disabled={archiveMutation.isPending}
+                            onClick={() =>
+                              archiveMutation.mutate({
+                                id: trip.id,
+                                archived: false,
+                              })
+                            }
+                            aria-label={t.trips.unarchiveAria(label(trip))}
+                          >
+                            <ArchiveRestore
+                              className="h-3.5 w-3.5"
+                              aria-hidden="true"
+                            />
+                          </Button>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </div>
           )}
         </>
       )}

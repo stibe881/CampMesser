@@ -506,6 +506,13 @@ export const tripLogs = mysqlTable(
     endDate: date("endDate", { mode: "string" }).notNull(),
     /** Sterne-Bewertung 1–5; null = (noch) nicht bewertet */
     rating: tinyint("rating"),
+    /**
+     * Archiviert seit (Nutzerwunsch 09.08.2026, Muster #194); null =
+     * sichtbar. Archivierte Aufenthalte verschwinden nur aus der
+     * Reiseliste – Statistik, Reisepass und Suche zählen sie weiter,
+     * Archivieren ist Aufräumen, nicht Löschen.
+     */
+    archivedAt: timestamp("archivedAt"),
     /** Geplante Ankunftszeit «HH:MM»; null = keine Angabe */
     arrivalTime: varchar("arrivalTime", { length: 5 }),
     /** Geplante Abreisezeit «HH:MM»; null = keine Angabe */

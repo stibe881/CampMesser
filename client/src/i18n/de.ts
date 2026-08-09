@@ -2722,6 +2722,13 @@ export const de = {
     menuPlanAria: (name: string) => `Menüplan für ${name} öffnen`,
     deletePlannedAria: (name: string) => `Geplanten Aufenthalt ${name} löschen`,
     deleteEntryAria: (name: string) => `Eintrag ${name} löschen`,
+    archiveAria: (name: string) => `${name} archivieren`,
+    unarchiveAria: (name: string) => `${name} aus dem Archiv holen`,
+    archiveSection: (n: number) => `Archiv (${n})`,
+    archiveHint:
+      "Archivierte Aufenthalte z\u00e4hlen weiter f\u00fcr Statistik und Reisepass \u2013 sie sind nur aus der Liste ger\u00e4umt.",
+    archivedToast: "Im Archiv abgelegt",
+    unarchivedToast: "Aus dem Archiv geholt",
     dossierAria: (name: string) => `Dossier von ${name} öffnen`,
     entriesTitle: "Deine Aufenthalte",
     empty:

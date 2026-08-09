@@ -153,6 +153,22 @@ export async function setTripLogRating(
     .where(and(eq(tripLogs.id, id), eq(tripLogs.userId, userId)));
 }
 /**
+ * Aufenthalt archivieren bzw. hervorholen (Nutzerwunsch 09.08.2026,
+ * Muster der Packlisten #194) – nur der eigene Eintrag: Mitglieder
+ * räumen nicht die Liste der Besitzerin auf.
+ */
+export async function setTripLogArchived(
+  id: number,
+  userId: number,
+  archived: boolean
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(tripLogs)
+    .set({ archivedAt: archived ? new Date() : null })
+    .where(and(eq(tripLogs.id, id), eq(tripLogs.userId, userId)));
+}
+/**
  * Wetterarchiv-JSON eines Tagebuch-Eintrags speichern (nur eigener Eintrag).
  * Wird vom Client einmalig nach der Heimkehr befüllt.
  */

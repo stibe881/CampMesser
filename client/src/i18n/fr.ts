@@ -2718,6 +2718,13 @@ export const fr: Translation = {
     menuPlanAria: (name: string) => `Ouvrir le plan des repas de ${name}`,
     deletePlannedAria: name => `Supprimer le séjour prévu ${name}`,
     deleteEntryAria: name => `Supprimer l'entrée ${name}`,
+    archiveAria: (name: string) => `Archiver ${name}`,
+    unarchiveAria: (name: string) => `Sortir ${name} des archives`,
+    archiveSection: (n: number) => `Archives (${n})`,
+    archiveHint:
+      "Les s\u00e9jours archiv\u00e9s comptent toujours pour les statistiques et le passeport \u2013 ils sont juste retir\u00e9s de la liste.",
+    archivedToast: "Plac\u00e9 dans les archives",
+    unarchivedToast: "Sorti des archives",
     dossierAria: (name: string) => `Ouvrir le dossier de ${name}`,
     entriesTitle: "Tes séjours",
     empty:

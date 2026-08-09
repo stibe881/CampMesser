@@ -517,6 +517,22 @@ export const tripsRouters = {
         return { success: true } as const;
       }),
     /**
+     * Aufenthalt archivieren/hervorholen (Nutzerwunsch 09.08.2026):
+     * nur der EIGENE Eintrag – die userId-Bedingung in der DB-Schicht
+     * lässt fremde und Mitglieds-Reisen unangetastet.
+     */
+    setArchived: protectedProcedure
+      .input(
+        z.object({
+          id: z.number().int().positive(),
+          archived: z.boolean(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        await db.setTripLogArchived(input.id, ctx.user.id, input.archived);
+        return { success: true } as const;
+      }),
+    /**
      * Reise duplizieren: legt eine neue geplante Reise mit neuem Zeitraum an –
      * die Kopie gehört IMMER dem aufrufenden Konto (auch Mitreisende dürfen
      * duplizieren). Übernommen werden Titel, Ort sowie Zeltplatz- und

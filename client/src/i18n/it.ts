@@ -2692,6 +2692,13 @@ export const it: Translation = {
     menuPlanAria: (name: string) => `Apri il piano dei pasti di ${name}`,
     deletePlannedAria: name => `Elimina il soggiorno pianificato ${name}`,
     deleteEntryAria: name => `Elimina la voce ${name}`,
+    archiveAria: (name: string) => `Archivia ${name}`,
+    unarchiveAria: (name: string) => `Recupera ${name} dall'archivio`,
+    archiveSection: (n: number) => `Archivio (${n})`,
+    archiveHint:
+      "I soggiorni archiviati contano ancora per statistiche e passaporto \u2013 sono solo tolti dalla lista.",
+    archivedToast: "Messo in archivio",
+    unarchivedToast: "Recuperato dall'archivio",
     dossierAria: (name: string) => `Apri il dossier di ${name}`,
     entriesTitle: "I tuoi soggiorni",
     empty:
