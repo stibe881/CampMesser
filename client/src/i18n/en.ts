@@ -2848,6 +2848,10 @@ export const en: Translation = {
     duplicateSubmit: "Duplicate",
     duplicated: "Trip duplicated – you'll find it under planned stays",
     duplicateFailed: "Duplicating failed",
+    saveTemplateConfirm: "Save this trip as your own template?",
+    saveTemplateAria: (name: string) => `Save trip ${name} as a template`,
+    templateSaved:
+      "Saved as a template \u2013 find it under \u201cFrom template\u201d.",
     journalTitle: "Trip journal",
     timelineTitle: "Timeline",
     timelineToggleAria: (name: string) =>
@@ -4434,6 +4438,12 @@ export const en: Translation = {
     withMenu: "Pre-fill menu plan",
     menuNote:
       "Pre-filled are dinners for every night and breakfast from the second day on. Lunches stay empty – on the road you eat whatever the day offers.",
+    ownSection: "Your templates",
+    ownStages: (n: number) => (n === 1 ? "1 stage" : `${n} stages`),
+    ownApply: "Apply",
+    ownCreated: "Trip created from your template.",
+    ownDeleteAria: (name: string) => `Delete template ${name}`,
+    ownDeleteConfirm: (name: string) => `Delete template \u201c${name}\u201d?`,
     create: "Create trip",
     created: (end: string, meals: number, list: boolean) =>
       `Trip created through ${end}${list ? ", packing list created" : ""}${

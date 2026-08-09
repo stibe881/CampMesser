@@ -2919,6 +2919,10 @@ export const it: Translation = {
     duplicateSubmit: "Duplica",
     duplicated: "Viaggio duplicato – lo trovi tra i soggiorni pianificati",
     duplicateFailed: "Duplicazione non riuscita",
+    saveTemplateConfirm: "Salvare questo viaggio come modello personale?",
+    saveTemplateAria: (name: string) => `Salva il viaggio ${name} come modello`,
+    templateSaved:
+      "Salvato come modello \u2013 lo trovi sotto \u00abDa modello\u00bb.",
     journalTitle: "Diario di viaggio",
     timelineTitle: "Cronologia",
     timelineToggleAria: (name: string) =>
@@ -4528,6 +4532,13 @@ export const it: Translation = {
     withMenu: "Precompilare il menu",
     menuNote:
       "Vengono precompilate le cene di ogni notte e la colazione dal secondo giorno. I pranzi restano liberi – in viaggio a mezzogiorno si mangia quello che capita.",
+    ownSection: "I tuoi modelli",
+    ownStages: (n: number) => (n === 1 ? "1 tappa" : `${n} tappe`),
+    ownApply: "Applica",
+    ownCreated: "Viaggio creato dal tuo modello.",
+    ownDeleteAria: (name: string) => `Elimina il modello ${name}`,
+    ownDeleteConfirm: (name: string) =>
+      `Eliminare il modello \u00ab${name}\u00bb?`,
     create: "Crea il viaggio",
     created: (end: string, meals: number, list: boolean) =>
       `Viaggio creato fino al ${end}${list ? ", lista bagagli creata" : ""}${

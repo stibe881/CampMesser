@@ -2956,6 +2956,10 @@ export const de = {
     duplicateSubmit: "Duplizieren",
     duplicated: "Reise dupliziert – sie steht bei den geplanten Aufenthalten",
     duplicateFailed: "Duplizieren fehlgeschlagen",
+    saveTemplateConfirm: "Diese Reise als eigene Vorlage speichern?",
+    saveTemplateAria: (name: string) => `Reise ${name} als Vorlage speichern`,
+    templateSaved:
+      "Als Vorlage gespeichert \u2013 zu finden unter \u00abAus Vorlage\u00bb.",
     journalTitle: "Reise-Tagebuch",
     timelineTitle: "Zeitachse",
     timelineToggleAria: (name: string) =>
@@ -4573,6 +4577,13 @@ export const de = {
     withMenu: "Menüplan vorfüllen",
     menuNote:
       "Vorgefüllt werden Abendessen für jede Nacht und Frühstück ab dem zweiten Tag. Mittagessen bleiben frei – unterwegs isst man mittags, was der Tag hergibt.",
+    ownSection: "Eigene Vorlagen",
+    ownStages: (n: number) => (n === 1 ? "1 Etappe" : `${n} Etappen`),
+    ownApply: "Anwenden",
+    ownCreated: "Reise aus eigener Vorlage angelegt.",
+    ownDeleteAria: (name: string) => `Vorlage ${name} l\u00f6schen`,
+    ownDeleteConfirm: (name: string) =>
+      `Vorlage \u00ab${name}\u00bb l\u00f6schen?`,
     create: "Reise anlegen",
     created: (end: string, meals: number, list: boolean) =>
       `Reise bis ${end} angelegt${list ? ", Packliste erstellt" : ""}${

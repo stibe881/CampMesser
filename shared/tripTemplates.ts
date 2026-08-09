@@ -370,3 +370,51 @@ export function templateListName(title: string, startDate: string): string {
   const month = startDate.slice(5, 7);
   return `${title} ${day}.${month}.`.slice(0, 120);
 }
+
+/**
+ * Eigene Reise-Vorlagen (#628): eine gelungene Reise als Vorlage
+ * speichern – Dauer, Art und die Etappen mit relativer Nächtezahl.
+ * Die Etappen liegen als JSON im Textfeld tripTemplatesCustom.stagesJson
+ * (gleiche Idee wie die eigenen Packvorlagen, #78); konkrete Daten
+ * entstehen erst beim Anwenden aus dem gewählten Anreisetag.
+ */
+export interface CustomTemplateStage {
+  name: string;
+  latitude: number | null;
+  longitude: number | null;
+  /** Nächte an dieser Etappe (mindestens 0 – Tagesstopp) */
+  nights: number;
+}
+
+/** Obergrenze eigener Reise-Vorlagen pro Konto. */
+export const MAX_CUSTOM_TRIP_TEMPLATES = 20;
+
+/** Etappen aus dem JSON-Feld lesen; kaputte Daten ergeben `[]`. */
+export function parseCustomTemplateStages(
+  json: string | null
+): CustomTemplateStage[] {
+  if (!json) return [];
+  try {
+    const raw: unknown = JSON.parse(json);
+    if (!Array.isArray(raw)) return [];
+    const stages: CustomTemplateStage[] = [];
+    for (const entry of raw) {
+      if (!entry || typeof entry !== "object") continue;
+      const stage = entry as Record<string, unknown>;
+      if (typeof stage.name !== "string" || !stage.name.trim()) continue;
+      const nights =
+        typeof stage.nights === "number" && Number.isFinite(stage.nights)
+          ? Math.max(0, Math.round(stage.nights))
+          : 0;
+      stages.push({
+        name: stage.name.slice(0, 140),
+        latitude: typeof stage.latitude === "number" ? stage.latitude : null,
+        longitude: typeof stage.longitude === "number" ? stage.longitude : null,
+        nights,
+      });
+    }
+    return stages;
+  } catch {
+    return [];
+  }
+}

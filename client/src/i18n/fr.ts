@@ -2947,6 +2947,12 @@ export const fr: Translation = {
     duplicateSubmit: "Dupliquer",
     duplicated: "Voyage dupliqué – il figure dans les séjours planifiés",
     duplicateFailed: "Échec de la duplication",
+    saveTemplateConfirm:
+      "Enregistrer ce voyage comme mod\u00e8le personnel\u00a0?",
+    saveTemplateAria: (name: string) =>
+      `Enregistrer le voyage ${name} comme mod\u00e8le`,
+    templateSaved:
+      "Enregistr\u00e9 comme mod\u00e8le \u2013 \u00e0 retrouver sous \u00ab\u00a0Depuis un mod\u00e8le\u00a0\u00bb.",
     journalTitle: "Journal de voyage",
     timelineTitle: "Chronologie",
     timelineToggleAria: (name: string) =>
@@ -4572,6 +4578,13 @@ export const fr: Translation = {
     withMenu: "Préremplir le menu",
     menuNote:
       "Sont préremplis les repas du soir de chaque nuit et le petit-déjeuner dès le deuxième jour. Les repas de midi restent libres – en voyage, on mange à midi ce que la journée offre.",
+    ownSection: "Vos mod\u00e8les",
+    ownStages: (n: number) => (n === 1 ? "1 \u00e9tape" : `${n} \u00e9tapes`),
+    ownApply: "Appliquer",
+    ownCreated: "Voyage cr\u00e9\u00e9 depuis votre mod\u00e8le.",
+    ownDeleteAria: (name: string) => `Supprimer le mod\u00e8le ${name}`,
+    ownDeleteConfirm: (name: string) =>
+      `Supprimer le mod\u00e8le \u00ab\u00a0${name}\u00a0\u00bb\u00a0?`,
     create: "Créer le voyage",
     created: (end: string, meals: number, list: boolean) =>
       `Voyage créé jusqu'au ${end}${list ? ", liste de bagages créée" : ""}${
