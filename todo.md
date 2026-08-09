@@ -16,7 +16,7 @@
 - [x] #527 Velo-Läden & Werkstätten (Heute-Ansicht, neues Preset-Flag bike)
 - [x] #528 Waschsalons im Platz-Dossier (shop=laundry/dry_cleaning)
 - [x] #529 Apotheken im SOS (amenity=pharmacy, Öffnungszeiten als Detail)
-- [ ] #530 Sprachhilfe Hotel & Städtereise
+- [x] #530 Sprachhilfe «Stadt & Hotel» EXISTIERTE BEREITS (#474, 10 Phrasen) – neu nur 4 Hotel-Sätze (späte Anreise, ruhigeres Zimmer, Defekt, Late-Checkout)
 - [x] #531 EXISTIERTE BEREITS (tripKindRows/kindStatsTitle in der Statistik) – kein Code
 - [x] #532 EXISTIERTE BEREITS (trackYearRows in der Statistik) – kein Code
 - [x] #533 Reise-Ort als Wetter-Ort: Vorschlags-Chip für Freitext-Reisen mit Ortssuche-Koordinaten (Zeltplätze hatten schon eigene Chips)

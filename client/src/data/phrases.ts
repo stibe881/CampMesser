@@ -779,6 +779,46 @@ export const phrases: Phrase[] = [
     ),
   },
   {
+    id: "city-late-arrival",
+    group: "city",
+    text: l4(
+      "Wir kommen erst gegen 22 Uhr an – ist die Rezeption dann noch besetzt?",
+      "Nous arrivons vers 22 heures – la réception sera-t-elle encore ouverte ?",
+      "Arriviamo verso le 22 – la reception sarà ancora aperta?",
+      "We will arrive around 10 pm – will reception still be open?"
+    ),
+  },
+  {
+    id: "city-quiet-room",
+    group: "city",
+    text: l4(
+      "Haben Sie ein ruhigeres Zimmer – nicht zur Strasse?",
+      "Avez-vous une chambre plus calme – pas côté rue ?",
+      "Avete una camera più tranquilla – non sulla strada?",
+      "Do you have a quieter room – not facing the street?"
+    ),
+  },
+  {
+    id: "city-room-issue",
+    group: "city",
+    text: l4(
+      "In unserem Zimmer funktioniert die Heizung/Klimaanlage nicht.",
+      "Dans notre chambre, le chauffage/la climatisation ne fonctionne pas.",
+      "Nella nostra camera il riscaldamento/l'aria condizionata non funziona.",
+      "The heating/air conditioning in our room is not working."
+    ),
+  },
+  {
+    id: "city-late-checkout",
+    group: "city",
+    text: l4(
+      "Können wir später auschecken – bis wann wäre das möglich?",
+      "Pouvons-nous libérer la chambre plus tard – jusqu'à quelle heure ?",
+      "Possiamo fare il check-out più tardi – fino a che ora?",
+      "Could we check out later – until what time would that be possible?"
+    ),
+  },
+  {
     id: "city-tickets",
     group: "city",
     text: l4(
