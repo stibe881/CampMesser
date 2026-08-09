@@ -6395,6 +6395,10 @@ export const it: Translation = {
     lexiconQuizBadge: "dal lessico",
     lexiconQuizHint:
       "Viene ricomposto dal lessico della natura a ogni avvio – giocabile anche in duello.",
+    countryQuizTitle: "Quiz dei paesi",
+    countryQuizAgeHint: "da circa 6 anni",
+    countryQuizHint:
+      "Bandiere dal prontuario dei paesi \u2013 rimescolate a ogni partita.",
     startQuizAria: (title: string) => `Avvia il quiz ${title}`,
     questionCount: (n: number) => `${n} domande`,
     progressAria: (done: number, total: number) =>

@@ -10,6 +10,7 @@ import {
   Check,
   Compass as CompassIcon,
   Gift,
+  Globe2,
   Leaf,
   Lightbulb,
   Link2,
@@ -73,6 +74,7 @@ import {
 } from "@/lib/customQuizzes";
 import { quizEntries } from "@/data/nature";
 import { buildNatureQuiz, NATURE_QUIZ_QUESTIONS } from "@/lib/natureQuiz";
+import { buildCountryQuiz, COUNTRY_QUIZ_QUESTIONS } from "@/lib/countryQuiz";
 import {
   duelFinished,
   duelPlayer,
@@ -103,6 +105,8 @@ const ACTIVE_CHILD_KEY = "campmesser.activeChild";
 
 /** Player-Id des automatisch erzeugten Natur-Lexikon-Quiz. */
 const NATURE_LEXICON_QUIZ_ID = "natur-lexikon-quiz";
+/** Länder-Quiz (#642): frisch gewürfelt aus dem Länder-Nachschlagewerk. */
+const COUNTRY_QUIZ_ID = "laender-quiz";
 
 function loadStoredActiveChild(): number | null {
   try {
@@ -1836,6 +1840,20 @@ export default function FamilyPage() {
     });
   };
 
+  /**
+   * Länder-Quiz (#642): Flaggen-Fragen aus dem Länder-Nachschlagewerk
+   * (#228), bei jedem Start frisch gewürfelt – gleicher Quiz-Player,
+   * gleiche Zähler und Abzeichen wie die Natur-Quizze.
+   */
+  const startCountryQuiz = () => {
+    startQuiz({
+      id: COUNTRY_QUIZ_ID,
+      title: t.family.countryQuizTitle,
+      ageHint: t.family.countryQuizAgeHint,
+      questions: buildCountryQuiz(lang),
+    });
+  };
+
   /** Auswahl im «Wer spielt?»-Dialog: Kind merken und Aktivität starten. */
   const chooseChild = (childId: number | null) => {
     setActiveChildId(childId);
@@ -2159,6 +2177,29 @@ export default function FamilyPage() {
           </span>
           <span className="text-xs text-muted-foreground">
             {t.family.lexiconQuizHint}
+          </span>
+        </button>
+
+        {/* Länder-Quiz (#642): Flaggen-Fragen aus dem Länder-
+            Nachschlagewerk (#228), bei jedem Start frisch gewürfelt */}
+        <button
+          type="button"
+          onClick={startCountryQuiz}
+          className="flex flex-col items-start gap-2 rounded-xl border border-border bg-card p-4 text-left transition-all hover:border-primary/40 hover:shadow-md active:scale-[0.99]"
+          aria-label={t.family.startQuizAria(t.family.countryQuizTitle)}
+        >
+          <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/15 text-primary">
+            <Globe2 className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <span className="font-semibold">{t.family.countryQuizTitle}</span>
+          <span className="flex flex-wrap gap-1.5">
+            <Badge variant="secondary">
+              {t.family.questionCount(COUNTRY_QUIZ_QUESTIONS)}
+            </Badge>
+            <Badge variant="outline">{t.family.lexiconQuizBadge}</Badge>
+          </span>
+          <span className="text-xs text-muted-foreground">
+            {t.family.countryQuizHint}
           </span>
         </button>
 

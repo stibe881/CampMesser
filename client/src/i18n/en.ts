@@ -6260,6 +6260,10 @@ export const en: Translation = {
     lexiconQuizBadge: "from the guide",
     lexiconQuizHint:
       "Put together afresh from the nature guide every time you start it – also playable as a duel.",
+    countryQuizTitle: "Country quiz",
+    countryQuizAgeHint: "from about 6 years",
+    countryQuizHint:
+      "Flags from the country reference \u2013 shuffled fresh every time.",
     startQuizAria: (title: string) => `Start quiz ${title}`,
     questionCount: (n: number) => `${n} questions`,
     progressAria: (done: number, total: number) =>

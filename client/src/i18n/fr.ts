@@ -6454,6 +6454,10 @@ export const fr: Translation = {
     lexiconQuizBadge: "issu du lexique",
     lexiconQuizHint:
       "Recomposé à partir du lexique nature à chaque démarrage – jouable aussi en duel.",
+    countryQuizTitle: "Quiz des pays",
+    countryQuizAgeHint: "d\u00e8s 6 ans environ",
+    countryQuizHint:
+      "Des drapeaux tir\u00e9s du guide des pays \u2013 m\u00e9lang\u00e9s \u00e0 chaque partie.",
     startQuizAria: (title: string) => `Démarrer le quiz ${title}`,
     questionCount: (n: number) => `${n} questions`,
     progressAria: (done: number, total: number) =>

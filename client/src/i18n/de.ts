@@ -6442,6 +6442,10 @@ export const de = {
     lexiconQuizBadge: "aus dem Lexikon",
     lexiconQuizHint:
       "Wird bei jedem Start neu aus dem Natur-Lexikon zusammengestellt – auch im Duell spielbar.",
+    countryQuizTitle: "L\u00e4nder-Quiz",
+    countryQuizAgeHint: "ab ca. 6 Jahren",
+    countryQuizHint:
+      "Flaggen aus dem L\u00e4nder-Nachschlagewerk \u2013 jedes Mal neu gew\u00fcrfelt.",
     startQuizAria: (title: string) => `Quiz ${title} starten`,
     questionCount: (n: number) => `${n} Fragen`,
     progressAria: (done: number, total: number) =>
