@@ -5810,6 +5810,11 @@ export const en: Translation = {
     addPlaceholderCooled: "e.g. tomatoes, cheese, beans …",
     addPlaceholderDry: "e.g. tin of ravioli, spaghetti, coffee …",
     addNameAria: "Add food item",
+    scanAria: "Scan barcode",
+    scanNoCode: "No barcode detected \u2013 take a closer, sharper photo.",
+    scanUnknown: (code: string) =>
+      `Product ${code} not found on OpenFoodFacts.`,
+    scanFailed: "Scan failed.",
     expiryAria: "Best-before date (optional)",
     submitAria: "Save food item",
     addFailed: "The entry could not be saved",

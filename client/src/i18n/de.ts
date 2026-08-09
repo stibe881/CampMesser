@@ -5981,6 +5981,12 @@ export const de = {
     addPlaceholderCooled: "z. B. Tomaten, Käse, Bohnen …",
     addPlaceholderDry: "z. B. Ravioli-Dose, Spaghetti, Kaffee …",
     addNameAria: "Lebensmittel hinzufügen",
+    scanAria: "Strichcode scannen",
+    scanNoCode:
+      "Kein Strichcode erkannt \u2013 n\u00e4her und scharf fotografieren.",
+    scanUnknown: (code: string) =>
+      `Produkt ${code} nicht in OpenFoodFacts gefunden.`,
+    scanFailed: "Scan fehlgeschlagen.",
     expiryAria: "Mindesthaltbarkeitsdatum (optional)",
     submitAria: "Lebensmittel speichern",
     addFailed: "Eintrag konnte nicht gespeichert werden",

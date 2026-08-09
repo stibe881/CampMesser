@@ -14,6 +14,7 @@ import {
 import { toast } from "sonner";
 import { Link, useLocation } from "wouter";
 import PageHeader from "@/components/PageHeader";
+import BarcodeScanButton from "@/components/BarcodeScanButton";
 import DataAge from "@/components/DataAge";
 import QueryError from "@/components/QueryError";
 import ListSkeleton from "@/components/ListSkeleton";
@@ -542,6 +543,9 @@ export default function FoodPage() {
           onChange={e => setName(e.target.value)}
           aria-label={t.food.addNameAria}
         />
+        {/* Barcode-Scan (#634): Foto des Strichcodes → Name via
+            OpenFoodFacts; ohne BarcodeDetector-API kein Knopf. */}
+        <BarcodeScanButton onProduct={product => setName(product)} />
         <Input
           className="w-20 shrink-0"
           value={quantity}

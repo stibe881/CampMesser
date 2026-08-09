@@ -5935,6 +5935,12 @@ export const it: Translation = {
     addPlaceholderCooled: "ad es. pomodori, formaggio, fagioli …",
     addPlaceholderDry: "ad es. scatola di ravioli, spaghetti, caffè …",
     addNameAria: "Aggiungi alimento",
+    scanAria: "Scansiona il codice a barre",
+    scanNoCode:
+      "Nessun codice riconosciuto \u2013 foto pi\u00f9 vicina e nitida.",
+    scanUnknown: (code: string) =>
+      `Prodotto ${code} non trovato su OpenFoodFacts.`,
+    scanFailed: "Scansione non riuscita.",
     expiryAria: "Termine minimo di conservazione (facoltativo)",
     submitAria: "Salva alimento",
     addFailed: "La voce non è stata salvata",

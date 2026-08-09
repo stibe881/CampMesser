@@ -5985,6 +5985,12 @@ export const fr: Translation = {
     addPlaceholderCooled: "p. ex. tomates, fromage, haricots …",
     addPlaceholderDry: "p. ex. boîte de raviolis, spaghettis, café …",
     addNameAria: "Ajouter un aliment",
+    scanAria: "Scanner le code-barres",
+    scanNoCode:
+      "Aucun code-barres d\u00e9tect\u00e9 \u2013 photo plus proche et nette.",
+    scanUnknown: (code: string) =>
+      `Produit ${code} introuvable sur OpenFoodFacts.`,
+    scanFailed: "\u00c9chec du scan.",
     expiryAria: "Date limite de consommation (facultatif)",
     submitAria: "Enregistrer l'aliment",
     addFailed: "L'entrée n'a pas pu être enregistrée",
