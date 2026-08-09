@@ -161,3 +161,65 @@ export const GEAR_TASK_SUGGESTIONS: GearTaskSuggestion[] = [
     intervalMonths: 6,
   },
 ];
+
+/**
+ * Fahrzeug-Service-Merker (#637): Vorschläge rund um Zugfahrzeug,
+ * Wohnwagen und Camper – gleiche Fälligkeits-Logik und Tabelle wie die
+ * Ausrüstungs-Pflege (#124), nur ein zweiter Vorschlags-Katalog.
+ */
+export const VEHICLE_TASK_SUGGESTIONS: GearTaskSuggestion[] = [
+  {
+    title: l4(
+      "Fahrzeug-Service / Ölwechsel",
+      "Service du véhicule / vidange",
+      "Tagliando / cambio olio",
+      "Vehicle service / oil change"
+    ),
+    intervalMonths: 12,
+  },
+  {
+    title: l4(
+      "Reifen & Reifendruck prüfen (auch Wohnwagen)",
+      "Contrôler pneus et pression (aussi caravane)",
+      "Controllare gomme e pressione (anche roulotte)",
+      "Check tyres & pressure (incl. caravan)"
+    ),
+    intervalMonths: 6,
+  },
+  {
+    title: l4(
+      "Gasprüfung Wohnwagen/Camper",
+      "Contrôle du gaz caravane/camping-car",
+      "Controllo gas roulotte/camper",
+      "Gas system check caravan/camper"
+    ),
+    intervalMonths: 36,
+  },
+  {
+    title: l4(
+      "Aufbaubatterie & Ladetechnik prüfen",
+      "Contrôler batterie auxiliaire et chargeur",
+      "Controllare batteria servizi e caricatore",
+      "Check leisure battery & charger"
+    ),
+    intervalMonths: 12,
+  },
+  {
+    title: l4(
+      "Dichtungen am Aufbau pflegen",
+      "Entretenir les joints de la cellule",
+      "Curare le guarnizioni della cellula",
+      "Treat body seals"
+    ),
+    intervalMonths: 12,
+  },
+  {
+    title: l4(
+      "Wasseranlage entkalken & desinfizieren",
+      "Détartrer et désinfecter le circuit d'eau",
+      "Decalcificare e disinfettare l'impianto acqua",
+      "Descale & sanitise the water system"
+    ),
+    intervalMonths: 12,
+  },
+];

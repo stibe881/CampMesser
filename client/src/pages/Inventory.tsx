@@ -44,7 +44,11 @@ import {
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { l4, LOCALE_TAGS, pick, type L4 } from "@shared/i18n";
-import { GEAR_TASK_SUGGESTIONS, gearTaskDue } from "@shared/gearTasks";
+import {
+  GEAR_TASK_SUGGESTIONS,
+  VEHICLE_TASK_SUGGESTIONS,
+  gearTaskDue,
+} from "@shared/gearTasks";
 import {
   countWarrantiesEndingSoon,
   MAX_WARRANTY_MONTHS,
@@ -276,6 +280,33 @@ function GearCareSection() {
               </Label>
               <div className="flex flex-wrap gap-1.5">
                 {GEAR_TASK_SUGGESTIONS.map(suggestion => {
+                  const label = pick(suggestion.title, lang);
+                  return (
+                    <button
+                      key={label}
+                      type="button"
+                      className="rounded-full border border-border px-3 py-1 text-xs transition-colors hover:bg-accent"
+                      onClick={() => {
+                        setTitle(label);
+                        setMonths(String(suggestion.intervalMonths));
+                      }}
+                      aria-label={t.inventory.gearSuggestionAria(label)}
+                    >
+                      {label} ·{" "}
+                      {t.inventory.gearIntervalText(suggestion.intervalMonths)}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            {/* Fahrzeug-Service-Merker (#637): zweiter Katalog rund um
+                Zugfahrzeug, Wohnwagen und Camper – gleiche Tabelle. */}
+            <div>
+              <Label className="mb-1.5 block">
+                {t.inventory.vehicleSuggestionsLabel}
+              </Label>
+              <div className="flex flex-wrap gap-1.5">
+                {VEHICLE_TASK_SUGGESTIONS.map(suggestion => {
                   const label = pick(suggestion.title, lang);
                   return (
                     <button

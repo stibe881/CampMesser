@@ -958,6 +958,7 @@ export const it: Translation = {
     gearDialogDescription:
       "Riprendi un suggerimento oppure crea un'attività personalizzata con intervallo.",
     gearSuggestionsLabel: "Suggerimenti",
+    vehicleSuggestionsLabel: "Veicolo e roulotte",
     gearSuggestionAria: (title: string) =>
       `Riprendi il suggerimento «${title}»`,
     gearTitleLabel: "Attività",

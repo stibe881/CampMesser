@@ -979,6 +979,7 @@ export const fr: Translation = {
     gearDialogDescription:
       "Reprends une suggestion ou saisis ta propre tâche avec un intervalle.",
     gearSuggestionsLabel: "Suggestions",
+    vehicleSuggestionsLabel: "V\u00e9hicule et caravane",
     gearSuggestionAria: (title: string) => `Reprendre la suggestion «${title}»`,
     gearTitleLabel: "Tâche",
     gearTitlePlaceholder: "p. ex. imperméabiliser la tente",

@@ -938,6 +938,7 @@ export const en: Translation = {
     gearDialogDescription:
       "Pick a suggestion or enter your own task with an interval.",
     gearSuggestionsLabel: "Suggestions",
+    vehicleSuggestionsLabel: "Vehicle & caravan",
     gearSuggestionAria: (title: string) => `Use suggestion “${title}”`,
     gearTitleLabel: "Task",
     gearTitlePlaceholder: "e.g. re-waterproof the tent",

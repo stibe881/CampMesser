@@ -978,6 +978,7 @@ export const de = {
     gearDialogDescription:
       "Übernimm einen Vorschlag oder erfasse eine eigene Aufgabe mit Intervall.",
     gearSuggestionsLabel: "Vorschläge",
+    vehicleSuggestionsLabel: "Fahrzeug & Wohnwagen",
     gearSuggestionAria: (title: string) => `Vorschlag «${title}» übernehmen`,
     gearTitleLabel: "Aufgabe",
     gearTitlePlaceholder: "z. B. Zelt imprägnieren",
