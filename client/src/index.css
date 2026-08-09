@@ -304,4 +304,27 @@
   textarea {
     font-size: max(16px, 1em);
   }
+
+  /*
+   * Datums- und Zeitfelder halten sich auf iOS sonst nicht an die
+   * Spaltenbreite: Das native Steuerelement bringt eine grosse
+   * Eigenbreite mit, und weil die Dialoge (DialogContent) ein Grid
+   * sind, wächst gleich die ganze Spalte mit – ALLE Felder ragen dann
+   * über den Dialogrand hinaus (Nutzer-Screenshots 09.08.2026,
+   * Reise-Formular und Vorlagen-Dialog). Ohne natives Aussehen
+   * verhält sich das Feld wie ein Textfeld und w-full gilt wieder;
+   * der iOS-Picker öffnet sich weiterhin.
+   */
+  input[type="date"],
+  input[type="time"] {
+    -webkit-appearance: none;
+    appearance: none;
+    min-width: 0;
+  }
+
+  /* Ohne natives Aussehen zentriert iOS den Wert – links ist richtig. */
+  input[type="date"]::-webkit-date-and-time-value,
+  input[type="time"]::-webkit-date-and-time-value {
+    text-align: left;
+  }
 }
