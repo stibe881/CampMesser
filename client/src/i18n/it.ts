@@ -3070,6 +3070,10 @@ export const it: Translation = {
     nameLabel: "Luogo",
     namePlaceholder: "es. Lago di Como",
     suggestionsLabel: "Da preferiti e luoghi salvati:",
+    shiftConfirm: (n: number, tage: number) =>
+      `Spostare ${n === 1 ? "la tappa successiva" : `le ${n} tappe successive`} di ${tage > 0 ? `+${tage}` : tage} ${Math.abs(tage) === 1 ? "giorno" : "giorni"}?`,
+    shifted: (n: number) =>
+      n === 1 ? "1 tappa spostata" : `${n} tappe spostate`,
     fromLabel: "Arrivo",
     toLabel: "Partenza",
     saved: "Tappa salvata",

@@ -3108,6 +3108,10 @@ export const de = {
     nameLabel: "Ort",
     namePlaceholder: "z. B. Comersee",
     suggestionsLabel: "Aus Favoriten & Merkorten:",
+    shiftConfirm: (n: number, tage: number) =>
+      `${n === 1 ? "Die folgende Etappe" : `Die ${n} folgenden Etappen`} um ${tage > 0 ? `+${tage}` : tage} ${Math.abs(tage) === 1 ? "Tag" : "Tage"} mitverschieben?`,
+    shifted: (n: number) =>
+      n === 1 ? "1 Etappe mitverschoben" : `${n} Etappen mitverschoben`,
     fromLabel: "Ankunft",
     toLabel: "Weiterreise",
     saved: "Etappe gespeichert",

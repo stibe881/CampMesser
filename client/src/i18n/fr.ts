@@ -3105,6 +3105,12 @@ export const fr: Translation = {
     nameLabel: "Lieu",
     namePlaceholder: "p. ex. lac de C\u00f4me",
     suggestionsLabel: "Depuis favoris et lieux retenus\u202f:",
+    shiftConfirm: (n: number, tage: number) =>
+      `D\u00e9caler ${n === 1 ? "l\u2019\u00e9tape suivante" : `les ${n} \u00e9tapes suivantes`} de ${tage > 0 ? `+${tage}` : tage} ${Math.abs(tage) === 1 ? "jour" : "jours"}\u202f?`,
+    shifted: (n: number) =>
+      n === 1
+        ? "1 \u00e9tape d\u00e9cal\u00e9e"
+        : `${n} \u00e9tapes d\u00e9cal\u00e9es`,
     fromLabel: "Arriv\u00e9e",
     toLabel: "D\u00e9part",
     saved: "\u00c9tape enregistr\u00e9e",

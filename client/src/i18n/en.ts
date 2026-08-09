@@ -2998,6 +2998,10 @@ export const en: Translation = {
     nameLabel: "Place",
     namePlaceholder: "e.g. Lake Como",
     suggestionsLabel: "From favourites & saved places:",
+    shiftConfirm: (n: number, tage: number) =>
+      `Shift ${n === 1 ? "the following stage" : `the ${n} following stages`} by ${tage > 0 ? `+${tage}` : tage} ${Math.abs(tage) === 1 ? "day" : "days"}?`,
+    shifted: (n: number) =>
+      n === 1 ? "1 stage shifted" : `${n} stages shifted`,
     fromLabel: "Arrival",
     toLabel: "Moving on",
     saved: "Stage saved",
