@@ -2952,6 +2952,9 @@ export const fr: Translation = {
   },
   tripExpenses: {
     budgetTightNote: "Le budget devient serré.",
+    dailyBudgetLine: (amount: string) =>
+      `Encore ${amount} par jour jusqu\u2019\u00e0 la fin du voyage.`,
+    galleryTitle: "Galerie des re\u00e7us",
     fuelTitle: "Calculer les frais de route",
     fuelHint:
       "Kilomètres × consommation × prix du carburant. Le calcul utilise la consommation moyenne – pour plus de précision, saisis le montant à la main.",

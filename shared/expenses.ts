@@ -414,6 +414,34 @@ export function budgetForecast(args: {
 }
 
 /**
+ * Tagesbudget unterwegs (#567): «Noch X CHF pro Tag bis Reiseende» –
+ * Rest des Budgets geteilt durch die Tage von HEUTE bis zur Abreise
+ * (beide einschliesslich).
+ *
+ * NUR während der Reise, nur mit gesetztem Budget, und nur solange etwas
+ * übrig ist: Ist das Budget gesprengt, sagt das der Über-Budget-Text
+ * deutlicher als ein «0 CHF/Tag».
+ */
+export function dailyBudgetLeftRappen(args: {
+  budgetRappen?: number | null;
+  spentRappen: number;
+  startDate: string;
+  endDate: string;
+  todayIso: string;
+}): number | null {
+  const budget = cleanRappen(args.budgetRappen ?? 0);
+  if (budget <= 0) return null;
+  if (args.todayIso < args.startDate || args.todayIso > args.endDate) {
+    return null;
+  }
+  const daysLeft = daysInclusive(args.todayIso, args.endDate);
+  if (daysLeft <= 0) return null;
+  const remaining = budget - cleanRappen(args.spentRappen);
+  if (remaining <= 0) return null;
+  return Math.floor(remaining / daysLeft);
+}
+
+/**
  * Budget pro Nacht – die ehrlichere Zahl beim Vergleich zweier Reisen.
  * Ohne Nächte (Tagesausflug) gibt es keine, dann kommt null zurück.
  */

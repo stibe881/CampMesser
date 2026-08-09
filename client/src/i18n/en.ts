@@ -2854,6 +2854,9 @@ export const en: Translation = {
   },
   tripExpenses: {
     budgetTightNote: "The budget is getting tight.",
+    dailyBudgetLine: (amount: string) =>
+      `${amount} per day left until the end of the trip.`,
+    galleryTitle: "Receipt gallery",
     fuelTitle: "Work out fuel costs",
     fuelHint:
       "Kilometres × consumption × fuel price. The maths uses your average consumption – if you want it exact, type the amount in by hand.",

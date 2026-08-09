@@ -2960,6 +2960,9 @@ export const de = {
   },
   tripExpenses: {
     budgetTightNote: "Das Budget wird knapp.",
+    dailyBudgetLine: (amount: string) =>
+      `Noch ${amount} pro Tag bis Reiseende.`,
+    galleryTitle: "Beleg-Galerie",
     fuelTitle: "Fahrtkosten berechnen",
     fuelHint:
       "Kilometer × Verbrauch × Spritpreis. Gerechnet wird mit dem Durchschnittsverbrauch – wer es genauer will, tippt den Betrag von Hand ein.",

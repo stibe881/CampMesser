@@ -2923,6 +2923,9 @@ export const it: Translation = {
   },
   tripExpenses: {
     budgetTightNote: "Il budget si sta esaurendo.",
+    dailyBudgetLine: (amount: string) =>
+      `Ancora ${amount} al giorno fino a fine viaggio.`,
+    galleryTitle: "Galleria degli scontrini",
     fuelTitle: "Calcolare i costi di viaggio",
     fuelHint:
       "Chilometri × consumo × prezzo del carburante. Si calcola con il consumo medio – chi vuole più precisione inserisce l'importo a mano.",

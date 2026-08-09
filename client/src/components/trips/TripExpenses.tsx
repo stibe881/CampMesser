@@ -79,6 +79,7 @@ import {
   expensesByCategory,
   budgetForecast,
   budgetStatus,
+  dailyBudgetLeftRappen,
   BUDGET_MAX_RAPPEN,
   eurRateToInput,
   expensesTotalRappen,
@@ -778,6 +779,22 @@ export default function TripExpenses({
                   {budget.level === "tight" &&
                     ` ${t.tripExpenses.budgetTightNote}`}
                 </p>
+                {/* Tagesbudget (#567): «Noch X CHF pro Tag» – nur während
+                    der Reise und nur, solange etwas übrig ist. */}
+                {(() => {
+                  const daily = dailyBudgetLeftRappen({
+                    budgetRappen,
+                    spentRappen: total,
+                    startDate,
+                    endDate,
+                    todayIso: today,
+                  });
+                  return daily !== null ? (
+                    <p className="mt-1 text-xs font-medium text-muted-foreground">
+                      {t.tripExpenses.dailyBudgetLine(money(daily))}
+                    </p>
+                  ) : null;
+                })()}
                 {/* Hochrechnung (#398): «Reicht das bei diesem Tempo?» –
                     die Frage stellt sich mitten in der Reise, nicht am
                     Ende, wenn der Stand-Balken sie längst beantwortet. */}
@@ -1405,6 +1422,49 @@ export default function TripExpenses({
                       </li>
                     ))}
                   </ul>
+
+                  {/* Beleg-Galerie (#566): alle Quittungen der Reise als
+                      Raster – fürs Abrechnen, ohne durch die Liste zu
+                      scrollen. Klick öffnet die Quittung in voller Grösse. */}
+                  {expenses.some(e => e.photoFileName) && (
+                    <div className="mt-3">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        {t.tripExpenses.galleryTitle}
+                      </p>
+                      <ul className="mt-1.5 grid grid-cols-3 gap-2 sm:grid-cols-4">
+                        {expenses
+                          .filter(e => e.photoFileName)
+                          .map(expense => (
+                            <li key={`gallery-${expense.id}`}>
+                              <a
+                                href={expensePhotoUrl(expense.photoFileName!)}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="block"
+                                aria-label={t.tripExpenses.photoViewAria(
+                                  labelOf(expense)
+                                )}
+                              >
+                                <img
+                                  src={expensePhotoUrl(expense.photoFileName!)}
+                                  alt=""
+                                  loading="lazy"
+                                  className="aspect-square w-full rounded-lg border border-border object-cover"
+                                />
+                                <span className="mt-0.5 block truncate text-[11px] text-muted-foreground">
+                                  {fmtDay(expense.day)} ·{" "}
+                                  {normalizeExpenseCurrency(
+                                    expense.currency
+                                  ) === "EUR"
+                                    ? eurMoney(expense.amountRappen)
+                                    : money(expense.amountRappen)}
+                                </span>
+                              </a>
+                            </li>
+                          ))}
+                      </ul>
+                    </div>
+                  )}
                 </>
               )}
 

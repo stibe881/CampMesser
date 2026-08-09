@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   budgetForecast,
   budgetStatus,
+  dailyBudgetLeftRappen,
   BUDGET_TIGHT_RATIO,
   EXPENSE_CATEGORIES,
   EXPENSE_CATEGORY_LABELS,
@@ -411,5 +412,59 @@ describe("budgetForecast", () => {
       expenses: [],
     });
     expect(forecast!.projectedRappen).toBe(0);
+  });
+});
+
+describe("dailyBudgetLeftRappen (#567)", () => {
+  const ARGS = {
+    budgetRappen: 100_000,
+    startDate: "2026-08-01",
+    endDate: "2026-08-10",
+  };
+
+  it("teilt den Rest durch die Tage von heute bis zur Abreise", () => {
+    // 570 CHF übrig, 5 Tage (06.–10.08. einschliesslich) → 114 CHF/Tag
+    expect(
+      dailyBudgetLeftRappen({
+        ...ARGS,
+        spentRappen: 43_000,
+        todayIso: "2026-08-06",
+      })
+    ).toBe(11_400);
+  });
+
+  it("schweigt vor der Reise, danach und ohne Budget", () => {
+    expect(
+      dailyBudgetLeftRappen({
+        ...ARGS,
+        spentRappen: 0,
+        todayIso: "2026-07-31",
+      })
+    ).toBeNull();
+    expect(
+      dailyBudgetLeftRappen({
+        ...ARGS,
+        spentRappen: 0,
+        todayIso: "2026-08-11",
+      })
+    ).toBeNull();
+    expect(
+      dailyBudgetLeftRappen({
+        ...ARGS,
+        budgetRappen: null,
+        spentRappen: 0,
+        todayIso: "2026-08-05",
+      })
+    ).toBeNull();
+  });
+
+  it("schweigt bei gesprengtem Budget – das sagt der Über-Budget-Text", () => {
+    expect(
+      dailyBudgetLeftRappen({
+        ...ARGS,
+        spentRappen: 120_000,
+        todayIso: "2026-08-05",
+      })
+    ).toBeNull();
   });
 });
