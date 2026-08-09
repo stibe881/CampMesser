@@ -1492,6 +1492,10 @@ export const it: Translation = {
       `${country}: aggiornato al ${date}. Valori in km/h; senza garanzia.`,
   },
   sos: {
+    tripCountryTitle: (country: string) =>
+      `Emergenze per il tuo viaggio: ${country}`,
+    tripCountryHint:
+      "Il tuo viaggio in corso è in questo paese – lì valgono questi numeri.",
     title: "SOS & dashboard d'emergenza",
     subtitle:
       "La tua posizione e tutti i numeri d'emergenza importanti – per ogni evenienza.",

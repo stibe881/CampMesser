@@ -1515,6 +1515,10 @@ export const fr: Translation = {
       `${country} : état au ${date}. Valeurs en km/h ; sans garantie.`,
   },
   sos: {
+    tripCountryTitle: (country: string) =>
+      `Urgences pour ton voyage : ${country}`,
+    tripCountryHint:
+      "Ton voyage en cours se trouve dans ce pays – ces numéros y sont valables.",
     title: "SOS & tableau de bord d'urgence",
     subtitle:
       "Ta position et tous les numéros d'urgence importants – au cas où.",

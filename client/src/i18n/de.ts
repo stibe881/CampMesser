@@ -1513,6 +1513,9 @@ export const de = {
       `${country}: Stand ${date}. Angaben in km/h; ohne Gewähr.`,
   },
   sos: {
+    tripCountryTitle: (country: string) => `Notruf für deine Reise: ${country}`,
+    tripCountryHint:
+      "Deine laufende Reise liegt in diesem Land – diese Nummern gelten dort.",
     title: "SOS & Notfall-Dashboard",
     subtitle:
       "Dein Standort und alle wichtigen Notfallnummern – für den Fall der Fälle.",
