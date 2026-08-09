@@ -3005,6 +3005,11 @@ export const it: Translation = {
     fuelConsumptionLabel: "Consumo (l/100 km)",
     fuelPriceLabel: "Prezzo (CHF/l)",
     fuelRoundTrip: "Andata e ritorno",
+    fuelTollLabel: "Pedaggio",
+    fuelTollNone: "Nessun pedaggio",
+    fuelTollLine: (toll: string, total: string) =>
+      `Pedaggio \u2248 ${toll} \u2013 in totale ${total}.`,
+    fuelTollSuffix: "stima pedaggio inclusa",
     fuelResult: (km: number, liters: string, amount: string) =>
       `${km} km · ${liters} l · ${amount}`,
     fuelApply: "Riprendere nella cassa",

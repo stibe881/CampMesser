@@ -2933,6 +2933,11 @@ export const en: Translation = {
     fuelConsumptionLabel: "Consumption (l/100 km)",
     fuelPriceLabel: "Price (CHF/l)",
     fuelRoundTrip: "There and back",
+    fuelTollLabel: "Road toll",
+    fuelTollNone: "No toll",
+    fuelTollLine: (toll: string, total: string) =>
+      `Toll \u2248 ${toll} \u2013 ${total} in total.`,
+    fuelTollSuffix: "incl. toll estimate",
     fuelResult: (km: number, liters: string, amount: string) =>
       `${km} km · ${liters} l · ${amount}`,
     fuelApply: "Add to the kitty",

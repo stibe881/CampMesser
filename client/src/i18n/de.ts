@@ -3043,6 +3043,11 @@ export const de = {
     fuelConsumptionLabel: "Verbrauch (l/100 km)",
     fuelPriceLabel: "Preis (CHF/l)",
     fuelRoundTrip: "Hin- und Rückfahrt",
+    fuelTollLabel: "Streckenmaut",
+    fuelTollNone: "Keine Maut",
+    fuelTollLine: (toll: string, total: string) =>
+      `Maut \u2248 ${toll} \u2013 zusammen ${total}.`,
+    fuelTollSuffix: "inkl. Maut-Sch\u00e4tzung",
     fuelResult: (km: number, liters: string, amount: string) =>
       `${km} km · ${liters} l · ${amount}`,
     fuelApply: "In die Reisekasse übernehmen",

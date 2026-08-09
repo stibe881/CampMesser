@@ -78,3 +78,48 @@ export function fuelCost(input: FuelCostInput): FuelCostResult {
     rappen: Math.round(liters * price),
   };
 }
+
+/**
+ * Streckenmaut-Schätzung (#638): grobe Durchschnitts-Sätze pro
+ * Autobahn-Kilometer für die Länder mit kilometerabhängiger Maut auf
+ * dem Weg ans Meer. Die Sätze sind bewusst RUNDE Näherungen (Stand 2026,
+ * PW mit Anhänger schwankt je nach Betreiber deutlich) – es geht um die
+ * Grössenordnung im Reisebudget, nicht um den Beleg. Vignetten-Länder
+ * (CH, AT, SI …) stehen im Länder-Nachschlagewerk (#228) und fehlen hier
+ * mit Absicht.
+ */
+export interface TollCountry {
+  code: string;
+  /** Rappen je Autobahn-Kilometer (einfacher Weg). */
+  ratePerKmRappen: number;
+}
+
+export const TOLL_COUNTRIES: TollCountry[] = [
+  { code: "FR", ratePerKmRappen: 10 },
+  { code: "IT", ratePerKmRappen: 8 },
+  { code: "ES", ratePerKmRappen: 9 },
+  { code: "PT", ratePerKmRappen: 10 },
+  { code: "HR", ratePerKmRappen: 6 },
+  { code: "GR", ratePerKmRappen: 7 },
+];
+
+/** Satz zu einem Länder-Code; unbekannt = null. */
+export function tollRateFor(code: string): number | null {
+  return (
+    TOLL_COUNTRIES.find(entry => entry.code === code)?.ratePerKmRappen ?? null
+  );
+}
+
+/**
+ * Maut schätzen: Autobahn-Kilometer × Satz, bei Hin- und Rückfahrt
+ * doppelt. Gerundet wird einmal am Schluss – wie beim Sprit.
+ */
+export function tollCost(input: {
+  tollKm: number;
+  ratePerKmRappen: number;
+  roundTrip?: boolean;
+}): number {
+  const oneWay = Math.min(clean(input.tollKm), MAX_DISTANCE_KM);
+  const totalKm = input.roundTrip === false ? oneWay : oneWay * 2;
+  return Math.round(totalKm * clean(input.ratePerKmRappen));
+}

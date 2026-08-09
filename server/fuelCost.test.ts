@@ -5,6 +5,9 @@ import {
   fuelCost,
   MAX_CONSUMPTION_L100,
   MAX_DISTANCE_KM,
+  TOLL_COUNTRIES,
+  tollCost,
+  tollRateFor,
 } from "@shared/fuelCost";
 
 describe("fuelCost", () => {
@@ -78,5 +81,30 @@ describe("fuelCost", () => {
     // 400 km bei 8.5 l/100 km und 1.85 CHF/l ≈ 63 CHF
     expect(result.rappen).toBeGreaterThan(5000);
     expect(result.rappen).toBeLessThan(8000);
+  });
+});
+
+describe("Streckenmaut-Schätzung (#638)", () => {
+  it("rechnet Autobahn-km mal Satz, hin und zurück doppelt", () => {
+    expect(
+      tollCost({ tollKm: 500, ratePerKmRappen: 10, roundTrip: true })
+    ).toBe(10_000);
+    expect(
+      tollCost({ tollKm: 500, ratePerKmRappen: 10, roundTrip: false })
+    ).toBe(5_000);
+  });
+
+  it("kennt die Länder mit km-Maut und liefert deren Satz", () => {
+    expect(tollRateFor("FR")).toBe(10);
+    expect(tollRateFor("IT")).toBe(8);
+    // Vignetten-Länder bewusst nicht in der Liste
+    expect(tollRateFor("CH")).toBeNull();
+    expect(tollRateFor("AT")).toBeNull();
+    expect(TOLL_COUNTRIES.every(entry => entry.ratePerKmRappen > 0)).toBe(true);
+  });
+
+  it("macht aus Unsinn 0 statt NaN", () => {
+    expect(tollCost({ tollKm: NaN, ratePerKmRappen: 10 })).toBe(0);
+    expect(tollCost({ tollKm: -5, ratePerKmRappen: 10 })).toBe(0);
   });
 });
