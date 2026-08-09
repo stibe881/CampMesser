@@ -107,6 +107,14 @@ export const EMERGENCY_COUNTRIES: CountryEmergency[] = [
     numbers: [{ label: GENERAL, number: "112" }],
   },
   {
+    code: "be",
+    name: l4("Belgien", "Belgique", "Belgio", "Belgium"),
+    numbers: [
+      { label: GENERAL, number: "112" },
+      { label: POLICE, number: "101" },
+    ],
+  },
+  {
     code: "hr",
     name: l4("Kroatien", "Croatie", "Croazia", "Croatia"),
     numbers: [
