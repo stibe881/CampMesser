@@ -4857,6 +4857,8 @@ export const en: Translation = {
     dryingDay: (day: string) => `Best drying weather at home: ${day}.`,
     stepReview: "Fill in the review: what was missing, what was too much?",
     stepNextTime: "Note “next time” reminders at the campsite",
+    stepReviewAria: "Mark the review as done",
+    stepNextTimeAria: "Mark “next time” as done",
     notePlaceholder: "e.g. 25 m extension cord",
     noteSave: "Note it",
     dismissAria: "Hide the homecoming reminder for this trip",

@@ -5000,6 +5000,8 @@ export const fr: Translation = {
     stepReview:
       "Remplir le bilan : qu'est-ce qui a manqué, qu'est-ce qui était en trop ?",
     stepNextTime: "Noter « la prochaine fois » sur le camping",
+    stepReviewAria: "Cocher la rétrospective comme faite",
+    stepNextTimeAria: "Cocher « la prochaine fois » comme fait",
     notePlaceholder: "p. ex. rallonge de 25 m",
     noteSave: "Noter",
     dismissAria: "Masquer le rappel de retour pour ce séjour",

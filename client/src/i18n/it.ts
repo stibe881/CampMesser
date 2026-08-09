@@ -4963,6 +4963,8 @@ export const it: Translation = {
     dryingDay: (day: string) => `Miglior tempo per asciugare a casa: ${day}.`,
     stepReview: "Compila il bilancio: cosa è mancato, cosa era di troppo?",
     stepNextTime: "Annota «la prossima volta» sul campeggio",
+    stepReviewAria: "Spunta la retrospettiva come fatta",
+    stepNextTimeAria: "Spunta «la prossima volta» come fatto",
     notePlaceholder: "es. prolunga da 25 m",
     noteSave: "Annota",
     dismissAria: "Nascondi il promemoria di rientro per questo soggiorno",

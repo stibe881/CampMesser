@@ -5001,6 +5001,8 @@ export const de = {
     dryingDay: (day: string) => `Bestes Trocknungs-Wetter daheim: ${day}.`,
     stepReview: "Rückblick ausfüllen: Was fehlte, was war zu viel?",
     stepNextTime: "«Beim nächsten Mal» am Platz notieren",
+    stepReviewAria: "Rückblick als erledigt abhaken",
+    stepNextTimeAria: "«Beim nächsten Mal» als erledigt abhaken",
     notePlaceholder: "z. B. Kabeltrommel 25 m",
     noteSave: "Notieren",
     dismissAria: "Heimkehr-Erinnerung zu dieser Reise ausblenden",

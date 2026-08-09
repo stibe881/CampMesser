@@ -78,6 +78,8 @@ describe("HomecomingCard", () => {
     localStorage.removeItem("campmesser.homecomingDismissed");
     localStorage.removeItem("campmesser.reviewPromptDismissed");
     localStorage.removeItem("campmesser.homecomingTent");
+    localStorage.removeItem("campmesser.homecomingReview");
+    localStorage.removeItem("campmesser.homecomingNextTime");
   });
 
   it("zeigt Titel und alle drei Schritte", async () => {
@@ -99,6 +101,25 @@ describe("HomecomingCard", () => {
     await userEvent.click(toggle);
     expect(toggle).toHaveAttribute("aria-pressed", "true");
     expect(localStorage.getItem("campmesser.homecomingTent")).toBe("[3]");
+  });
+
+  // Nutzerwunsch 09.08.2026: ALLE Kreise sind antippbar – auch Rückblick
+  // und Merker lassen sich von Hand abhaken; sind alle drei zu, ist die
+  // Karte fertig und verschwindet.
+  it("alle drei Schritte sind abhakbar, danach verschwindet die Karte", async () => {
+    await renderCard();
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Mark tent drying as done" })
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: "Mark the review as done" })
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: "Mark “next time” as done" })
+    );
+    expect(screen.queryByText('Back from "Aare weekend"?')).toBeNull();
+    expect(localStorage.getItem("campmesser.homecomingReview")).toBe("[3]");
+    expect(localStorage.getItem("campmesser.homecomingNextTime")).toBe("[3]");
   });
 
   it("wegklicken gilt je Reise – die Karte verschwindet", async () => {
