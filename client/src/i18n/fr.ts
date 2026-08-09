@@ -2056,6 +2056,19 @@ export const fr: Translation = {
       `${n} lieu${n === 1 ? "" : "x"} retenu${n === 1 ? "" : "s"}`,
     savedPlaceDelete: "Retirer le lieu",
     savedPlaceDeleted: "Lieu retir\u00e9",
+    savedPlaceAddStage: "Ajouter comme \u00e9tape",
+    savedPlacePlanTrip: "Planifier un voyage ici",
+    stageDialogTitle: "Pour quel voyage\u00a0?",
+    stageDialogHint:
+      "Le lieu est ajout\u00e9 comme \u00e9tape \u2013 ajuste ensuite l\u2019arriv\u00e9e et le d\u00e9part dans le voyage.",
+    stageDialogEmpty:
+      "Aucun voyage pr\u00e9vu ou en cours \u2013 cr\u00e9es-en un d\u2019abord.",
+    stageAdded: (trip: string) =>
+      `\u00c9tape ajout\u00e9e \u2013 dans \u00ab\u00a0${trip}\u00a0\u00bb`,
+    savedPlacesListTitle: "Tes lieux \u00e0 retenir",
+    savedPlacesListAria: (name: string) =>
+      `Afficher le lieu ${name} sur la carte`,
+    savedPlacesDistance: (km: string) => `${km} de chez toi`,
     savedPlaceCreatedToast: (name: string) =>
       `Lieu \u00ab\u202f${name}\u202f\u00bb enregistr\u00e9`,
     createdToast: (name: string) => `«${name}» créé comme favori`,

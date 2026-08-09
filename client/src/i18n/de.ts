@@ -2053,6 +2053,19 @@ export const de = {
     savedPlaceLegend: (n: number) => `${n} Merkort${n === 1 ? "" : "e"}`,
     savedPlaceDelete: "Merkort entfernen",
     savedPlaceDeleted: "Merkort entfernt",
+    savedPlaceAddStage: "Als Etappe hinzuf\u00fcgen",
+    savedPlacePlanTrip: "Reise hierhin planen",
+    stageDialogTitle: "Zu welcher Reise?",
+    stageDialogHint:
+      "Der Merkort wird als Etappe angeh\u00e4ngt \u2013 Ankunft und Weiterreise passt du danach in der Reise an.",
+    stageDialogEmpty:
+      "Keine geplante oder laufende Reise \u2013 lege zuerst eine an.",
+    stageAdded: (trip: string) =>
+      `Etappe angelegt \u2013 in \u00ab${trip}\u00bb`,
+    savedPlacesListTitle: "Deine Merkorte",
+    savedPlacesListAria: (name: string) =>
+      `Merkort ${name} auf der Karte zeigen`,
+    savedPlacesDistance: (km: string) => `${km} von zuhause`,
     savedPlaceCreatedToast: (name: string) =>
       `Merkort \u00ab${name}\u00bb gespeichert`,
     createdToast: (name: string) => `«${name}» als Favorit angelegt`,

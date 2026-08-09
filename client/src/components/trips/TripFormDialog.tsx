@@ -168,6 +168,7 @@ export default function TripFormDialog({
   spots,
   packLists,
   onClose,
+  initialPlace = null,
 }: {
   open: boolean;
   /** Zu bearbeitende Reise – null heisst «Neue Reise». */
@@ -175,6 +176,11 @@ export default function TripFormDialog({
   spots: FormSpot[];
   packLists: FormPackList[];
   onClose: () => void;
+  /**
+   * Vorbelegter Ort (#562, «Reise hierhin planen» am Merkort): Name und
+   * Koordinaten stehen beim Öffnen schon im Formular – nur bei «Neu».
+   */
+  initialPlace?: { name: string; lat: number; lng: number } | null;
 }) {
   const { lang, t } = useI18n();
   const utils = trpc.useUtils();
@@ -337,6 +343,12 @@ export default function TripFormDialog({
       setFormKind("camping");
       setFormCoords(null);
       setPlaceResults(null);
+    }
+    // Vorbelegter Ort (#562): Der Merkort steht beim Öffnen im Formular –
+    // Name als Freitext-Ort, Koordinaten wie ein Ortssuche-Treffer.
+    if (!editing && initialPlace) {
+      setForm(f => ({ ...f, location: initialPlace.name }));
+      setFormCoords({ lat: initialPlace.lat, lng: initialPlace.lng });
     }
     // Nur beim Öffnen bzw. beim Wechsel der geladenen Reise neu aufbauen –
     // Tipp-Zwischenstände dürfen ein Re-Render nicht verlieren.

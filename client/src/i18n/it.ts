@@ -2028,6 +2028,19 @@ export const it: Translation = {
       `${n} luogh${n === 1 ? "o salvato" : "i salvati"}`,
     savedPlaceDelete: "Rimuovi il luogo",
     savedPlaceDeleted: "Luogo rimosso",
+    savedPlaceAddStage: "Aggiungi come tappa",
+    savedPlacePlanTrip: "Pianifica un viaggio qui",
+    stageDialogTitle: "Per quale viaggio?",
+    stageDialogHint:
+      "Il luogo viene aggiunto come tappa \u2013 poi regola arrivo e partenza nel viaggio.",
+    stageDialogEmpty:
+      "Nessun viaggio pianificato o in corso \u2013 creane prima uno.",
+    stageAdded: (trip: string) =>
+      `Tappa aggiunta \u2013 in \u00ab${trip}\u00bb`,
+    savedPlacesListTitle: "I tuoi luoghi salvati",
+    savedPlacesListAria: (name: string) =>
+      `Mostra il luogo ${name} sulla mappa`,
+    savedPlacesDistance: (km: string) => `${km} da casa`,
     savedPlaceCreatedToast: (name: string) =>
       `Luogo \u00ab${name}\u00bb salvato`,
     createdToast: (name: string) => `«${name}» creato come preferito`,

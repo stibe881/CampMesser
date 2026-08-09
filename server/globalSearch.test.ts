@@ -434,3 +434,20 @@ describe("Suche über Ausweise & Tankbuch (#482)", () => {
     expect(hits[0].path).toBe("/tankbuch");
   });
 });
+
+describe("Suche über Merkorte (#564)", () => {
+  it("findet einen Merkort über Name und Notiz, Treffer führt zur Karte", () => {
+    const own = {
+      savedPlaces: [
+        { id: 3, name: "Ossiacher See", note: "Platz am Ostufer schauen" },
+      ],
+    };
+    const byName = searchOwnContent("ossiacher", own, 6, "de");
+    expect(byName.length).toBeGreaterThan(0);
+    expect(byName[0].path).toBe("/karte");
+    expect(byName[0].title).toBe("Ossiacher See");
+    const byNote = searchOwnContent("ostufer", own, 6, "de");
+    expect(byNote.length).toBeGreaterThan(0);
+    expect(byNote[0].path).toBe("/karte");
+  });
+});

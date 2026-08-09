@@ -1992,6 +1992,16 @@ export const en: Translation = {
     savedPlaceLegend: (n: number) => `${n} saved place${n === 1 ? "" : "s"}`,
     savedPlaceDelete: "Remove place",
     savedPlaceDeleted: "Place removed",
+    savedPlaceAddStage: "Add as stage",
+    savedPlacePlanTrip: "Plan a trip here",
+    stageDialogTitle: "Which trip?",
+    stageDialogHint:
+      "The place is appended as a stage \u2013 adjust arrival and departure in the trip afterwards.",
+    stageDialogEmpty: "No planned or running trip \u2013 create one first.",
+    stageAdded: (trip: string) => `Stage added \u2013 in \u201c${trip}\u201d`,
+    savedPlacesListTitle: "Your saved places",
+    savedPlacesListAria: (name: string) => `Show place ${name} on the map`,
+    savedPlacesDistance: (km: string) => `${km} from home`,
     savedPlaceCreatedToast: (name: string) =>
       `Saved place \u201c${name}\u201d stored`,
     createdToast: (name: string) => `“${name}” created as favourite`,

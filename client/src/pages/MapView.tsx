@@ -69,7 +69,9 @@
  * sein Popup.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { fmtLong } from "@/lib/dateFormat";
+import { fmtDayMonth, fmtLong } from "@/lib/dateFormat";
+import { useTodayIso } from "@/lib/useTodayIso";
+import { tripDisplayName } from "@shared/tripName";
 import { Link, useLocation, useSearch } from "wouter";
 import {
   Baby,
@@ -85,6 +87,7 @@ import {
   Search,
   Star,
   Tent,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import PageHeader from "@/components/PageHeader";
@@ -393,6 +396,7 @@ function SpotsMap({
   focusExcursionId,
   nightsBySpotId,
   savedPlaces,
+  focusPoint = null,
 }: {
   spots: SpotPin[];
   targets: TentFinderTarget[];
@@ -405,6 +409,8 @@ function SpotsMap({
   nightsBySpotId: Map<number, number>;
   /** Merkorte (#537). */
   savedPlaces: SavedPlacePin[];
+  /** Aus der Merkorte-Liste (#563) angefahrener Punkt; nonce = jeder Klick. */
+  focusPoint?: { lat: number; lon: number; nonce: number } | null;
 }) {
   const { lang, t } = useI18n();
   const [, navigate] = useLocation();
@@ -441,9 +447,65 @@ function SpotsMap({
   );
   const [newNote, setNewNote] = useState("");
   const [newColor, setNewColor] = useState<SavedPlaceColor>("red");
+  /**
+   * Merkort → Etappe (#562): der Merkort, der gerade an eine Reise
+   * gehängt wird – der Dialog fragt nur noch «zu welcher?».
+   */
+  const [stagePlace, setStagePlace] = useState<SavedPlacePin | null>(null);
+  const [stageBusy, setStageBusy] = useState(false);
+  const stageToday = useTodayIso();
+  const stageTripsQuery = trpc.trips.list.useQuery(undefined, {
+    enabled: stagePlace !== null,
+  });
+  /** Geplante und laufende Reisen – Vergangenes braucht keine Etappe mehr. */
+  const stageTrips = (stageTripsQuery.data ?? []).filter(
+    trip => trip.endDate >= stageToday
+  );
+  const addStageToTrip = async (
+    trip: { id: number; startDate: string; endDate: string },
+    label: string
+  ) => {
+    if (!stagePlace) return;
+    setStageBusy(true);
+    try {
+      // Sinnvoller Vorschlag wie im Etappen-Formular: Die neue Etappe
+      // beginnt, wo die letzte endet – angepasst wird in der Reise.
+      const stops = await utils.client.trips.stops.list.query({
+        tripId: trip.id,
+      });
+      const last = stops[stops.length - 1];
+      const from = last ? last.endDate : trip.startDate;
+      const to = trip.endDate < from ? from : trip.endDate;
+      await utils.client.trips.stops.add.mutate({
+        tripId: trip.id,
+        name: stagePlace.name,
+        latitude: stagePlace.latitude,
+        longitude: stagePlace.longitude,
+        startDate: from,
+        endDate: to,
+      });
+      void utils.trips.stops.list.invalidate({ tripId: trip.id });
+      toast.success(t.mapView.stageAdded(label));
+      setStagePlace(null);
+    } catch (error) {
+      toast.error(
+        error instanceof Error && error.message
+          ? error.message
+          : t.common.actionFailed
+      );
+    } finally {
+      setStageBusy(false);
+    }
+  };
 
   // Basis-Layer «Karte / Satellit» – Wahl bleibt in localStorage erhalten
   const [layerKind, setLayerKind] = useState<MapLayerKind>(loadMapLayer);
+
+  // Aus der Merkorte-Liste (#563) angeklickt: Karte zum Stern fahren.
+  useEffect(() => {
+    if (!focusPoint || !mapReady) return;
+    engineRef.current?.setView([focusPoint.lat, focusPoint.lon], 13);
+  }, [focusPoint, mapReady]);
 
   // Ein-/ausblendbare Pin-Ebenen (Favoriten/Ziele/Beobachtungen/OSM) –
   // Wahl bleibt in localStorage erhalten, Standard: alle an. Der Filter
@@ -1338,6 +1400,27 @@ function SpotsMap({
       route.className =
         "mt-1.5 flex w-full items-center justify-center rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors no-underline";
       popup.appendChild(route);
+      // Vom Wunsch zum Plan (#562): als Etappe an eine Reise hängen oder
+      // gleich eine neue Reise mit diesem Ort beginnen.
+      const addStage = document.createElement("button");
+      addStage.type = "button";
+      addStage.textContent = t.mapView.savedPlaceAddStage;
+      addStage.className = "block text-sm font-medium underline";
+      addStage.addEventListener("click", () => {
+        engineRef.current?.closePopup();
+        setStagePlace(place);
+      });
+      popup.appendChild(addStage);
+      const planTrip = document.createElement("button");
+      planTrip.type = "button";
+      planTrip.textContent = t.mapView.savedPlacePlanTrip;
+      planTrip.className = "block text-sm font-medium underline";
+      planTrip.addEventListener("click", () => {
+        navigate(
+          `/tagebuch?neu=1&ort=${encodeURIComponent(place.name)}&lat=${place.latitude}&lng=${place.longitude}`
+        );
+      });
+      popup.appendChild(planTrip);
       const remove = document.createElement("button");
       remove.type = "button";
       remove.textContent = t.mapView.savedPlaceDelete;
@@ -1942,6 +2025,57 @@ function SpotsMap({
         )}
       </div>
 
+      {/* Merkort → Etappe (#562): geplante/laufende Reise wählen */}
+      <Dialog
+        open={stagePlace !== null}
+        onOpenChange={open => {
+          if (!open) setStagePlace(null);
+        }}
+      >
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>{t.mapView.stageDialogTitle}</DialogTitle>
+            <DialogDescription>{t.mapView.stageDialogHint}</DialogDescription>
+          </DialogHeader>
+          {stageTrips.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              {t.mapView.stageDialogEmpty}
+            </p>
+          ) : (
+            <ul className="max-h-64 space-y-1.5 overflow-y-auto">
+              {stageTrips.map(trip => {
+                const label = tripDisplayName(trip, lang);
+                return (
+                  <li key={trip.id}>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start"
+                      disabled={stageBusy}
+                      onClick={() => void addStageToTrip(trip, label)}
+                    >
+                      <span className="min-w-0 flex-1 truncate text-left">
+                        {label}
+                      </span>
+                      <span className="ml-2 shrink-0 text-xs text-muted-foreground">
+                        {fmtDayMonth(
+                          new Date(`${trip.startDate}T00:00:00`),
+                          lang
+                        )}{" "}
+                        –{" "}
+                        {fmtDayMonth(
+                          new Date(`${trip.endDate}T00:00:00`),
+                          lang
+                        )}
+                      </span>
+                    </Button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </DialogContent>
+      </Dialog>
+
       <Dialog
         open={proposed !== null}
         onOpenChange={open => {
@@ -2095,6 +2229,24 @@ export default function MapViewPage() {
   const { data: savedPlacesData } = trpc.savedPlaces.list.useQuery(undefined, {
     enabled: isAuthenticated,
   });
+  // Verwaltungsliste (#563): Distanz von zuhause, Sprung zum Pin
+  const { data: home } = trpc.home.get.useQuery(undefined, {
+    enabled: isAuthenticated && (savedPlacesData?.length ?? 0) > 0,
+    staleTime: 5 * 60_000,
+  });
+  const [focusPoint, setFocusPoint] = useState<{
+    lat: number;
+    lon: number;
+    nonce: number;
+  } | null>(null);
+  const utils = trpc.useUtils();
+  const removePlaceMutation = trpc.savedPlaces.remove.useMutation({
+    onSuccess: () => {
+      toast.success(t.mapView.savedPlaceDeleted);
+      void utils.savedPlaces.list.invalidate();
+    },
+    onError: () => toast.error(t.common.actionFailed),
+  });
 
   // Ausflugfinder-Anbindung (#271): zuerst die billige Frage, ob das Feature
   // überhaupt eingerichtet ist (fasst die Quelle nicht an) – erst wenn ja,
@@ -2239,7 +2391,93 @@ export default function MapViewPage() {
             focusExcursionId={focusExcursionId}
             nightsBySpotId={nightsBySpotId}
             savedPlaces={savedPlacesData ?? []}
+            focusPoint={focusPoint}
           />
+
+          {/* Merkorte-Verwaltungsliste (#563): Bei vielen Sternen skaliert
+              die Karte allein nicht mehr – hier stehen alle mit Farbe,
+              Notiz und Distanz von zuhause; Klick fährt die Karte hin. */}
+          {(savedPlacesData?.length ?? 0) > 0 && (
+            <Card className="mt-4">
+              <CardContent className="py-4">
+                <h2 className="mb-2 flex items-center gap-2 font-serif text-base font-semibold">
+                  <Star className="h-4 w-4 text-primary" aria-hidden="true" />
+                  {t.mapView.savedPlacesListTitle}
+                </h2>
+                <ul className="space-y-1">
+                  {(savedPlacesData ?? []).map(place => {
+                    const distanceKm = home
+                      ? distanceMeters(
+                          home.latitude,
+                          home.longitude,
+                          place.latitude,
+                          place.longitude
+                        ) / 1000
+                      : null;
+                    return (
+                      <li
+                        key={place.id}
+                        className="flex items-center gap-2 rounded-lg bg-muted/40 px-3 py-2"
+                      >
+                        <button
+                          type="button"
+                          className="flex min-w-0 flex-1 items-center gap-2 text-left"
+                          aria-label={t.mapView.savedPlacesListAria(place.name)}
+                          onClick={() =>
+                            setFocusPoint({
+                              lat: place.latitude,
+                              lon: place.longitude,
+                              nonce: Date.now(),
+                            })
+                          }
+                        >
+                          <span
+                            className="h-3 w-3 shrink-0 rounded-full"
+                            style={{
+                              backgroundColor:
+                                SAVED_PLACE_COLOR_HEX[
+                                  normalizeSavedPlaceColor(place.color)
+                                ],
+                            }}
+                            aria-hidden="true"
+                          />
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-sm font-medium">
+                              {place.name}
+                            </span>
+                            <span className="block truncate text-xs text-muted-foreground">
+                              {[
+                                place.note || null,
+                                distanceKm !== null
+                                  ? t.mapView.savedPlacesDistance(
+                                      `${Math.round(distanceKm)} km`
+                                    )
+                                  : null,
+                              ]
+                                .filter(Boolean)
+                                .join(" · ")}
+                            </span>
+                          </span>
+                        </button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 shrink-0 text-muted-foreground/60 hover:text-destructive"
+                          disabled={removePlaceMutation.isPending}
+                          onClick={() =>
+                            removePlaceMutation.mutate({ id: place.id })
+                          }
+                          aria-label={t.mapView.savedPlaceDelete}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                        </Button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
         </>
       )}
     </div>

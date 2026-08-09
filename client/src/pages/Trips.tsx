@@ -272,11 +272,27 @@ export default function TripsPage() {
     setEditingId(null);
   };
 
-  // Schnellaktion «Neuer Tagebuch-Eintrag» (?neu=1): den Reise-Dialog öffnen
+  // Schnellaktion «Neuer Tagebuch-Eintrag» (?neu=1): den Reise-Dialog
+  // öffnen – mit vorbelegtem Ort, wenn der Merkort ihn mitbringt (#562)
   const search = useSearch();
+  const [newTripPlace, setNewTripPlace] = useState<{
+    name: string;
+    lat: number;
+    lng: number;
+  } | null>(null);
   useEffect(() => {
     if (!isAuthenticated) return;
-    if (new URLSearchParams(search).get("neu") === "1") openNewTripDialog();
+    const params = new URLSearchParams(search);
+    if (params.get("neu") !== "1") return;
+    const ort = params.get("ort");
+    const lat = Number(params.get("lat"));
+    const lng = Number(params.get("lng"));
+    setNewTripPlace(
+      ort && Number.isFinite(lat) && Number.isFinite(lng)
+        ? { name: ort, lat, lng }
+        : null
+    );
+    openNewTripDialog();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, isAuthenticated]);
   /**
@@ -841,6 +857,7 @@ export default function TripsPage() {
         spots={spots}
         packLists={listsQuery.data ?? []}
         onClose={closeForm}
+        initialPlace={newTripPlace}
       />
 
       {/* Umschalten und Kalender betreffen die ganze Liste – bei einer
