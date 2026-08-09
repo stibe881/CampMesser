@@ -3104,6 +3104,7 @@ export const fr: Translation = {
     editTitle: "Modifier l\u2019\u00e9tape",
     nameLabel: "Lieu",
     namePlaceholder: "p. ex. lac de C\u00f4me",
+    suggestionsLabel: "Depuis favoris et lieux retenus\u202f:",
     fromLabel: "Arriv\u00e9e",
     toLabel: "D\u00e9part",
     saved: "\u00c9tape enregistr\u00e9e",

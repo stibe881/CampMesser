@@ -456,6 +456,36 @@ export default function TodayPage() {
                 )}
               </p>
             )}
+            {/* Check-in der Etappe (#576): Heisst ein Zeltplatz-Favorit
+                wie die aktuelle Etappe, steht seine Check-in-Info am An-
+                und Weiterreisetag hier – Verknüpfung über den Namen, wie
+                bei der Übernachtungs-Statistik. */}
+            {(() => {
+              if (!currentStop) return null;
+              if (
+                today !== currentStop.startDate &&
+                today !== currentStop.endDate
+              ) {
+                return null;
+              }
+              const stageSpot = (spotsQuery.data ?? []).find(
+                s =>
+                  s.name.trim().toLowerCase() ===
+                  currentStop.name.trim().toLowerCase()
+              );
+              if (!stageSpot?.checkinInfo || stageSpot.id === spot?.id) {
+                return null;
+              }
+              return (
+                <p className="mt-1 flex items-center gap-1.5 text-sm">
+                  <KeyRound
+                    className="h-4 w-4 shrink-0 text-primary"
+                    aria-hidden="true"
+                  />
+                  {stageSpot.checkinInfo}
+                </p>
+              );
+            })()}
             {/* Weiterreise-Hinweis (#559): morgen beginnt die nächste
                 Etappe – mit Sprung in die Navigation, wo Koordinaten da
                 sind. */}

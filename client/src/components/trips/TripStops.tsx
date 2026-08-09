@@ -21,6 +21,8 @@ import {
   Plus,
   Route,
   Search,
+  Star,
+  Tent,
   Trash2,
   X,
 } from "lucide-react";
@@ -107,6 +109,39 @@ export default function TripStops({
 
   /** null = Formular zu, "neu" = neue Etappe, sonst die Id der bearbeiteten. */
   const [editing, setEditing] = useState<number | "neu" | null>(null);
+  /**
+   * Favoriten und Merkorte als Etappen-Vorschlag (#576/#577): Die
+   * Rundreise entsteht aus der Wunschliste – ein Tipp übernimmt Name
+   * UND Koordinaten. Geladen erst, wenn das Formular offen ist.
+   */
+  const spotsQuery = trpc.spots.list.useQuery(undefined, {
+    enabled: editing !== null,
+    staleTime: 5 * 60_000,
+  });
+  const savedPlacesQuery = trpc.savedPlaces.list.useQuery(undefined, {
+    enabled: editing !== null,
+    staleTime: 5 * 60_000,
+  });
+  const pickSuggestions = useMemo(
+    () => [
+      ...(spotsQuery.data ?? []).map(spot => ({
+        key: `spot-${spot.id}`,
+        name: spot.name,
+        lat: spot.latitude,
+        lng: spot.longitude,
+        kind: "spot" as const,
+      })),
+      ...(savedPlacesQuery.data ?? []).map(place => ({
+        key: `place-${place.id}`,
+        name: place.name,
+        lat: place.latitude,
+        lng: place.longitude,
+        kind: "saved" as const,
+      })),
+    ],
+    [spotsQuery.data, savedPlacesQuery.data]
+  );
+
   const [name, setName] = useState("");
   const [from, setFrom] = useState(startDate);
   const [to, setTo] = useState(endDate);
@@ -632,6 +667,35 @@ export default function TripStops({
                         </span>
                       )}
                     </div>
+                    {/* Favoriten & Merkorte als Ein-Tipp-Vorschlag
+                        (#576/#577): Name UND Koordinaten auf einmal –
+                        die Rundreise entsteht aus der Wunschliste. */}
+                    {pickSuggestions.length > 0 && (
+                      <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                        <span className="text-xs text-muted-foreground">
+                          {ts.suggestionsLabel}
+                        </span>
+                        {pickSuggestions.slice(0, 8).map(pick => (
+                          <button
+                            key={pick.key}
+                            type="button"
+                            onClick={() => {
+                              setName(pick.name);
+                              setCoords({ lat: pick.lat, lng: pick.lng });
+                              setPlaceResults(null);
+                            }}
+                            className="flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+                          >
+                            {pick.kind === "spot" ? (
+                              <Tent className="h-3 w-3" aria-hidden="true" />
+                            ) : (
+                              <Star className="h-3 w-3" aria-hidden="true" />
+                            )}
+                            {pick.name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                     {placeResults !== null &&
                       (placeResults.length === 0 ? (
                         <p className="mt-1.5 text-xs text-muted-foreground">

@@ -2997,6 +2997,7 @@ export const en: Translation = {
     editTitle: "Edit stage",
     nameLabel: "Place",
     namePlaceholder: "e.g. Lake Como",
+    suggestionsLabel: "From favourites & saved places:",
     fromLabel: "Arrival",
     toLabel: "Moving on",
     saved: "Stage saved",

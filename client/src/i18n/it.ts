@@ -3069,6 +3069,7 @@ export const it: Translation = {
     editTitle: "Modifica tappa",
     nameLabel: "Luogo",
     namePlaceholder: "es. Lago di Como",
+    suggestionsLabel: "Da preferiti e luoghi salvati:",
     fromLabel: "Arrivo",
     toLabel: "Partenza",
     saved: "Tappa salvata",

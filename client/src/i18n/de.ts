@@ -3107,6 +3107,7 @@ export const de = {
     editTitle: "Etappe bearbeiten",
     nameLabel: "Ort",
     namePlaceholder: "z. B. Comersee",
+    suggestionsLabel: "Aus Favoriten & Merkorten:",
     fromLabel: "Ankunft",
     toLabel: "Weiterreise",
     saved: "Etappe gespeichert",
