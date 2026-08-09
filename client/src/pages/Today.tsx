@@ -21,7 +21,7 @@
  * KEINE NEUEN ABFRAGEN OHNE REISE: Alles hängt an `enabled: Boolean(trip)`.
  * Wer die Seite im Winter öffnet, holt nichts.
  */
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { fmtDayMonth, fmtWeekdayLong } from "@/lib/dateFormat";
 import { Link } from "wouter";
 import {
@@ -43,6 +43,7 @@ import {
   TriangleAlert,
   Bike,
   CableCar,
+  Wind,
 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
@@ -102,6 +103,11 @@ import { Landmark, Umbrella } from "lucide-react";
 import { modules } from "@/data/modules";
 import { tripKindPreset } from "@shared/tripKind";
 import { findCountryRules, guessCountryCode } from "@/data/roadRules";
+import {
+  airQualityLabel,
+  airQualityLevel,
+  airQualityNoteworthy,
+} from "@shared/airQuality";
 
 export default function TodayPage() {
   const { lang, t } = useI18n();
@@ -207,6 +213,41 @@ export default function TodayPage() {
           ? { latitude: trip.latitude, longitude: trip.longitude }
           : null;
   const weather = useDayWeather(coords?.latitude, coords?.longitude, lang);
+  /**
+   * Luftqualität (#588): eine Zeile NUR ab «schlecht» – dieselbe
+   * Schwelle wie im Morgen-Briefing (#565). Ein Abruf pro Ansicht,
+   * ohne Netz bleibt die Zeile weg.
+   */
+  const [airAqi, setAirAqi] = useState<number | null>(null);
+  useEffect(() => {
+    if (!trip || coords == null) return;
+    let cancelled = false;
+    const params = new URLSearchParams({
+      latitude: String(coords.latitude),
+      longitude: String(coords.longitude),
+      current: "european_aqi",
+    });
+    fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?${params}`)
+      .then(res => (res.ok ? res.json() : null))
+      .then((json: { current?: { european_aqi?: number } } | null) => {
+        const aqi = json?.current?.european_aqi;
+        if (!cancelled && typeof aqi === "number") setAirAqi(aqi);
+      })
+      .catch(() => {
+        // Ohne Netz bleibt die Zeile einfach weg.
+      });
+    return () => {
+      cancelled = true;
+    };
+    // Nur Koordinaten-Wechsel zählt – trip ist über coords abgedeckt.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [coords?.latitude, coords?.longitude]);
+  const airLine =
+    airAqi !== null && airQualityNoteworthy(airAqi)
+      ? t.airQuality.briefingLine(
+          airQualityLabel(airQualityLevel(airAqi), lang)
+        )
+      : null;
 
   const choresQuery = trpc.chores.assignments.useQuery(
     { day: today },
@@ -483,6 +524,17 @@ export default function TodayPage() {
                   Math.round(weather.maxC),
                   weather.label
                 )}
+              </p>
+            )}
+            {/* Luftqualität (#588): nur bei schlechter Luft – ein
+                tägliches «alles gut» wäre Lärm. */}
+            {airLine && (
+              <p className="mt-1 flex items-center gap-1.5 text-sm">
+                <Wind
+                  className="h-4 w-4 shrink-0 text-amber-600"
+                  aria-hidden="true"
+                />
+                {airLine}
               </p>
             )}
             {/* Wetterumschwung (#417): «Morgen kippt das Wetter» steht
