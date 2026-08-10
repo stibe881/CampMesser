@@ -44,6 +44,7 @@ import {
   Wallet,
 } from "lucide-react";
 import { Link, useRoute, useSearch } from "wouter";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
 import { useI18n, useT } from "@/i18n";
@@ -83,6 +84,7 @@ import { buildTripIcs, icsFileName, type IcsTrip } from "@shared/ics";
 import { tripDays } from "@shared/menuPlan";
 import {
   countMainSlots,
+  parseReadinessDone,
   tripReadiness,
   type ReadinessKey,
 } from "@shared/tripReadiness";
@@ -126,6 +128,8 @@ export default function TripReadinessCard({
     spotId: number | null;
     arrivalTime: string | null;
     shared?: boolean;
+    /** Von Hand erledigte Bereitschafts-Punkte (#667), JSON-Liste. */
+    readinessDoneJson?: string | null;
     /** Für den Auslands-Hinweis (#524): Land aus Ort/Titel/Platz raten. */
     location?: string | null;
     title?: string | null;
@@ -233,6 +237,23 @@ export default function TripReadinessCard({
   );
 
   /**
+   * Von Hand erledigte Punkte (#667): Wer ohne Packliste und Menüplan
+   * unterwegs ist, hakt hier selbst ab – die Ampel kann das nicht wissen.
+   */
+  const utils = trpc.useUtils();
+  const manualDone = useMemo(
+    () => parseReadinessDone(trip.readinessDoneJson ?? null),
+    [trip.readinessDoneJson]
+  );
+  const setDone = trpc.trips.setReadinessDone.useMutation({
+    onSuccess: () => {
+      utils.trips.list.invalidate();
+      utils.trips.counts.invalidate();
+    },
+    onError: () => toast.error(t.common.actionFailed),
+  });
+
+  /**
    * Der Stand aus der gebündelten Abfrage – er trägt die Zahl am
    * ZUGEKLAPPTEN Schalter (#362). Aufgeklappt gewinnen die eigenen
    * Abfragen: Sie stimmen sofort nach dem Abhaken, während die gebündelte
@@ -277,6 +298,7 @@ export default function TripReadinessCard({
             : null
           : (bundled?.shopping ?? null),
         sharedTrip: trip.shared === true,
+        manualDone,
       }),
     [
       trip.spotId,
@@ -289,6 +311,7 @@ export default function TripReadinessCard({
       menuQuery.data,
       shoppingQuery.data,
       days,
+      manualDone,
     ]
   );
 
@@ -421,18 +444,50 @@ export default function TripReadinessCard({
                         {detail}
                       </span>
                     </span>
-                    <span
-                      className={cn(
-                        "shrink-0 rounded-full px-2 py-0.5 text-[0.7rem] font-medium",
-                        row.status === "ok"
-                          ? "bg-primary/10 text-primary"
-                          : "bg-muted text-muted-foreground"
-                      )}
-                    >
-                      {row.status === "ok"
-                        ? t.trips.readinessStatusOk
-                        : t.trips.readinessStatusOpen}
-                    </span>
+                    {/* Der Status ist neu ein SCHALTER (#667): antippen
+                        hakt den Punkt von Hand ab – oder nimmt das
+                        Häkchen wieder weg. Punkte, die ohnehin aus den
+                        Daten erledigt sind, bleiben unantastbar: Sie
+                        von Hand «offen» zu setzen hiesse, die eigenen
+                        Daten zu verleugnen. */}
+                    {row.status === "ok" && !row.manual ? (
+                      <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[0.7rem] font-medium text-primary">
+                        {t.trips.readinessStatusOk}
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={setDone.isPending}
+                        aria-pressed={row.status === "ok"}
+                        aria-label={
+                          row.status === "ok"
+                            ? t.trips.readinessUndoneAria(label)
+                            : t.trips.readinessMarkDoneAria(label)
+                        }
+                        title={
+                          row.status === "ok"
+                            ? t.trips.readinessManualHint
+                            : t.trips.readinessMarkDoneHint
+                        }
+                        onClick={() =>
+                          setDone.mutate({
+                            tripId: trip.id,
+                            key: row.key,
+                            done: row.status !== "ok",
+                          })
+                        }
+                        className={cn(
+                          "shrink-0 rounded-full px-2 py-0.5 text-[0.7rem] font-medium transition-colors",
+                          row.status === "ok"
+                            ? "bg-primary/10 text-primary hover:bg-primary/20"
+                            : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                        )}
+                      >
+                        {row.status === "ok"
+                          ? t.trips.readinessStatusManual
+                          : t.trips.readinessStatusOpen}
+                      </button>
+                    )}
                     {href ? (
                       <Button
                         asChild

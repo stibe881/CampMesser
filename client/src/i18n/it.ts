@@ -2851,6 +2851,14 @@ export const it: Translation = {
       n === 1 ? "1 punto aperto" : `${n} punti aperti`,
     readinessStatusOk: "fatto",
     readinessStatusOpen: "aperto",
+    readinessStatusManual: "fatto \u2713",
+    readinessMarkDoneAria: (label: string) =>
+      `Segna ${label} come fatto a mano`,
+    readinessUndoneAria: (label: string) =>
+      `Segna ${label} di nuovo come da fare`,
+    readinessMarkDoneHint:
+      "Tocca per segnare come fatto a mano (ad es. se parti senza lista bagagli)",
+    readinessManualHint: "Fatto a mano \u2013 tocca di nuovo per riaprirlo",
     readinessOpenLink: "Apri",
     readinessOpenAria: (label: string) => `Apri ${label}`,
     readinessEditLink: "Completa",

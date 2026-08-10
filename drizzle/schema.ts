@@ -538,6 +538,17 @@ export const tripLogs = mysqlTable(
      */
     budgetRappen: int("budgetRappen"),
     /**
+     * Von Hand auf «erledigt» gesetzte Bereitschafts-Punkte (#667,
+     * Nutzerwunsch 10.08.2026): JSON-Liste der ReadinessKeys.
+     *
+     * WARUM: Die Ampel rechnet aus Daten – keine Packliste heisst
+     * «offen». Beim freien Campen für eine Nacht gibt es aber bewusst
+     * keine Packliste und keinen Menüplan; die Reise ist trotzdem
+     * bereit. Wer hier hakt, sagt: «erledigt, ich weiss was ich tue» –
+     * und die Zahl am Schalter stimmt wieder.
+     */
+    readinessDoneJson: text("readinessDoneJson"),
+    /**
      * Euro-Kurs der Reisekasse (#441): CHF pro EUR × 10 000 (0.94 → 9400).
      * null = kein Kurs gesetzt; Euro-Beträge bleiben dann unverrechnet.
      * Am Aufenthalt und nicht global: Der Kurs gehört zur Reise, wie man

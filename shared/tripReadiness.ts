@@ -36,8 +36,45 @@ export function countMainSlots(
 }
 
 /** Geprüfte Bereiche des Cockpits, in Anzeige-Reihenfolge. */
-export type ReadinessKey =
-  "packList" | "menuPlan" | "shopping" | "spot" | "arrivalTime";
+export const READINESS_KEYS = [
+  "packList",
+  "menuPlan",
+  "shopping",
+  "spot",
+  "arrivalTime",
+] as const;
+export type ReadinessKey = (typeof READINESS_KEYS)[number];
+
+/**
+ * Von Hand erledigte Punkte aus dem gespeicherten JSON lesen (#667).
+ * Defensiv: kaputte Werte und unbekannte Schlüssel fallen weg – lieber
+ * ein Punkt zu viel offen als eine erfundene Bereitschaft.
+ */
+export function parseReadinessDone(raw: unknown): ReadinessKey[] {
+  if (typeof raw !== "string" || !raw.trim()) return [];
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    const seen = new Set<ReadinessKey>();
+    parsed.forEach(value => {
+      if (
+        typeof value === "string" &&
+        (READINESS_KEYS as readonly string[]).indexOf(value) >= 0
+      ) {
+        seen.add(value as ReadinessKey);
+      }
+    });
+    return READINESS_KEYS.filter(key => seen.has(key));
+  } catch {
+    return [];
+  }
+}
+
+/** Liste zum Speichern normieren (bekannte Schlüssel, feste Reihenfolge). */
+export function serializeReadinessDone(keys: readonly string[]): string {
+  const seen = new Set(keys);
+  return JSON.stringify(READINESS_KEYS.filter(key => seen.has(key)));
+}
 
 /** Zustand einer Zeile: erledigt oder noch offen. */
 export type ReadinessStatus = "ok" | "open";
@@ -45,6 +82,12 @@ export type ReadinessStatus = "ok" | "open";
 export interface ReadinessRow {
   key: ReadinessKey;
   status: ReadinessStatus;
+  /**
+   * Gilt dieser Punkt NUR, weil er von Hand abgehakt wurde (#667)? Die
+   * Anzeige sagt das dazu – sonst wundert man sich später, warum die
+   * Packliste «erledigt» ist, obwohl keine verknüpft ist.
+   */
+  manual?: boolean;
   /**
    * Zahl zur Zeile – je nach Bereich Prozent (packList), Anzahl fehlender
    * Haupt-Slots (menuPlan) oder offener Einträge (shopping); sonst 0.
@@ -65,6 +108,8 @@ export interface TripReadinessInput {
   shopping: { open: number; total: number } | null;
   /** Geteilte Reise? Dann ist die Reise-Einkaufsliste immer ein Thema. */
   sharedTrip: boolean;
+  /** Von Hand auf «erledigt» gesetzte Punkte (#667). */
+  manualDone?: readonly ReadinessKey[];
 }
 
 export interface TripReadiness {
@@ -87,26 +132,39 @@ function packedPercent(checked: number, total: number): number {
  */
 export function tripReadiness(input: TripReadinessInput): TripReadiness {
   const rows: ReadinessRow[] = [];
+  const manual = new Set(input.manualDone ?? []);
+  /**
+   * Ein von Hand gesetztes Häkchen sticht die Rechnung – aber nur nach
+   * OBEN: Was ohnehin erledigt ist, braucht keinen Vermerk «von Hand».
+   */
+  const withManual = (row: ReadinessRow): ReadinessRow =>
+    row.status === "ok" || !manual.has(row.key)
+      ? row
+      : { ...row, status: "ok", manual: true };
 
   // Packliste: ohne Liste offen, mit Liste erst bei 100 % erledigt.
   if (input.packList === null) {
-    rows.push({ key: "packList", status: "open", value: 0 });
+    rows.push(withManual({ key: "packList", status: "open", value: 0 }));
   } else {
     const { checked, total } = input.packList;
-    rows.push({
-      key: "packList",
-      status: total > 0 && checked >= total ? "ok" : "open",
-      value: packedPercent(checked, total),
-    });
+    rows.push(
+      withManual({
+        key: "packList",
+        status: total > 0 && checked >= total ? "ok" : "open",
+        value: packedPercent(checked, total),
+      })
+    );
   }
 
   // Menüplan: nur auswerten, wenn es überhaupt Haupt-Slots gibt.
   if (input.menu !== null && input.menu.mainSlots > 0) {
-    rows.push({
-      key: "menuPlan",
-      status: input.menu.emptySlots === 0 ? "ok" : "open",
-      value: input.menu.emptySlots,
-    });
+    rows.push(
+      withManual({
+        key: "menuPlan",
+        status: input.menu.emptySlots === 0 ? "ok" : "open",
+        value: input.menu.emptySlots,
+      })
+    );
   }
 
   // Reise-Einkäufe: bei geteilten Reisen immer, sonst nur mit Einträgen.
@@ -114,23 +172,25 @@ export function tripReadiness(input: TripReadinessInput): TripReadiness {
     input.shopping !== null &&
     (input.sharedTrip || input.shopping.total > 0)
   ) {
-    rows.push({
-      key: "shopping",
-      status: input.shopping.open === 0 ? "ok" : "open",
-      value: input.shopping.open,
-    });
+    rows.push(
+      withManual({
+        key: "shopping",
+        status: input.shopping.open === 0 ? "ok" : "open",
+        value: input.shopping.open,
+      })
+    );
   }
 
-  rows.push({
-    key: "spot",
-    status: input.hasSpot ? "ok" : "open",
-    value: 0,
-  });
-  rows.push({
-    key: "arrivalTime",
-    status: input.hasArrivalTime ? "ok" : "open",
-    value: 0,
-  });
+  rows.push(
+    withManual({ key: "spot", status: input.hasSpot ? "ok" : "open", value: 0 })
+  );
+  rows.push(
+    withManual({
+      key: "arrivalTime",
+      status: input.hasArrivalTime ? "ok" : "open",
+      value: 0,
+    })
+  );
 
   const openCount = rows.filter(row => row.status === "open").length;
   return { rows, openCount, ready: rows.length > 0 && openCount === 0 };

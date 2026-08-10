@@ -37,6 +37,12 @@ export const changelog: ChangelogBlock[] = [
         "Ogni viaggio ora ha un programma del giorno: annota per ogni giorno cosa avete in programma (con orario, se vuoi) \u2013 la vista Oggi mostra il programma da spuntare, i compagni pianificano con te e il resoconto di viaggio lo stampa.",
         "Every trip now has a day plan: note for each day what you are planning (with a time if you like) \u2013 the Today view shows the day\u2019s programme to tick off, companions plan along, and the trip report prints it too."
       ),
+      l4(
+        "In der Bereitschaft l\u00e4sst sich jetzt jeder Punkt von Hand abhaken \u2013 wer ohne Packliste und Men\u00fcplan losf\u00e4hrt, bekommt die Reise trotzdem auf \u00aballes bereit\u00bb.",
+        "Dans la check-list de pr\u00e9paration, chaque point peut d\u00e9sormais \u00eatre coch\u00e9 \u00e0 la main \u2013 m\u00eame sans liste de bagages ni menu, ton voyage peut passer \u00e0 \u00ab\u00a0tout est pr\u00eat\u00a0\u00bb.",
+        "Nella lista di prontezza ora puoi spuntare a mano ogni punto \u2013 anche senza lista bagagli e men\u00f9 il viaggio pu\u00f2 passare a \u00abtutto pronto\u00bb.",
+        "In the readiness check every point can now be ticked off manually \u2013 even without a packing list and meal plan your trip can reach \u201call set\u201d."
+      ),
     ],
   },
   {

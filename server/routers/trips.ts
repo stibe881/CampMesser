@@ -16,6 +16,11 @@ import {
   MAX_TRIP_PLAN_ITEMS,
   TRIP_PLAN_TITLE_MAX_LENGTH,
 } from "@shared/tripPlan";
+import {
+  READINESS_KEYS,
+  parseReadinessDone,
+  serializeReadinessDone,
+} from "@shared/tripReadiness";
 import { TRIP_KINDS, normalizeTripKind } from "@shared/tripKind";
 import { getEcbEurRate } from "../ecbRates";
 import { getHolidaysAbroad } from "../holidaysAbroad";
@@ -872,6 +877,43 @@ export const tripsRouters = {
      * Zeit und Abhaken unterwegs. Einträge gehören zur REISE; Mitreisende
      * planen mit (canAccessTrip), wie beim Journal und der Pinnwand.
      */
+    /**
+     * Bereitschafts-Punkt von Hand auf «erledigt» setzen (#667).
+     *
+     * Die Ampel rechnet aus Daten – wer ohne Packliste und Menüplan
+     * unterwegs ist (freies Campen, eine Nacht), soll die Punkte trotzdem
+     * abhaken können. Gespeichert wird die Liste der erledigten Bereiche
+     * an der Reise; `done: false` nimmt das Häkchen wieder weg.
+     */
+    setReadinessDone: protectedProcedure
+      .input(
+        z.object({
+          tripId: z.number().int().positive(),
+          key: z.enum(READINESS_KEYS),
+          done: z.boolean(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const trip = await db.getTripLog(input.tripId, ctx.user.id);
+        if (!trip) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Aufenthalt nicht gefunden.",
+          });
+        }
+        const current = new Set(parseReadinessDone(trip.readinessDoneJson));
+        if (input.done) {
+          current.add(input.key);
+        } else {
+          current.delete(input.key);
+        }
+        await db.setTripReadinessDone(
+          input.tripId,
+          ctx.user.id,
+          serializeReadinessDone(Array.from(current))
+        );
+        return { success: true } as const;
+      }),
     plan: router({
       list: protectedProcedure
         .input(z.object({ tripId: z.number().int().positive() }))

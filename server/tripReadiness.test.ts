@@ -4,6 +4,8 @@ import {
   MAIN_MEALS,
   tripReadiness,
   type TripReadinessInput,
+  parseReadinessDone,
+  serializeReadinessDone,
 } from "@shared/tripReadiness";
 
 /** Basis: alles erledigt – einzelne Felder pro Test überschreiben. */
@@ -153,5 +155,46 @@ describe("tripReadiness", () => {
     expect(result.rows.find(r => r.key === "arrivalTime")?.status).toBe("open");
     expect(result.openCount).toBe(2);
     expect(result.ready).toBe(false);
+  });
+});
+
+describe("Von Hand erledigte Punkte (#667)", () => {
+  it("hakt offene Punkte ab und merkt sie als «manuell»", () => {
+    const result = tripReadiness(
+      input({
+        packList: null,
+        hasSpot: false,
+        manualDone: ["packList", "spot"],
+      })
+    );
+    const pack = result.rows.find(r => r.key === "packList");
+    expect(pack?.status).toBe("ok");
+    expect(pack?.manual).toBe(true);
+    expect(result.rows.find(r => r.key === "spot")?.manual).toBe(true);
+    // Beide Punkte zählen nicht mehr als offen
+    expect(result.openCount).toBe(0);
+    expect(result.ready).toBe(true);
+  });
+
+  it("markiert ohnehin erledigte Punkte NICHT als manuell", () => {
+    const result = tripReadiness(
+      input({ hasArrivalTime: true, manualDone: ["arrivalTime"] })
+    );
+    const row = result.rows.find(r => r.key === "arrivalTime");
+    expect(row?.status).toBe("ok");
+    expect(row?.manual).toBeUndefined();
+  });
+
+  it("liest und schreibt die gespeicherte Liste defensiv", () => {
+    expect(parseReadinessDone('["spot","packList"]')).toEqual([
+      "packList",
+      "spot",
+    ]);
+    expect(parseReadinessDone('["spot","quatsch",7]')).toEqual(["spot"]);
+    expect(parseReadinessDone("kein json")).toEqual([]);
+    expect(parseReadinessDone(null)).toEqual([]);
+    expect(serializeReadinessDone(["arrivalTime", "packList", "x"])).toBe(
+      '["packList","arrivalTime"]'
+    );
   });
 });

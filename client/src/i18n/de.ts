@@ -2885,6 +2885,15 @@ export const de = {
       n === 1 ? "1 Punkt offen" : `${n} Punkte offen`,
     readinessStatusOk: "erledigt",
     readinessStatusOpen: "offen",
+    readinessStatusManual: "erledigt \u2713",
+    readinessMarkDoneAria: (label: string) =>
+      `${label} von Hand als erledigt markieren`,
+    readinessUndoneAria: (label: string) =>
+      `${label} wieder als offen markieren`,
+    readinessMarkDoneHint:
+      "Antippen: von Hand als erledigt markieren (z.\u00a0B. wenn du ohne Packliste unterwegs bist)",
+    readinessManualHint:
+      "Von Hand erledigt \u2013 antippen macht es wieder offen",
     readinessOpenLink: "Öffnen",
     readinessOpenAria: (label: string) => `${label} öffnen`,
     readinessEditLink: "Ergänzen",

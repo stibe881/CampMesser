@@ -2782,6 +2782,12 @@ export const en: Translation = {
       n === 1 ? "1 item open" : `${n} items open`,
     readinessStatusOk: "done",
     readinessStatusOpen: "open",
+    readinessStatusManual: "done \u2713",
+    readinessMarkDoneAria: (label: string) => `Mark ${label} as done manually`,
+    readinessUndoneAria: (label: string) => `Mark ${label} as open again`,
+    readinessMarkDoneHint:
+      "Tap to mark as done manually (e.g. when travelling without a packing list)",
+    readinessManualHint: "Marked done manually \u2013 tap to reopen",
     readinessOpenLink: "Open",
     readinessOpenAria: (label: string) => `Open ${label}`,
     readinessEditLink: "Complete",

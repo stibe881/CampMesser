@@ -63,6 +63,21 @@ export async function getTripLogs(userId: number) {
     .where(eq(tripLogs.userId, userId))
     .orderBy(desc(tripLogs.startDate), desc(tripLogs.id));
 }
+/**
+ * Von Hand erledigte Bereitschafts-Punkte speichern (#667) – nur an
+ * eigenen Reisen; die Berechtigung prüft der Router.
+ */
+export async function setTripReadinessDone(
+  id: number,
+  userId: number,
+  readinessDoneJson: string
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(tripLogs)
+    .set({ readinessDoneJson })
+    .where(and(eq(tripLogs.id, id), eq(tripLogs.userId, userId)));
+}
 export async function addTripLog(data: InsertTripLog) {
   const db = requireDb(await getDb());
   const [result] = await db.insert(tripLogs).values(data);
