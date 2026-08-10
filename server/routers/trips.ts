@@ -12,6 +12,10 @@ import {
   toChfExpenses,
 } from "@shared/expenses";
 import { MAX_TRIP_STOPS, TRIP_STOP_NAME_MAX_LENGTH } from "@shared/tripStops";
+import {
+  MAX_TRIP_PLAN_ITEMS,
+  TRIP_PLAN_TITLE_MAX_LENGTH,
+} from "@shared/tripPlan";
 import { TRIP_KINDS, normalizeTripKind } from "@shared/tripKind";
 import { getEcbEurRate } from "../ecbRates";
 import { getHolidaysAbroad } from "../holidaysAbroad";
@@ -863,6 +867,164 @@ export const tripsRouters = {
      * mitschreiben (canAccessTrip). Pro Eintrag wird der Anzeigename von
      * createdByUserId aufgelöst («von <Name>» bei gemeinsamen Reisen).
      */
+    /**
+     * Tagesplan (#666): WAS an WELCHEM Reisetag ansteht – mit optionaler
+     * Zeit und Abhaken unterwegs. Einträge gehören zur REISE; Mitreisende
+     * planen mit (canAccessTrip), wie beim Journal und der Pinnwand.
+     */
+    plan: router({
+      list: protectedProcedure
+        .input(z.object({ tripId: z.number().int().positive() }))
+        .query(async ({ ctx, input }) => {
+          const trip = await db.canAccessTrip(input.tripId, ctx.user.id);
+          if (!trip) return [];
+          return db.getTripPlanItems(input.tripId);
+        }),
+      add: protectedProcedure
+        .input(
+          z.object({
+            tripId: z.number().int().positive(),
+            day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+            title: z.string().trim().min(1).max(TRIP_PLAN_TITLE_MAX_LENGTH),
+            timeAt: z
+              .string()
+              .regex(/^([01]\d|2[0-3]):[0-5]\d$/)
+              .nullish(),
+          })
+        )
+        .mutation(async ({ ctx, input }) => {
+          const trip = await db.canAccessTrip(input.tripId, ctx.user.id);
+          if (!trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Aufenthalt nicht gefunden.",
+            });
+          }
+          if (input.day < trip.startDate || input.day > trip.endDate) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "Der Tag liegt ausserhalb des Aufenthalts.",
+            });
+          }
+          const existing = await db.getTripPlanItems(input.tripId);
+          if (existing.length >= MAX_TRIP_PLAN_ITEMS) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "Der Tagesplan ist voll.",
+            });
+          }
+          const id = await db.addTripPlanItem({
+            tripId: input.tripId,
+            day: input.day,
+            title: input.title.trim(),
+            timeAt: input.timeAt ?? null,
+            createdByUserId: ctx.user.id,
+          });
+          await noteTripChange(
+            input.tripId,
+            ctx.user.id,
+            "plan",
+            "add",
+            input.title.trim()
+          );
+          return { id };
+        }),
+      update: protectedProcedure
+        .input(
+          z.object({
+            id: z.number().int().positive(),
+            day: z
+              .string()
+              .regex(/^\d{4}-\d{2}-\d{2}$/)
+              .optional(),
+            title: z
+              .string()
+              .trim()
+              .min(1)
+              .max(TRIP_PLAN_TITLE_MAX_LENGTH)
+              .optional(),
+            /** null räumt die Zeit weg, undefined lässt sie stehen. */
+            timeAt: z
+              .string()
+              .regex(/^([01]\d|2[0-3]):[0-5]\d$/)
+              .nullish(),
+          })
+        )
+        .mutation(async ({ ctx, input }) => {
+          const item = await db.getTripPlanItem(input.id);
+          const trip = item
+            ? await db.canAccessTrip(item.tripId, ctx.user.id)
+            : null;
+          if (!item || !trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Eintrag nicht gefunden.",
+            });
+          }
+          if (
+            input.day !== undefined &&
+            (input.day < trip.startDate || input.day > trip.endDate)
+          ) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "Der Tag liegt ausserhalb des Aufenthalts.",
+            });
+          }
+          await db.updateTripPlanItem(input.id, {
+            ...(input.day !== undefined ? { day: input.day } : {}),
+            ...(input.title !== undefined ? { title: input.title.trim() } : {}),
+            ...(input.timeAt !== undefined ? { timeAt: input.timeAt } : {}),
+          });
+          await noteTripChange(
+            item.tripId,
+            ctx.user.id,
+            "plan",
+            "edit",
+            input.title?.trim() ?? item.title
+          );
+          return { success: true } as const;
+        }),
+      /** Abhaken – bewusst ohne Verlaufs-Eintrag (Haken sind Alltag). */
+      toggle: protectedProcedure
+        .input(z.object({ id: z.number().int().positive(), done: z.boolean() }))
+        .mutation(async ({ ctx, input }) => {
+          const item = await db.getTripPlanItem(input.id);
+          const trip = item
+            ? await db.canAccessTrip(item.tripId, ctx.user.id)
+            : null;
+          if (!item || !trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Eintrag nicht gefunden.",
+            });
+          }
+          await db.updateTripPlanItem(input.id, { done: input.done });
+          return { success: true } as const;
+        }),
+      remove: protectedProcedure
+        .input(z.object({ id: z.number().int().positive() }))
+        .mutation(async ({ ctx, input }) => {
+          const item = await db.getTripPlanItem(input.id);
+          const trip = item
+            ? await db.canAccessTrip(item.tripId, ctx.user.id)
+            : null;
+          if (!item || !trip) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Eintrag nicht gefunden.",
+            });
+          }
+          await db.deleteTripPlanItem(input.id);
+          await noteTripChange(
+            item.tripId,
+            ctx.user.id,
+            "plan",
+            "remove",
+            item.title
+          );
+          return { success: true } as const;
+        }),
+    }),
     journal: router({
       list: protectedProcedure
         .input(z.object({ tripId: z.number().int().positive() }))

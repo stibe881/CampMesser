@@ -1076,6 +1076,42 @@ export const tripJournal = mysqlTable(
   ]
 );
 
+/**
+ * Tagesplan einer Reise (#666, Nutzerwunsch 10.08.2026): WAS an WELCHEM
+ * Tag ansteht – «Di: Wanderung Seealpsee, 14:00 Schwimmbad». Wie Journal
+ * und Menüplan gehört ein Eintrag zur REISE (kein userId als Besitz):
+ * Mitreisende planen mit, die Berechtigung prüft der Router über
+ * canAccessTrip. `createdByUserId` hält fest, WER eingetragen hat.
+ *
+ * `done` macht den Plan zur Checkliste: In der Heute-Ansicht hakt man
+ * ab, was erledigt ist – der Plan wird unterwegs zur Tagesbegleitung
+ * statt nur zur Absicht.
+ */
+export const tripPlanItems = mysqlTable(
+  "tripPlanItems",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    /** Verknüpfte Reise (tripLogs.id) */
+    tripId: int("tripId").notNull(),
+    day: date("day", { mode: "string" }).notNull(),
+    title: varchar("title", { length: 140 }).notNull(),
+    /** Geplante Zeit «HH:MM»; null = irgendwann an dem Tag. */
+    timeAt: varchar("timeAt", { length: 5 }),
+    /** Abgehakt in der Heute-Ansicht bzw. im Plan. */
+    done: boolean("done").notNull().default(false),
+    /** Konto, das den Eintrag angelegt hat; null = unbekannt */
+    createdByUserId: int("createdByUserId"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [
+    index("tripPlanItems_tripId").on(table.tripId),
+    index("tripPlanItems_trip_day").on(table.tripId, table.day),
+  ]
+);
+
+export type TripPlanItem = typeof tripPlanItems.$inferSelect;
+export type InsertTripPlanItem = typeof tripPlanItems.$inferInsert;
+
 export type TripJournalEntry = typeof tripJournal.$inferSelect;
 export type InsertTripJournalEntry = typeof tripJournal.$inferInsert;
 

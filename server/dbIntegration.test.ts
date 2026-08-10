@@ -181,6 +181,26 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
       day: "2026-08-01",
       text: "Angekommen und Zelt aufgestellt.",
     });
+    // Tagesplan (#666): Eintrag anlegen, abhaken, Zeitraum abweisen
+    const planItem = await authed.trips.plan.add({
+      tripId,
+      day: "2026-08-01",
+      title: "Wanderung zum See",
+      timeAt: "09:30",
+    });
+    await expect(
+      authed.trips.plan.add({ tripId, day: "2026-08-05", title: "X" })
+    ).rejects.toThrow();
+    await authed.trips.plan.toggle({ id: planItem.id, done: true });
+    await authed.trips.plan.update({ id: planItem.id, timeAt: null });
+    const planOwn = await authed.trips.plan.list({ tripId });
+    expect(planOwn).toHaveLength(1);
+    expect(planOwn[0]).toMatchObject({
+      day: "2026-08-01",
+      title: "Wanderung zum See",
+      timeAt: null,
+      done: true,
+    });
     await authed.hunts.save({
       title: "CI-Jagd",
       intro: "Los",
@@ -1049,6 +1069,10 @@ describe.skipIf(!hasDb)("Datenbank-Integration (Auth-Flow)", () => {
         .select()
         .from(schema.tripJournal)
         .where(eq(schema.tripJournal.tripId, tripId)),
+      dbc
+        .select()
+        .from(schema.tripPlanItems)
+        .where(eq(schema.tripPlanItems.tripId, tripId)),
     ]);
     expect(remaining.map(rows => rows.length)).toEqual(remaining.map(() => 0));
 

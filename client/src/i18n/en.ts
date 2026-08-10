@@ -4613,6 +4613,23 @@ export const en: Translation = {
     print: "Print the passport",
     note: "The stamps come from the trips in your journal; nothing is recorded twice. Each site gets the same shape, colour and tilt from its own name – identical on every device and after every reload.",
   },
+  tripPlan: {
+    title: "Day plan",
+    toggleAria: (trip: string) => `Expand or collapse the day plan of ${trip}`,
+    count: (done: number, total: number) => `${done}/${total} done`,
+    hint: "What's the plan for each day? With a time the day sorts itself \u2013 on the road you tick things off in the Today view.",
+    todayBadge: "today",
+    addAria: (day: string) => `Add an entry for ${day}`,
+    titlePlaceholder: "What's planned? (e.g. hike to the lake)",
+    timeLabel: "Time (optional)",
+    add: "Add",
+    save: "Save",
+    editAria: (title: string) => `Edit ${title}`,
+    deleteConfirm: (title: string) =>
+      `Remove \u201c${title}\u201d from the day plan?`,
+    deleteAria: (title: string) => `Delete ${title}`,
+    doneAria: (title: string) => `${title} done`,
+  },
   drill: {
     title: "Emergency drill",
     intro:
@@ -4671,6 +4688,8 @@ export const en: Translation = {
     menu: "Meal plan",
     shopping: "Shopping list",
     mealsTitle: "On the plate today",
+    planTitle: "Planned today",
+    planDoneAria: (title: string) => `${title} done`,
     mealsEmpty: "Nothing planned for today.",
     mealsLink: "Open menu plan",
     mealUnknown: "Planned",

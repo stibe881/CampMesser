@@ -4758,6 +4758,24 @@ export const fr: Translation = {
     print: "Imprimer le passeport",
     note: "Les tampons proviennent des voyages du carnet ; rien n'est saisi deux fois. Chaque camping reçoit, à partir de son nom, la même forme, la même couleur et la même inclinaison – identiques sur chaque appareil.",
   },
+  tripPlan: {
+    title: "Programme du jour",
+    toggleAria: (trip: string) =>
+      `D\u00e9plier ou replier le programme de ${trip}`,
+    count: (done: number, total: number) => `${done}/${total} fait`,
+    hint: "Que pr\u00e9voyez-vous chaque jour\u00a0? Avec une heure, la journ\u00e9e se trie toute seule \u2013 en route, tu coches dans la vue Aujourd\u2019hui.",
+    todayBadge: "aujourd\u2019hui",
+    addAria: (day: string) => `Ajouter une entr\u00e9e pour ${day}`,
+    titlePlaceholder: "Quoi de pr\u00e9vu\u00a0? (p.\u00a0ex. rando au lac)",
+    timeLabel: "Heure (optionnelle)",
+    add: "Ajouter",
+    save: "Enregistrer",
+    editAria: (title: string) => `Modifier ${title}`,
+    deleteConfirm: (title: string) =>
+      `Supprimer \u00ab\u00a0${title}\u00a0\u00bb du programme\u00a0?`,
+    deleteAria: (title: string) => `Supprimer ${title}`,
+    doneAria: (title: string) => `${title} fait`,
+  },
   drill: {
     title: "Exercice d'urgence",
     intro:
@@ -4819,6 +4837,8 @@ export const fr: Translation = {
     menu: "Menu",
     shopping: "Liste de courses",
     mealsTitle: "Au menu aujourd'hui",
+    planTitle: "Pr\u00e9vu aujourd'hui",
+    planDoneAria: (title: string) => `${title} fait`,
     mealsEmpty: "Rien de prévu pour aujourd'hui.",
     mealsLink: "Ouvrir le menu",
     mealUnknown: "Prévu",

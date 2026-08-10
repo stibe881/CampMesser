@@ -41,6 +41,7 @@ import {
   tripJournal,
   tripLogs,
   tripMembers,
+  tripPlanItems,
   tripPhotos,
   tripShoppingItems,
   users,
@@ -236,6 +237,8 @@ export async function deleteTripLog(id: number, userId: number) {
   await db.delete(menuDayNotes).where(eq(menuDayNotes.tripId, id));
   // Tages-Journal der Reise (#192) hängt wie die Notizen an der Reise
   await db.delete(tripJournal).where(eq(tripJournal.tripId, id));
+  // Tagesplan (#666) hängt ebenfalls an der Reise
+  await db.delete(tripPlanItems).where(eq(tripPlanItems.tripId, id));
   // Mitglieder und offene Einladungs-Links der Reise mit aufräumen
   await db.delete(tripMembers).where(eq(tripMembers.tripId, id));
   await db.delete(tripInvites).where(eq(tripInvites.tripId, id));
@@ -808,6 +811,55 @@ export async function upsertTripJournalEntry(
     .insert(tripJournal)
     .values({ tripId, day, text, createdByUserId, ...moodSet })
     .onDuplicateKeyUpdate({ set: { text, createdByUserId, ...moodSet } });
+}
+/** Tagesplan (#666): alle Einträge einer Reise – Sortierung macht shared/tripPlan.ts. */
+export async function getTripPlanItems(tripId: number) {
+  const db = requireDb(await getDb());
+  return db
+    .select()
+    .from(tripPlanItems)
+    .where(eq(tripPlanItems.tripId, tripId))
+    .orderBy(asc(tripPlanItems.id));
+}
+/** Plan-Eintrag anlegen – Berechtigung prüft der Router (canAccessTrip). */
+export async function addTripPlanItem(data: {
+  tripId: number;
+  day: string;
+  title: string;
+  timeAt: string | null;
+  createdByUserId: number | null;
+}) {
+  const db = requireDb(await getDb());
+  const result = await db.insert(tripPlanItems).values(data);
+  return Number(result[0].insertId);
+}
+/** Einzelnen Plan-Eintrag laden – der Aufrufer prüft canAccessTrip über tripId. */
+export async function getTripPlanItem(id: number) {
+  const db = requireDb(await getDb());
+  const rows = await db
+    .select()
+    .from(tripPlanItems)
+    .where(eq(tripPlanItems.id, id))
+    .limit(1);
+  return rows[0] ?? null;
+}
+/** Plan-Eintrag ändern (nur mitgeschickte Felder). */
+export async function updateTripPlanItem(
+  id: number,
+  patch: Partial<{
+    day: string;
+    title: string;
+    timeAt: string | null;
+    done: boolean;
+  }>
+) {
+  const db = requireDb(await getDb());
+  await db.update(tripPlanItems).set(patch).where(eq(tripPlanItems.id, id));
+}
+/** Plan-Eintrag löschen – nur NACH einer canAccessTrip-Prüfung im Router. */
+export async function deleteTripPlanItem(id: number) {
+  const db = requireDb(await getDb());
+  await db.delete(tripPlanItems).where(eq(tripPlanItems.id, id));
 }
 /** Journal-Eintrag löschen – nur NACH einer canAccessTrip-Prüfung im Router. */
 export async function deleteTripJournalEntry(tripId: number, day: string) {

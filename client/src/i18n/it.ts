@@ -4712,6 +4712,23 @@ export const it: Translation = {
     print: "Stampa il passaporto",
     note: "I timbri nascono dai viaggi del diario; nulla viene registrato due volte. Ogni campeggio riceve dal proprio nome la stessa forma, lo stesso colore e la stessa inclinazione – uguali su ogni dispositivo.",
   },
+  tripPlan: {
+    title: "Programma del giorno",
+    toggleAria: (trip: string) => `Apri o chiudi il programma di ${trip}`,
+    count: (done: number, total: number) => `${done}/${total} fatto`,
+    hint: "Cosa avete in programma ogni giorno? Con un orario la giornata si ordina da sola \u2013 in viaggio spunti nella vista Oggi.",
+    todayBadge: "oggi",
+    addAria: (day: string) => `Aggiungi una voce per ${day}`,
+    titlePlaceholder: "Cosa c'\u00e8 in programma? (es. escursione al lago)",
+    timeLabel: "Orario (facoltativo)",
+    add: "Aggiungi",
+    save: "Salva",
+    editAria: (title: string) => `Modifica ${title}`,
+    deleteConfirm: (title: string) =>
+      `Eliminare \u00ab${title}\u00bb dal programma?`,
+    deleteAria: (title: string) => `Elimina ${title}`,
+    doneAria: (title: string) => `${title} fatto`,
+  },
   drill: {
     title: "Esercitazione d'emergenza",
     intro:
@@ -4773,6 +4790,8 @@ export const it: Translation = {
     menu: "Menu",
     shopping: "Lista della spesa",
     mealsTitle: "Oggi nel piatto",
+    planTitle: "In programma oggi",
+    planDoneAria: (title: string) => `${title} fatto`,
     mealsEmpty: "Per oggi non c'è nulla di previsto.",
     mealsLink: "Apri il menu",
     mealUnknown: "Previsto",

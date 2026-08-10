@@ -220,6 +220,7 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     menuDayNotes,
     menuEntries,
     tripJournal,
+    tripPlanItems,
     tripBoardNotes,
     customRecipes,
     customHunts,
@@ -376,6 +377,10 @@ export async function deleteUserAccount(userId: number): Promise<void> {
     await db
       .delete(tripJournal)
       .where(inArray(tripJournal.tripId, ownedTripIds));
+    // Tagesplan (#666) eigener Reisen – wie das Journal reise-gebunden
+    await db
+      .delete(tripPlanItems)
+      .where(inArray(tripPlanItems.tripId, ownedTripIds));
     // Pinnwand (#245) eigener Reisen komplett – auch Zettel von
     // Mitreisenden. Eigene Zettel in FREMDEN Reisen bleiben bewusst stehen
     // (sie gehören zur Reise); userId bleibt als tote Referenz zurück, die

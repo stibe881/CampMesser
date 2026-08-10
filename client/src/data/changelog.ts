@@ -28,6 +28,18 @@ export type { ChangelogBlock };
 
 export const changelog: ChangelogBlock[] = [
   {
+    id: "2026-08-10.1",
+    date: "2026-08-10",
+    entries: [
+      l4(
+        "Neu hat jede Reise einen Tagesplan: Trag pro Reisetag ein, was ihr vorhabt (mit Zeit, wenn du magst) \u2013 die Heute-Ansicht zeigt das Tagesprogramm zum Abhaken, Mitreisende planen mit, und der Reisebericht druckt das Programm mit.",
+        "Chaque voyage a d\u00e9sormais un programme du jour\u00a0: note pour chaque jour ce que vous pr\u00e9voyez (avec l\u2019heure si tu veux) \u2013 la vue Aujourd\u2019hui montre le programme \u00e0 cocher, les compagnons planifient avec toi, et le rapport de voyage l\u2019imprime aussi.",
+        "Ogni viaggio ora ha un programma del giorno: annota per ogni giorno cosa avete in programma (con orario, se vuoi) \u2013 la vista Oggi mostra il programma da spuntare, i compagni pianificano con te e il resoconto di viaggio lo stampa.",
+        "Every trip now has a day plan: note for each day what you are planning (with a time if you like) \u2013 the Today view shows the day\u2019s programme to tick off, companions plan along, and the trip report prints it too."
+      ),
+    ],
+  },
+  {
     id: "2026-08-09.9",
     date: "2026-08-09",
     entries: [
@@ -108,48 +120,6 @@ export const changelog: ChangelogBlock[] = [
         "Pour la famille, un quiz des pays avec les drapeaux du guide des pays \u2013 et le pack hors ligne du voyage emporte d\u00e9sormais aussi \u00e9tapes, journal et lieux retenus dans la zone blanche.",
         "Per la famiglia c\u2019\u00e8 un quiz dei paesi con le bandiere del prontuario \u2013 e il pacchetto offline del viaggio ora porta con s\u00e9 anche tappe, diario e luoghi salvati dove non c\u2019\u00e8 campo.",
         "For the family there is a country quiz with flags from the country reference \u2013 and the trip offline pack now takes stages, journal and saved places into the dead zone too."
-      ),
-    ],
-  },
-  {
-    id: "2026-08-09.7",
-    date: "2026-08-09",
-    entries: [
-      l4(
-        "Merkorte können mehr: Foto direkt im Karten-Popup, ein Knopf macht aus dem Merkort einen Zeltplatz-Favoriten (das Foto zügelt mit), Farb-Chips mit eigenen Namen filtern die Karte, Gelöschtes liegt 30 Tage im Papierkorb – und die Heute-Ansicht sagt dir, wenn ein Merkort in der Nähe ist.",
-        "Les lieux repérés savent en faire plus : photo directement dans la bulle de la carte, un bouton transforme le lieu en emplacement favori (la photo déménage avec), des pastilles de couleur avec tes propres noms filtrent la carte, ce qui est supprimé reste 30 jours dans la corbeille – et la vue Aujourd'hui te dit quand un lieu repéré est à proximité.",
-        "I luoghi salvati sanno fare di più: foto direttamente nel popup della mappa, un pulsante trasforma il luogo in piazzola preferita (la foto trasloca con lui), chip colorati con nomi personali filtrano la mappa, ciò che elimini resta 30 giorni nel cestino – e la vista Oggi ti avvisa quando un luogo salvato è nelle vicinanze.",
-        "Saved places can do more: photo right in the map popup, one button turns a saved place into a favourite spot (the photo moves along), colour chips with your own names filter the map, deleted places stay in the bin for 30 days – and the Today view tells you when a saved place is nearby."
-      ),
-      l4(
-        "Rundreisen sichtbar gemacht: Die Karte zeichnet die Etappen-Routen deiner Reisen als Linien (eigene Ebene), die neue Vorlage «Rundreise» legt drei Etappen gleich mit an, Duplizieren nimmt die Etappen mit, jede Etappe zeigt ihre Nächte – und im Tagebuch filterst du neu nach Jahr.",
-        "Les circuits deviennent visibles : la carte trace les itinéraires d'étapes de tes voyages en lignes (couche dédiée), le nouveau modèle « Circuit » crée d'emblée trois étapes, la duplication emporte les étapes, chaque étape affiche ses nuits – et dans le journal tu filtres désormais par année.",
-        "I giri si vedono: la mappa disegna le rotte a tappe dei tuoi viaggi come linee (livello dedicato), il nuovo modello «Tour itinerante» crea subito tre tappe, la duplicazione porta con sé le tappe, ogni tappa mostra le sue notti – e nel diario ora filtri per anno.",
-        'Road trips made visible: the map draws your trips\' stage routes as lines (own layer), the new "Road trip" template sets up three stages right away, duplicating takes the stages along, each stage shows its nights – and in the journal you can now filter by year.'
-      ),
-      l4(
-        "Erinnerungen mit Wetter: Das Reise-Tagebuch zeigt zu jedem Tag das damalige Wetter aus dem Archiv, der gedruckte Reise-Bericht enthält jetzt auch die Tages-Fotos des Journals – und die Schnell-Ausgabe fotografiert den Beleg gleich mit.",
-        "Des souvenirs avec la météo : le journal de voyage montre pour chaque jour la météo d'alors depuis l'archive, le rapport de voyage imprimé contient désormais aussi les photos du jour du journal – et la saisie rapide photographie le justificatif en même temps.",
-        "Ricordi con il meteo: il diario di viaggio mostra per ogni giorno il meteo di allora dall'archivio, il rapporto di viaggio stampato ora contiene anche le foto del giorno del diario – e la registrazione rapida fotografa subito lo scontrino.",
-        "Memories with weather: the trip journal shows each day's past weather from the archive, the printed trip report now also includes the journal's photos of the day – and the quick expense photographs the receipt right away."
-      ),
-      l4(
-        "Unterwegs im Ausland: Der Vignetten-Richtpreis (CH/AT/SI) wandert per Knopf in die Reisekasse, am Abend vor einem Feiertag im Reiseland warnt dich ein Push («Läden oft geschlossen») – und das SOS kennt neu die Spitäler in der Nähe.",
-        "En route à l'étranger : le prix indicatif de la vignette (CH/AT/SI) rejoint la caisse de voyage d'un bouton, la veille d'un jour férié du pays de voyage une notification t'avertit (« magasins souvent fermés ») – et le SOS connaît désormais les hôpitaux à proximité.",
-        "In viaggio all'estero: il prezzo indicativo della vignetta (CH/AT/SI) entra nella cassa di viaggio con un pulsante, la sera prima di un festivo del paese di viaggio una notifica ti avvisa («negozi spesso chiusi») – e l'SOS ora conosce gli ospedali nelle vicinanze.",
-        'On the road abroad: the vignette guide price (CH/AT/SI) goes into the travel fund with one button, the evening before a public holiday in your destination a push warns you ("shops often closed") – and the SOS now knows the hospitals nearby.'
-      ),
-      l4(
-        "Zahlen, die Freude machen: Das Tankbuch zeigt die Tank-Kosten pro Monat, die Statistik eine Rekorde-Karte (meiste Nächte am Stück, längste Etappe, weiteste Rundreise) – und die Reisekasse filtert die Posten neu nach Person.",
-        "Des chiffres qui font plaisir : le carnet de carburant montre les coûts par mois, les statistiques une carte des records (le plus de nuits d'affilée, étape la plus longue, circuit le plus long) – et la caisse de voyage filtre désormais les dépenses par personne.",
-        "Numeri che fanno piacere: il libretto carburante mostra i costi al mese, le statistiche una scheda dei record (più notti di fila, tappa più lunga, tour più lungo) – e la cassa di viaggio ora filtra le spese per persona.",
-        "Numbers that spark joy: the fuel log shows fuel costs per month, the statistics a records card (most nights in a row, longest stage, longest road trip) – and the travel fund now filters expenses by person."
-      ),
-      l4(
-        "Fein abgestimmt: Deine Schriftgrösse gilt jetzt auf allen Geräten, die Packliste zeigt je Person einen Fortschritts-Balken, sechs neue One-Pot-Rezepte warten im Rezeptbuch – und wer im System «Bewegung reduzieren» eingeschaltet hat, bekommt eine ruhige App ohne Animationen.",
-        "Finement réglé : ta taille de police vaut maintenant sur tous les appareils, la liste de bagages affiche une barre de progression par personne, six nouvelles recettes en une casserole t'attendent dans le livre de recettes – et si « réduire les animations » est activé dans le système, l'app reste calme, sans animations.",
-        "Messo a punto: la tua dimensione dei caratteri ora vale su tutti i dispositivi, la lista bagagli mostra una barra di avanzamento per persona, sei nuove ricette in pentola unica ti aspettano nel ricettario – e chi ha attivato «riduci animazioni» nel sistema ha un'app tranquilla, senza animazioni.",
-        'Fine-tuned: your font size now applies on all devices, the packing list shows a progress bar per person, six new one-pot recipes await in the recipe book – and if "reduce motion" is on in your system, the app stays calm without animations.'
       ),
     ],
   },

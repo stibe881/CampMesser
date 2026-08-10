@@ -27,6 +27,7 @@ import { Link } from "wouter";
 import { distanceMeters } from "@shared/geo";
 import {
   Cake,
+  CalendarCheck,
   ArrowRight,
   CalendarDays,
   Check,
@@ -84,6 +85,7 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { useTodayIso } from "@/lib/useTodayIso";
 import { birthdaysInRange } from "@shared/birthdays";
+import { planItemsForDay } from "@shared/tripPlan";
 import AvalancheDanger from "@/components/AvalancheDanger";
 import CampfireLight from "@/components/CampfireLight";
 import QuickExpense from "@/components/trips/QuickExpense";
@@ -152,6 +154,20 @@ export default function TodayPage() {
     { tripId: trip?.id ?? 0 },
     { enabled: Boolean(trip) }
   );
+  // Tagesplan (#666): die Einträge des heutigen Tages zum Abhaken
+  const planQuery = trpc.trips.plan.list.useQuery(
+    { tripId: trip?.id ?? 0 },
+    { enabled: Boolean(trip) }
+  );
+  const todayPlan = useMemo(
+    () => planItemsForDay(planQuery.data ?? [], today),
+    [planQuery.data, today]
+  );
+  const planToggle = trpc.trips.plan.toggle.useMutation({
+    onSuccess: () =>
+      utils.trips.plan.list.invalidate({ tripId: trip?.id ?? 0 }),
+    onError: () => toast.error(t.common.actionFailed),
+  });
   const boardQuery = trpc.trips.board.list.useQuery(
     { tripId: trip?.id ?? 0 },
     { enabled: Boolean(trip) }
@@ -931,6 +947,49 @@ export default function TodayPage() {
                 placeName={place}
               />
             </LazySection>
+          )}
+
+          {/* Tagesplan (#666): was heute ansteht – als Checkliste. Ohne
+              Einträge bleibt die Karte weg, statt leer zu mahnen. */}
+          {todayPlan.length > 0 && (
+            <section className="mt-4 rounded-xl border border-border bg-card p-4">
+              <h3 className="flex items-center gap-2 text-sm font-semibold">
+                <CalendarCheck
+                  className="h-4 w-4 text-primary"
+                  aria-hidden="true"
+                />
+                {td.planTitle}
+              </h3>
+              <ul className="mt-2 space-y-1.5">
+                {todayPlan.map(item => (
+                  <li key={item.id} className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={item.done}
+                      onChange={() => {
+                        hapticTick();
+                        planToggle.mutate({ id: item.id, done: !item.done });
+                      }}
+                      aria-label={td.planDoneAria(item.title)}
+                      className="h-4 w-4 shrink-0 accent-primary"
+                    />
+                    {item.timeAt && (
+                      <span className="shrink-0 rounded bg-accent px-1.5 py-0.5 font-mono text-xs text-accent-foreground">
+                        {item.timeAt}
+                      </span>
+                    )}
+                    <span
+                      className={cn(
+                        "min-w-0 flex-1 break-words text-sm",
+                        item.done && "text-muted-foreground line-through"
+                      )}
+                    >
+                      {item.title}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
           )}
 
           {/* Essen: die zweite Frage des Tages.

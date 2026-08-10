@@ -9,6 +9,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { tripDisplayName, tripPlaceName } from "@shared/tripName";
 import { trpc } from "@/lib/trpc";
+import { planDays, planItemsForDay, sortPlanItems } from "@shared/tripPlan";
 import { printNeedsBrowserTab } from "@/lib/standalone";
 import { recipes } from "@/data/recipes";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
@@ -48,6 +49,11 @@ export default function TripPrintPage() {
   const menuQuery = trpc.menu.listByTrip.useQuery(
     { tripId },
     { enabled: isAuthenticated && validId }
+  );
+  // Tagesplan (#666) – gedruckt als Programm vor dem Journal
+  const planQuery = trpc.trips.plan.list.useQuery(
+    { tripId },
+    { enabled: isAuthenticated }
   );
   // Tages-Journal (#192) – wird als eigener Abschnitt mitgedruckt
   const journalQuery = trpc.trips.journal.list.useQuery(
@@ -112,6 +118,10 @@ export default function TripPrintPage() {
   const journalEntries = useMemo(
     () => journalQuery.data ?? [],
     [journalQuery.data]
+  );
+  const planItems = useMemo(
+    () => sortPlanItems(planQuery.data ?? []),
+    [planQuery.data]
   );
 
   const entryFor = (day: string, meal: Meal) =>
@@ -366,6 +376,32 @@ export default function TripPrintPage() {
                 </tbody>
               </table>
             </div>
+          </section>
+        )}
+
+        {/* Tagesplan (#666): das Programm der Reise, nur Tage mit Einträgen */}
+        {planItems.length > 0 && (
+          <section className="mb-6">
+            <h2 className="mb-2 border-b border-foreground/30 pb-1 text-sm font-bold uppercase tracking-wide">
+              {t.tripPlan.title}
+            </h2>
+            <ul className="space-y-2">
+              {planDays(planItems).map(day => (
+                <li key={day} className="print-station">
+                  <p className="text-xs font-semibold capitalize">
+                    {fmtJournalDay(day)}
+                  </p>
+                  <ul className="ml-4 list-disc space-y-0.5">
+                    {planItemsForDay(planItems, day).map(item => (
+                      <li key={item.id} className="text-sm">
+                        {item.timeAt ? `${item.timeAt} – ` : ""}
+                        {item.title}
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+            </ul>
           </section>
         )}
 

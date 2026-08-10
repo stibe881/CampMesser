@@ -33,6 +33,7 @@ export const CHANGE_AREAS = [
   "guestbook",
   "photo",
   "member",
+  "plan",
 ] as const;
 export type ChangeArea = (typeof CHANGE_AREAS)[number];
 
@@ -54,6 +55,12 @@ export const AREA_LABELS: Record<ChangeArea, L4> = {
   guestbook: l4("Gästebuch", "Livre d'or", "Libro degli ospiti", "Guest book"),
   photo: l4("Fotos", "Photos", "Foto", "Photos"),
   member: l4("Mitreisende", "Compagnons", "Compagni di viaggio", "Companions"),
+  plan: l4(
+    "Tagesplan",
+    "Programme du jour",
+    "Programma del giorno",
+    "Day plan"
+  ),
 };
 
 export const ACTION_LABELS: Record<ChangeAction, L4> = {

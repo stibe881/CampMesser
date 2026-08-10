@@ -4754,6 +4754,23 @@ export const de = {
     print: "Pass drucken",
     note: "Die Stempel entstehen aus den Reisen im Tagebuch; nichts wird doppelt erfasst. Jeder Platz bekommt aus seinem Namen dieselbe Form, Farbe und Schräglage – auf jedem Gerät und nach jedem Neuladen gleich.",
   },
+  tripPlan: {
+    title: "Tagesplan",
+    toggleAria: (trip: string) => `Tagesplan von ${trip} ein- oder ausklappen`,
+    count: (done: number, total: number) => `${done}/${total} erledigt`,
+    hint: "Was habt ihr an welchem Tag vor? Mit Zeit sortiert sich der Tag von selbst \u2013 unterwegs hakst du in der Heute-Ansicht ab.",
+    todayBadge: "heute",
+    addAria: (day: string) => `Eintrag f\u00fcr ${day} hinzuf\u00fcgen`,
+    titlePlaceholder: "Was steht an? (z.\u00a0B. Wanderung Seealpsee)",
+    timeLabel: "Zeit (optional)",
+    add: "Hinzuf\u00fcgen",
+    save: "Speichern",
+    editAria: (title: string) => `${title} bearbeiten`,
+    deleteConfirm: (title: string) =>
+      `\u00ab${title}\u00bb aus dem Tagesplan l\u00f6schen?`,
+    deleteAria: (title: string) => `${title} l\u00f6schen`,
+    doneAria: (title: string) => `${title} erledigt`,
+  },
   drill: {
     title: "Notfall-Übung",
     intro:
@@ -4814,6 +4831,8 @@ export const de = {
     menu: "Menüplan",
     shopping: "Einkaufsliste",
     mealsTitle: "Heute auf dem Teller",
+    planTitle: "Heute geplant",
+    planDoneAria: (title: string) => `${title} erledigt`,
     mealsEmpty: "Für heute ist nichts eingetragen.",
     mealsLink: "Menüplan öffnen",
     mealUnknown: "Eingetragen",

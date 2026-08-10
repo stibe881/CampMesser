@@ -37,6 +37,7 @@ import { trpc } from "@/lib/trpc";
 import { useT } from "@/i18n";
 import LazySection from "@/components/LazySection";
 import TripJournal from "@/components/trips/TripJournal";
+import TripPlan from "@/components/trips/TripPlan";
 import TripBoard from "@/components/trips/TripBoard";
 import { TripPhotos } from "@/components/trips/TripWidgets";
 import TripDatePoll from "@/components/TripDatePoll";
@@ -365,6 +366,15 @@ export function TripDetailSections({
   return (
     <LazySection minHeight={320}>
       <Suspense fallback={null}>
+        {/* Tagesplan (#666): WAS an welchem Tag ansteht – gerade auch
+            VOR der Reise, denn geplant wird vorher. */}
+        <TripPlan
+          tripId={trip.id}
+          tripName={name}
+          startDate={trip.startDate}
+          endDate={trip.endDate}
+          today={today}
+        />
         {/* Reise-Tagebuch (#192): erst ab dem ersten Reisetag */}
         {(phase === "past" || trip.startDate <= today) && (
           <TripJournal
