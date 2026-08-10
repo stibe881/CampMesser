@@ -85,6 +85,19 @@ export async function setFamilyChildFamilyMember(
     .set({ familyMember })
     .where(and(eq(familyChildren.id, id), eq(familyChildren.userId, userId)));
 }
+
+/** Geburtstag setzen oder löschen (#656). */
+export async function setFamilyChildBirthday(
+  id: number,
+  userId: number,
+  birthday: string | null
+) {
+  const db = requireDb(await getDb());
+  await db
+    .update(familyChildren)
+    .set({ birthday })
+    .where(and(eq(familyChildren.id, id), eq(familyChildren.userId, userId)));
+}
 export async function renameFamilyChild(
   id: number,
   userId: number,

@@ -155,15 +155,19 @@ export default function MapViewPage() {
     pick(SAVED_PLACE_COLOR_LABELS[normalizeSavedPlaceColor(color)], lang);
   const [colorFilter, setColorFilter] = useState<string | null>(null);
   const [editLegend, setEditLegend] = useState(false);
-  const visiblePlaces = useMemo(
-    () =>
-      (savedPlacesData ?? []).filter(
-        place =>
-          colorFilter === null ||
-          normalizeSavedPlaceColor(place.color) === colorFilter
-      ),
-    [savedPlacesData, colorFilter]
-  );
+  /** Volltext-Filter über Name und Notiz der Merkorte (#662). */
+  const [placeQuery, setPlaceQuery] = useState("");
+  const visiblePlaces = useMemo(() => {
+    const query = placeQuery.trim().toLowerCase();
+    return (savedPlacesData ?? []).filter(
+      place =>
+        (colorFilter === null ||
+          normalizeSavedPlaceColor(place.color) === colorFilter) &&
+        (query === "" ||
+          place.name.toLowerCase().includes(query) ||
+          (place.note ?? "").toLowerCase().includes(query))
+    );
+  }, [savedPlacesData, colorFilter, placeQuery]);
   /** Farben, die überhaupt vergeben sind – nur die stehen zur Wahl. */
   const usedColors = useMemo(
     () =>
@@ -547,6 +551,18 @@ export default function MapViewPage() {
                   tabIndex={-1}
                   onChange={e => void handlePlacePhotoSelected(e.target.files)}
                 />
+                {/* Merkorte durchsuchen (#662): Name UND Notiz, wirkt wie
+                    der Farb-Filter auf Karte und Liste zugleich. */}
+                {(savedPlacesData?.length ?? 0) > 3 && (
+                  <Input
+                    type="search"
+                    value={placeQuery}
+                    onChange={e => setPlaceQuery(e.target.value)}
+                    placeholder={t.mapView.placeSearchPlaceholder}
+                    aria-label={t.mapView.placeSearchPlaceholder}
+                    className="mb-2 h-9"
+                  />
+                )}
                 {/* Farb-Legende (#602): eigene Namen für die Pin-Farben,
                     Filter wirkt auf Karte UND Liste. */}
                 {usedColors.length > 1 && (

@@ -1350,6 +1350,9 @@ export const en: Translation = {
     waitingSensor: "Waiting for sensor data",
     pitchLabel: "Forwards / backwards",
     rollLabel: "Left / right",
+    wedgeTitle: "Wedge helper:",
+    wedgePitch: (cm: string) => `front/back: raise by ~${cm} cm`,
+    wedgeRoll: (cm: string) => `left/right: raise by ~${cm} cm`,
     levelNow: "Level – perfect position!",
     zeroHere: "Zero here",
     resetCalibration: "Reset calibration",
@@ -1371,6 +1374,8 @@ export const en: Translation = {
     tireFrontLabel: "Tyre pressure front (bar)",
     tireRearLabel: "Tyre pressure rear (bar)",
     serviceDueLabel: "Next service",
+    wheelbaseLabel: "Wheelbase (cm)",
+    trackLabel: "Track width (cm)",
     title: "Payload calculator",
     subtitle:
       "Is your rig overloaded? Limits, load and traffic light at a glance.",
@@ -1475,6 +1480,8 @@ export const en: Translation = {
   roadRules: {
     plugTitle: "Sockets & adapters",
     twoWheelsTitle: "Motorbike & bike",
+    quietTitle: "Quiet hours & customs",
+    dogsTitle: "Travelling with a dog",
     tippingTitle: "Tipping",
     paymentTitle: "Cash & cards",
     title: "Tolls, vignettes & rules",
@@ -1584,6 +1591,12 @@ export const en: Translation = {
     rangeUnknown: "–",
     rangeLabel: "Runtime",
     consumptionPerDay: "Consumption / day",
+    powerCostLabel: "Hook-up price",
+    powerCostUnit: "CHF/kWh (posted at the bollard or reception)",
+    powerCostPerDay: (chf: string) => `\u2248 ${chf} CHF of power per day`,
+    powerCostPerWeek: (chf: string) => `${chf} CHF per week`,
+    powerCostHint:
+      "Calculated from your daily consumption above. For the travel fund: record it as an expense \u2013 the amount here is an estimate.",
     solarPerDay: "Solar yield / day",
     balancePerDay: "Balance / day",
     availableLabel: "Usable now",
@@ -2055,6 +2068,7 @@ export const en: Translation = {
     savedPlacePromote: "Turn into a favourite pitch",
     savedPlacePromoted: "The saved place is now a favourite pitch.",
     colorFilterAria: "Filter saved places by colour",
+    placeSearchPlaceholder: "Search saved places (name or note)",
     colorAll: "All",
     colorLegendEdit: "Edit legend",
     colorNameAria: (color: string) => `Custom name for the colour ${color}`,
@@ -2669,6 +2683,12 @@ export const en: Translation = {
     submit: "Save entry",
     moreSections: "More about the trip",
     statsLink: "View statistics and milestones",
+    monthIdeasTitle: "Where to in \u2026?",
+    monthIdeasAria: "Destination ideas by month",
+    monthIdeasRow: (visits: number, nights: number, year: number) =>
+      `${visits}\u00d7 \u00b7 ${nights === 1 ? "1 night" : `${nights} nights`} \u00b7 last ${year}`,
+    monthIdeasEmpty: (month: string) =>
+      `You have never travelled in ${month} \u2013 time for a first.`,
     plannedTitle: "Planned stays",
     holidaySectionLabel: "School & public holidays",
     holidayCantonAria: "Choose the canton for holiday hints",
@@ -2894,6 +2914,7 @@ export const en: Translation = {
     journalCount: (n: number) => (n === 1 ? "1 entry" : `${n} entries`),
     journalEmptyDay: "Nothing recorded yet",
     journalPlaceholder: "What happened today?",
+    journalMoodAria: "Mood of the day",
     journalEditAria: (day: string) => `Edit the entry of ${day}`,
     journalSave: "Save",
     journalSaved: "Journal entry saved",
@@ -3107,6 +3128,8 @@ export const en: Translation = {
     legLine: (km: string, duration: string) =>
       `Drive: \u2248 ${km} \u00b7 ${duration}`,
     legEstimated: "estimated as the crow flies",
+    legTooLong: (drive: string) =>
+      `Long driving day (${drive}) \u2013 a stopover makes the day more relaxed.`,
     legTotal: (km: string, duration: string) =>
       `Whole loop: \u2248 ${km} \u00b7 ${duration}`,
     optimizeButton: "Shortest loop",
@@ -4580,6 +4603,13 @@ export const en: Translation = {
       "These are the same people as in family mode – anyone already there shows up here too.",
     noPlaceEmpty:
       "The trips count, but they have no place name – a stamp needs a place. Add a campsite or location to the trip and the stamp will appear.",
+    shareImage: "Save as image",
+    imageSaved: "Image saved.",
+    imageFailed: "The image could not be created.",
+    countriesTitle: "Country stamps",
+    countryStampAria: (country: string, trips: number) =>
+      `Country stamp ${country}, ${trips} trips`,
+    rankReached: (title: string) => `New level reached: \u201c${title}\u201d!`,
     print: "Print the passport",
     note: "The stamps come from the trips in your journal; nothing is recorded twice. Each site gets the same shape, colour and tilt from its own name – identical on every device and after every reload.",
   },
@@ -4620,6 +4650,12 @@ export const en: Translation = {
     nightsLeft: (nights: number) =>
       nights === 1 ? "1 night left" : `${nights} nights left`,
     departureToday: "Departure day",
+    birthdayToday: (name: string, age: number | null) =>
+      age === null
+        ? `It's ${name}'s birthday today \u2013 cake!`
+        : `${name} turns ${age} today \u2013 cake!`,
+    birthdayUpcoming: (name: string, date: string) =>
+      `${name} has a birthday on ${date} \u2013 during this trip!`,
     stageLine: (name: string, until: string) =>
       `Stage: ${name} \u00b7 until ${until}`,
     stageNext: (name: string) => `Moving on to ${name} tomorrow`,
@@ -5485,6 +5521,7 @@ export const en: Translation = {
       bakery: "Bakery",
       farm: "Farm shop",
       butcher: "Butcher",
+      vet: "Vet",
     },
     openNow: "Open now",
     closedNow: "Closed now",
@@ -6326,6 +6363,8 @@ export const en: Translation = {
     childrenEmpty:
       "No children yet – add a name below so badges can be collected.",
     childNamePlaceholder: "Child's name",
+    birthdayLabel: "Birthday",
+    birthdayAria: (name: string) => `Birthday of ${name}`,
     addChild: "Add child",
     renameChildAria: (name: string) => `Rename ${name}`,
     renameSaveAria: (name: string) => `Save new name for ${name}`,

@@ -15,6 +15,7 @@ import {
   INVERTER_EFFICIENCY,
   applyWeatherToConsumers,
   coolingHoursPerDay,
+  landPowerRappenPerDay,
 } from "@shared/powerBudget";
 
 const storage = (patch: Partial<PowerStorage> = {}): PowerStorage => ({
@@ -385,5 +386,20 @@ describe("Kühlgeräte nach Wetter (#405)", () => {
       { name: "Kühlbox", watts: 45, hoursPerDay: 8, cooling: true },
     ];
     expect(applyWeatherToConsumers(consumers, null)[0].hoursPerDay).toBe(8);
+  });
+});
+
+describe("Landstrom-Kosten (#650)", () => {
+  it("rechnet Wh und Rappen pro kWh in Rappen pro Tag um", () => {
+    // 1500 Wh/Tag bei 70 Rp./kWh = 105 Rappen
+    expect(landPowerRappenPerDay(1500, 70)).toBe(105);
+    // Rundung auf ganze Rappen
+    expect(landPowerRappenPerDay(1234, 70)).toBe(86);
+  });
+
+  it("liefert null ohne Preis oder ohne Verbrauch", () => {
+    expect(landPowerRappenPerDay(1500, null)).toBeNull();
+    expect(landPowerRappenPerDay(1500, 0)).toBeNull();
+    expect(landPowerRappenPerDay(0, 70)).toBeNull();
   });
 });

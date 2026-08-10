@@ -893,6 +893,8 @@ export const tripsRouters = {
             tripId: z.number().int().positive(),
             day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
             text: z.string().max(TRIP_JOURNAL_MAX_LENGTH).nullish(),
+            /** Stimmungs-Emoji (#661); undefined = unverändert lassen. */
+            mood: z.string().trim().max(8).nullish(),
           })
         )
         .mutation(async ({ ctx, input }) => {
@@ -915,7 +917,8 @@ export const tripsRouters = {
               input.tripId,
               input.day,
               text,
-              ctx.user.id
+              ctx.user.id,
+              input.mood === undefined ? undefined : input.mood?.trim() || null
             );
           } else {
             // Das Tages-Foto (#590) hängt am Eintrag – ohne Zeile keine Datei.

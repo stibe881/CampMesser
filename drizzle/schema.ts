@@ -862,6 +862,10 @@ export const pushSubscriptions = mysqlTable(
     lastEvePackKey: varchar("lastEvePackKey", { length: 64 }),
     /** Schlüssel der letzten Hitze-Erinnerung («heat:YYYY-MM-DD»): max. 1 pro Tag */
     lastHeatKey: varchar("lastHeatKey", { length: 64 }),
+    /** Schlüssel der letzten Budget-Warnung (#665, «budget:<tripId>:<80|100>») */
+    lastBudgetKey: varchar("lastBudgetKey", { length: 64 }),
+    /** Schlüssel des letzten Wochenend-Wetters (#659, «weekend:YYYY-MM-DD») */
+    lastWeekendKey: varchar("lastWeekendKey", { length: 64 }),
     lastNotifiedAt: timestamp("lastNotifiedAt"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
@@ -1056,6 +1060,11 @@ export const tripJournal = mysqlTable(
      * Bild zu diesem Tag».
      */
     photoFileName: varchar("photoFileName", { length: 64 }),
+    /**
+     * Stimmung des Tages (#661): das Emoji selbst («😀»), kein Code –
+     * sprachfrei und ohne Übersetzungstabelle. null = nicht erfasst.
+     */
+    mood: varchar("mood", { length: 8 }),
     /** Konto, das den Eintrag zuletzt geschrieben hat; null = unbekannt */
     createdByUserId: int("createdByUserId"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -1440,6 +1449,13 @@ export const familyChildren = mysqlTable(
      * Standard `true`, damit bestehende Profile Familie bleiben.
      */
     familyMember: boolean("familyMember").notNull().default(true),
+    /**
+     * Geburtstag (#656), optional: Fällt er in einen Reisezeitraum, sagt
+     * es die Heute-Ansicht – Kuchen einplanen. Nur Monat/Tag zählen für
+     * den Hinweis; das Jahr bleibt trotzdem gespeichert (Alter im Pass
+     * wäre ein späterer Schritt).
+     */
+    birthday: date("birthday", { mode: "string" }),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
   table => [index("familyChildren_userId").on(table.userId)]

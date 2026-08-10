@@ -41,6 +41,7 @@ import {
   packItems,
   pushLog,
   pushSubscriptions,
+  tripExpenses,
   tripLogs,
   tripStops,
 } from "../drizzle/schema";
@@ -786,6 +787,166 @@ export function buildHolidayEveAlert(
   };
 }
 
+// ── Budget-Warnung (#665) ────────────────────────────────────────────
+
+/** Eine laufende Reise mit Limite und bisher erfassten Ausgaben. */
+export interface BudgetTripLike {
+  id: number;
+  name: string;
+  budgetRappen: number;
+  spentRappen: number;
+}
+
+export interface BudgetAlert {
+  title: string;
+  body: string;
+  /** Dedup «budget:<tripId>:<80|100>» – je Stufe höchstens ein Push. */
+  key: string;
+}
+
+function budgetAlertText(
+  name: string,
+  level: 80 | 100,
+  spentChf: number,
+  budgetChf: number,
+  lang: Language
+) {
+  const texts: Record<Language, { title: string; body: string }> = {
+    de: {
+      title:
+        level === 100
+          ? `Reisekasse: Limite erreicht (${name})`
+          : `Reisekasse: 80 % der Limite (${name})`,
+      body: `${spentChf} von ${budgetChf} CHF ausgegeben.`,
+    },
+    fr: {
+      title:
+        level === 100
+          ? `Caisse de voyage : limite atteinte (${name})`
+          : `Caisse de voyage : 80 % de la limite (${name})`,
+      body: `${spentChf} CHF dépensés sur ${budgetChf}.`,
+    },
+    it: {
+      title:
+        level === 100
+          ? `Cassa di viaggio: limite raggiunto (${name})`
+          : `Cassa di viaggio: 80 % del limite (${name})`,
+      body: `${spentChf} CHF spesi su ${budgetChf}.`,
+    },
+    en: {
+      title:
+        level === 100
+          ? `Travel fund: limit reached (${name})`
+          : `Travel fund: 80% of the limit (${name})`,
+      body: `${spentChf} of ${budgetChf} CHF spent.`,
+    },
+  };
+  return texts[lang] ?? texts.de;
+}
+
+/**
+ * Budget-Warnung bauen (#665): Bei 80 % der Reisekassen-Limite kommt die
+ * erste Meldung, beim Erreichen die zweite – der Schlüssel trägt die
+ * Stufe, darum ersetzt die 100er-Meldung die 80er ohne Doppel-Push. Bei
+ * mehreren Reisen gewinnt die mit dem vollsten Budget.
+ */
+export function buildBudgetAlert(
+  trips: readonly BudgetTripLike[],
+  lang: Language = "de"
+): BudgetAlert | null {
+  const hits = trips
+    .filter(t => t.budgetRappen > 0 && t.spentRappen >= t.budgetRappen * 0.8)
+    .map(t => ({
+      trip: t,
+      level: (t.spentRappen >= t.budgetRappen ? 100 : 80) as 80 | 100,
+      ratio: t.spentRappen / t.budgetRappen,
+    }))
+    .sort((a, b) => b.ratio - a.ratio || a.trip.id - b.trip.id);
+  const first = hits[0];
+  if (!first) return null;
+  const text = budgetAlertText(
+    first.trip.name,
+    first.level,
+    Math.round(first.trip.spentRappen / 100),
+    Math.round(first.trip.budgetRappen / 100),
+    lang
+  );
+  return { ...text, key: `budget:${first.trip.id}:${first.level}` };
+}
+
+// ── Wochenend-Wetter daheim (#659) ───────────────────────────────────
+
+/** Gesendet wird nur freitags in diesem Zürich-Stundenfenster (inklusive). */
+export const WEEKEND_SEND_HOUR_FROM = 10;
+export const WEEKEND_SEND_HOUR_TO = 13;
+
+export interface WeekendAlert {
+  title: string;
+  body: string;
+  /** Dedup «weekend:<Samstag>» – höchstens einer pro Wochenende. */
+  key: string;
+}
+
+/** Ein Tag gilt als Ausflugs-Wetter ab 18 °C und unter 2 mm Regen. */
+export function isOutingWeather(day: TurnDay): boolean {
+  return (
+    Number.isFinite(day.tempMaxC) &&
+    day.tempMaxC >= 18 &&
+    day.precipitationSumMm < 2
+  );
+}
+
+function weekendDayLine(day: TurnDay, label: string): string {
+  const temp = Number.isFinite(day.tempMaxC)
+    ? `${Math.round(day.tempMaxC)}°`
+    : "–";
+  const rain =
+    day.precipitationSumMm >= 1
+      ? ` · ${Math.round(day.precipitationSumMm)} mm`
+      : "";
+  return `${label} ${temp}${rain}`;
+}
+
+/**
+ * Wochenend-Wetter bauen (#659): freitags ein Blick auf Samstag und
+ * Sonntag am Heim-Standort. Gemeldet wird NUR, wenn mindestens ein Tag
+ * Ausflugs-Wetter verspricht – bei Sauwetter schweigt der Push, statt
+ * schlechte Laune zuzustellen.
+ */
+export function buildWeekendAlert(
+  days: readonly TurnDay[],
+  saturday: string,
+  sunday: string,
+  lang: Language = "de"
+): WeekendAlert | null {
+  const sat = days.find(d => d.date === saturday);
+  const sun = days.find(d => d.date === sunday);
+  if (!sat || !sun) return null;
+  if (!isOutingWeather(sat) && !isOutingWeather(sun)) return null;
+  const labels: Record<Language, [string, string, string, string]> = {
+    de: ["Sa", "So", "Wochenend-Wetter daheim", "Lust auf einen Spontan-Trip?"],
+    fr: [
+      "Sa",
+      "Di",
+      "Météo du week-end à la maison",
+      "Envie d'un trip spontané ?",
+    ],
+    it: [
+      "Sa",
+      "Do",
+      "Meteo del weekend a casa",
+      "Voglia di un viaggio spontaneo?",
+    ],
+    en: ["Sat", "Sun", "Weekend weather at home", "Fancy a spontaneous trip?"],
+  };
+  const [satLabel, sunLabel, title, tail] = labels[lang] ?? labels.de;
+  return {
+    title,
+    body: `${weekendDayLine(sat, satLabel)} · ${weekendDayLine(sun, sunLabel)} – ${tail}`,
+    key: `weekend:${saturday}`,
+  };
+}
+
 /** Gesendet wird nur abends (Europe/Zurich), Stunde von–bis (inklusive). */
 export const EVE_PACK_SEND_HOUR_FROM = 17;
 export const EVE_PACK_SEND_HOUR_TO = 21;
@@ -1031,12 +1192,16 @@ export interface WeatherTurnPushAlert {
 }
 
 /** Tagesprognose heute+morgen für den Umschwungs-Vergleich (#427). */
-async function dailyTurnFor(lat: number, lon: number): Promise<TurnDay[]> {
+async function dailyTurnFor(
+  lat: number,
+  lon: number,
+  forecastDays = 2
+): Promise<TurnDay[]> {
   const params = new URLSearchParams({
     latitude: lat.toFixed(4),
     longitude: lon.toFixed(4),
     timezone: "auto",
-    forecast_days: "2",
+    forecast_days: String(forecastDays),
     daily: "temperature_2m_max,precipitation_sum,wind_gusts_10m_max",
   });
   const res = await fetch(
@@ -1487,6 +1652,77 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
   const yesterday = isoYesterday(today);
   const endedYesterday = allTrips.filter(trip => trip.endDate === yesterday);
   const spotById = new Map(spots.map(s => [s.id, s]));
+  // ── Budget-Warnung (#665): Reisekasse bei 80 %/100 % der Limite ──
+  const budgetTrips = allTrips.filter(
+    trip =>
+      trip.budgetRappen !== null &&
+      trip.budgetRappen > 0 &&
+      trip.startDate <= today &&
+      trip.endDate >= today
+  );
+  const spentByTripId = new Map<number, number>();
+  if (budgetTrips.length > 0) {
+    const expenseRows = await db
+      .select({
+        tripId: tripExpenses.tripId,
+        amountRappen: tripExpenses.amountRappen,
+      })
+      .from(tripExpenses)
+      .where(
+        inArray(
+          tripExpenses.tripId,
+          budgetTrips.map(t => t.id)
+        )
+      );
+    for (const row of expenseRows) {
+      spentByTripId.set(
+        row.tripId,
+        (spentByTripId.get(row.tripId) ?? 0) + row.amountRappen
+      );
+    }
+  }
+  const budgetAlertByUser = new Map<string, BudgetAlert>();
+  for (const userId of userIds) {
+    const own = budgetTrips
+      .filter(trip => trip.userId === userId)
+      .map(trip => ({
+        id: trip.id,
+        name: tripDisplayName(trip),
+        budgetRappen: trip.budgetRappen ?? 0,
+        spentRappen: spentByTripId.get(trip.id) ?? 0,
+      }));
+    if (own.length === 0) continue;
+    for (const lang of langsOf(userId)) {
+      const alert = buildBudgetAlert(own, lang);
+      if (alert) budgetAlertByUser.set(alertFor(userId, lang), alert);
+    }
+  }
+
+  // ── Wochenend-Wetter (#659): freitags ein Blick auf Sa/So daheim ──
+  const weekendAlertByUser = new Map<string, WeekendAlert>();
+  const weekdayToday = new Date(`${today}T12:00:00Z`).getUTCDay();
+  const weekendHour = zurichHour();
+  if (
+    weekdayToday === 5 &&
+    weekendHour >= WEEKEND_SEND_HOUR_FROM &&
+    weekendHour <= WEEKEND_SEND_HOUR_TO
+  ) {
+    const saturday = shiftIsoDay(today, 1);
+    const sunday = shiftIsoDay(today, 2);
+    for (const home of homes) {
+      let weekendDays: TurnDay[];
+      try {
+        weekendDays = await dailyTurnFor(home.latitude, home.longitude, 4);
+      } catch {
+        continue; // Wetterdienst nicht erreichbar: nächsten Freitag wieder
+      }
+      for (const lang of langsOf(home.userId)) {
+        const alert = buildWeekendAlert(weekendDays, saturday, sunday, lang);
+        if (alert) weekendAlertByUser.set(alertFor(home.userId, lang), alert);
+      }
+    }
+  }
+
   const rainByTripId = new Map<number, number>();
   if (endedYesterday.length > 0) {
     // Regen pro gerundeter Koordinate nur einmal abrufen (Muster alertCache);
@@ -2256,6 +2492,71 @@ export async function checkAndNotify(): Promise<PushCheckResult> {
         await db
           .update(pushSubscriptions)
           .set({ lastEvePackKey: evePackAlert.key, lastNotifiedAt: new Date() })
+          .where(eq(pushSubscriptions.id, sub.id));
+      } else if (outcome === "gone") {
+        continue;
+      }
+    }
+
+    // ── Budget-Warnung (#665): 80 %/100 % der Reisekassen-Limite (Flag wantsTrips) ──
+    const budgetAlert = subscriptionWants(sub, "trip")
+      ? budgetAlertByUser.get(alertFor(sub.userId, subLang(sub.lang)))
+      : undefined;
+    if (budgetAlert && budgetAlert.key !== sub.lastBudgetKey) {
+      const budgetPayload = JSON.stringify({
+        title: budgetAlert.title,
+        body: budgetAlert.body,
+        url: "/tagebuch",
+        tag: "campmesser-budget",
+      });
+      const outcome = await sendTo(sub, budgetPayload);
+      if (outcome === "sent") {
+        result.sent += 1;
+        await logPushOnce(
+          sub.userId,
+          "trip",
+          budgetAlert.key,
+          budgetAlert.title,
+          budgetAlert.body,
+          "/tagebuch"
+        );
+        await db
+          .update(pushSubscriptions)
+          .set({ lastBudgetKey: budgetAlert.key, lastNotifiedAt: new Date() })
+          .where(eq(pushSubscriptions.id, sub.id));
+      } else if (outcome === "gone") {
+        continue;
+      }
+    }
+
+    // ── Wochenend-Wetter daheim (#659, Flag wantsWeather) ──
+    const weekendAlert = subscriptionWants(sub, "weather")
+      ? weekendAlertByUser.get(alertFor(sub.userId, subLang(sub.lang)))
+      : undefined;
+    if (weekendAlert && weekendAlert.key !== sub.lastWeekendKey) {
+      const weekendPayload = JSON.stringify({
+        title: weekendAlert.title,
+        body: weekendAlert.body,
+        url: "/wetter",
+        tag: "campmesser-weekend",
+      });
+      const outcome = await sendTo(sub, weekendPayload);
+      if (outcome === "sent") {
+        result.sent += 1;
+        await logPushOnce(
+          sub.userId,
+          "weather",
+          weekendAlert.key,
+          weekendAlert.title,
+          weekendAlert.body,
+          "/wetter"
+        );
+        await db
+          .update(pushSubscriptions)
+          .set({
+            lastWeekendKey: weekendAlert.key,
+            lastNotifiedAt: new Date(),
+          })
           .where(eq(pushSubscriptions.id, sub.id));
       } else if (outcome === "gone") {
         continue;

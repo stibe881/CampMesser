@@ -15,6 +15,7 @@
  */
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  AlertTriangle,
   ChevronDown,
   MapPin,
   Pencil,
@@ -59,6 +60,9 @@ import {
   currentTripStop,
 } from "@shared/tripStops";
 import { cn } from "@/lib/utils";
+
+/** Ab dieser Fahrzeit je Umzug meldet sich der Tagesetappen-Wächter (#653). */
+const LONG_LEG_SECONDS = 5 * 3600;
 
 /** Kilometer knapp formatieren: unter 10 km eine Nachkommastelle. */
 function fmtKm(distanceM: number): string {
@@ -658,13 +662,27 @@ export default function TripStops({
                         {(() => {
                           const leg = legs.get(stop.id);
                           return leg ? (
-                            <p className="text-xs text-muted-foreground">
-                              {ts.legLine(
-                                fmtKm(leg.distanceM),
-                                fmtDrive(leg.durationS)
+                            <>
+                              <p className="text-xs text-muted-foreground">
+                                {ts.legLine(
+                                  fmtKm(leg.distanceM),
+                                  fmtDrive(leg.durationS)
+                                )}
+                                {leg.estimated && ` (${ts.legEstimated})`}
+                              </p>
+                              {/* Tagesetappen-Wächter (#653): über 5 h am
+                                  Stück ist mit Kindern und Gespann kein
+                                  Vergnügen mehr – Zwischenhalt vorschlagen. */}
+                              {leg.durationS > LONG_LEG_SECONDS && (
+                                <p className="flex items-center gap-1 text-xs font-medium text-chart-1">
+                                  <AlertTriangle
+                                    className="h-3 w-3 shrink-0"
+                                    aria-hidden="true"
+                                  />
+                                  {ts.legTooLong(fmtDrive(leg.durationS))}
+                                </p>
                               )}
-                              {leg.estimated && ` (${ts.legEstimated})`}
-                            </p>
+                            </>
                           ) : null;
                         })()}
                       </div>

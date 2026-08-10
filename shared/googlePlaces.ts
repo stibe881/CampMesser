@@ -196,7 +196,8 @@ export function parseGooglePlaces(json: unknown): GooglePlace[] {
 /** Google-Typen auf unsere Ladenarten abbilden; null = passt zu keiner. */
 export function googleShopKind(
   types: readonly string[]
-): "supermarket" | "convenience" | "bakery" | "butcher" | null {
+): "supermarket" | "convenience" | "bakery" | "butcher" | "vet" | null {
+  if (types.indexOf("veterinary_care") !== -1) return "vet";
   if (types.indexOf("bakery") !== -1) return "bakery";
   if (types.indexOf("butcher_shop") !== -1) return "butcher";
   if (types.indexOf("convenience_store") !== -1) return "convenience";

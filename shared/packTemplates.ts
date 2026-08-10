@@ -1289,6 +1289,110 @@ export const packScenarios: PackScenario[] = [
     ],
   },
   {
+    id: "hund",
+    label: l4(
+      "Camping mit Hund",
+      "Camping avec chien",
+      "Campeggio con il cane",
+      "Camping with a dog"
+    ),
+    description: l4(
+      "Alles für den Vierbeiner – vom Napf bis zum Heimtierausweis.",
+      "Tout pour le compagnon à quatre pattes – de la gamelle au passeport.",
+      "Tutto per l'amico a quattro zampe – dalla ciotola al passaporto.",
+      "Everything for the four-legged friend – from bowl to pet passport."
+    ),
+    icon: "PawPrint",
+    items: [
+      ...basisAusruestung,
+      {
+        name: l4(
+          "Hundefutter für alle Tage",
+          "Croquettes pour tout le s\u00e9jour",
+          "Cibo per cane per tutti i giorni",
+          "Dog food for every day"
+        ),
+        category: cat.kueche,
+      },
+      {
+        name: l4(
+          "Futter- und Wassernapf",
+          "Gamelles (nourriture et eau)",
+          "Ciotole per cibo e acqua",
+          "Food and water bowls"
+        ),
+        category: cat.kueche,
+      },
+      {
+        name: l4(
+          "Leine & Laufleine mit Erdspiess",
+          "Laisse & longe avec piquet",
+          "Guinzaglio e cavo con picchetto",
+          "Leash & tie-out with ground stake"
+        ),
+        category: cat.sonstiges,
+      },
+      {
+        name: l4("Maulkorb", "Muselière", "Museruola", "Muzzle"),
+        category: cat.sonstiges,
+      },
+      {
+        name: l4(
+          "Hundebett oder Decke",
+          "Panier ou couverture",
+          "Cuccia o coperta",
+          "Dog bed or blanket"
+        ),
+        category: cat.schlafen,
+      },
+      {
+        name: l4(
+          "Kotbeutel",
+          "Sacs \u00e0 crottes",
+          "Sacchetti igienici",
+          "Poop bags"
+        ),
+        category: cat.hygiene,
+      },
+      {
+        name: l4(
+          "Zeckenzange & Pfoten-Erste-Hilfe",
+          "Pince \u00e0 tiques & premiers secours pour pattes",
+          "Pinza per zecche e primo soccorso per le zampe",
+          "Tick tweezers & paw first aid"
+        ),
+        category: cat.sicherheit,
+      },
+      {
+        name: l4(
+          "Heimtierausweis & Impfnachweis",
+          "Passeport animal & preuves de vaccination",
+          "Passaporto dell'animale e vaccinazioni",
+          "Pet passport & vaccination proof"
+        ),
+        category: cat.sonstiges,
+      },
+      {
+        name: l4(
+          "Hundehandtuch",
+          "Linge pour le chien",
+          "Asciugamano per il cane",
+          "Dog towel"
+        ),
+        category: cat.hygiene,
+      },
+      {
+        name: l4(
+          "Reise-Wassernapf f\u00fcr unterwegs",
+          "Gamelle de voyage pour la route",
+          "Ciotola da viaggio per strada",
+          "Travel water bowl for the road"
+        ),
+        category: cat.sonstiges,
+      },
+    ],
+  },
+  {
     id: "custom",
     label: l4(
       "Eigene Liste",

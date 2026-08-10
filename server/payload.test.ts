@@ -34,6 +34,8 @@ function vehicle(over: Partial<VehicleProfile>): VehicleProfile {
     tireFrontBar: null,
     tireRearBar: null,
     serviceDue: null,
+    wheelbaseCm: null,
+    trackCm: null,
     ...over,
   };
 }

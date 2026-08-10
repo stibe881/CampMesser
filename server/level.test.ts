@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
   parseBarInput,
+  parseCmInput,
   sanitizeBar,
+  sanitizeCm,
   sanitizeServiceDue,
   sanitizeVehicle,
+  wedgeHeightCm,
 } from "@shared/vehicles";
 import {
   bubblePosition,
@@ -153,5 +156,41 @@ describe("Reifendruck & Service (#481)", () => {
     expect(vehicle?.tireFrontBar).toBe(2.5);
     expect(vehicle?.tireRearBar).toBe(3);
     expect(vehicle?.serviceDue).toBe("2026-10-12");
+  });
+});
+
+describe("Keil-Rechner (#651)", () => {
+  it("rechnet tan(Winkel) mal Radabstand, auf halbe cm gerundet", () => {
+    // 1° auf 340 cm Radstand: tan(1°) × 340 ≈ 5.93 → 6 cm
+    expect(wedgeHeightCm(1, 340)).toBe(6);
+    // 2° auf 190 cm Spurweite: tan(2°) × 190 ≈ 6.63 → 6.5 cm
+    expect(wedgeHeightCm(2, 190)).toBe(6.5);
+    // 45° trifft den Abstand exakt
+    expect(wedgeHeightCm(45, 100)).toBe(100);
+  });
+
+  it("ignoriert das Vorzeichen – der Keil kommt unter die tiefe Seite", () => {
+    expect(wedgeHeightCm(-1, 340)).toBe(wedgeHeightCm(1, 340));
+  });
+
+  it("liefert null ohne erfassten Abstand und 0 im Lot", () => {
+    expect(wedgeHeightCm(3, null)).toBeNull();
+    expect(wedgeHeightCm(3, 0)).toBeNull();
+    expect(wedgeHeightCm(0, 340)).toBe(0);
+  });
+
+  it("säubert cm-Angaben und nimmt sie durch sanitizeVehicle mit", () => {
+    expect(sanitizeCm(339.6)).toBe(340);
+    expect(sanitizeCm(99999)).toBe(1500);
+    expect(sanitizeCm(-3)).toBeNull();
+    expect(parseCmInput("3'400")).toBe(1500);
+    expect(parseCmInput("190")).toBe(190);
+    expect(parseCmInput("abc")).toBeNull();
+    const vehicle = sanitizeVehicle(
+      { name: "Bus", kind: "bus", wheelbaseCm: 340, trackCm: 190 },
+      "v1"
+    );
+    expect(vehicle?.wheelbaseCm).toBe(340);
+    expect(vehicle?.trackCm).toBe(190);
   });
 });

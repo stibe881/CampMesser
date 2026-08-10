@@ -28,6 +28,48 @@ export type { ChangelogBlock };
 
 export const changelog: ChangelogBlock[] = [
   {
+    id: "2026-08-09.9",
+    date: "2026-08-09",
+    entries: [
+      l4(
+        "Der Reisepass kann mehr: Sichere ihn als Bild f\u00fcrs Teilen (das geht auch in der App sofort), unter den Platz-Stempeln sammelst du neu L\u00e4nder-Stempel mit Flagge \u2013 und eine neue Stufe wird gefeiert statt still gewechselt.",
+        "Le passeport sait en faire plus\u00a0: enregistre-le comme image \u00e0 partager (\u00e7a marche aussi tout de suite dans l\u2019app), sous les tampons des campings tu collectionnes d\u00e9sormais des tampons de pays avec drapeau \u2013 et chaque nouveau niveau est f\u00eat\u00e9 au lieu de changer en silence.",
+        "Il passaporto sa fare di pi\u00f9: salvalo come immagine da condividere (funziona subito anche nell\u2019app), sotto i timbri dei campeggi ora collezioni timbri dei paesi con bandiera \u2013 e ogni nuovo livello viene festeggiato invece di cambiare in silenzio.",
+        "The passport can do more: save it as an image to share (works instantly in the app too), below the campsite stamps you now collect country stamps with flags \u2013 and a new level gets celebrated instead of changing silently."
+      ),
+      l4(
+        "Am Platz: Die Wasserwaage rechnet dir die Keil-H\u00f6he aus (Radstand und Spurweite stehen neu am Fahrzeug-Profil), und das Energie-Budget sch\u00e4tzt aus dem kWh-Preis der S\u00e4ule deine Stromkosten pro Tag und Woche.",
+        "Sur place\u00a0: le niveau \u00e0 bulle calcule la hauteur de cale (empattement et voie figurent d\u00e9sormais dans le profil du v\u00e9hicule), et le budget d\u2019\u00e9nergie estime tes frais d\u2019\u00e9lectricit\u00e9 par jour et par semaine \u00e0 partir du prix du kWh de la borne.",
+        "In piazzola: la livella calcola l\u2019altezza del cuneo (passo e carreggiata ora stanno nel profilo del veicolo), e il bilancio energetico stima i costi della corrente al giorno e alla settimana dal prezzo al kWh della colonnina.",
+        "At the pitch: the spirit level calculates the wedge height for you (wheelbase and track width now live in the vehicle profile), and the energy budget estimates your power costs per day and week from the bollard\u2019s kWh price."
+      ),
+      l4(
+        "Beim Planen: Der Rundreise-Planer warnt vor Tagesetappen \u00fcber f\u00fcnf Stunden, und \u00abWohin im \u2026?\u00bb bei den Reisen erinnert dich, wo du in einem Monat schon einmal gl\u00fccklich warst.",
+        "En planifiant\u00a0: le planificateur de circuit signale les \u00e9tapes de plus de cinq heures, et \u00ab\u00a0O\u00f9 aller en \u2026\u00a0?\u00a0\u00bb dans les voyages te rappelle o\u00f9 tu as d\u00e9j\u00e0 \u00e9t\u00e9 heureux ce mois-l\u00e0.",
+        "Nella pianificazione: il pianificatore dei giri avvisa per tappe oltre le cinque ore, e \u00abDove andare a \u2026?\u00bb nei viaggi ti ricorda dove sei gi\u00e0 stato felice in quel mese.",
+        "When planning: the round-trip planner warns about driving days over five hours, and \u201cWhere to in \u2026?\u201d in your trips reminds you where you were already happy in that month."
+      ),
+      l4(
+        "F\u00fcr Hund und Land: Das L\u00e4nder-Nachschlagewerk kennt neu Ruhezeiten, Sonntags-Gepflogenheiten und Hunde-Regeln der wichtigsten L\u00e4nder, es gibt eine Packvorlage \u00abCamping mit Hund\u00bb \u2013 und die Einkaufs-Suche am Platz findet jetzt auch Tier\u00e4rzte.",
+        "Pour le chien et le pays\u00a0: le guide des pays conna\u00eet d\u00e9sormais les heures de repos, les usages du dimanche et les r\u00e8gles pour chiens des principaux pays, il y a un mod\u00e8le de liste \u00ab\u00a0Camping avec chien\u00a0\u00bb \u2013 et la recherche de commerces pr\u00e8s du camping trouve aussi les v\u00e9t\u00e9rinaires.",
+        "Per cane e paese: il prontuario dei paesi ora conosce orari di riposo, usanze domenicali e regole per i cani dei paesi principali, c\u2019\u00e8 un modello \u00abCampeggio con il cane\u00bb \u2013 e la ricerca dei negozi vicino al campeggio trova anche i veterinari.",
+        "For dog and country: the country reference now knows quiet hours, Sunday customs and dog rules of the main countries, there is a \u201cCamping with a dog\u201d packing template \u2013 and the shop search near the site now also finds vets."
+      ),
+      l4(
+        "Unterwegs pers\u00f6nlicher: Geburtstage der Familie erscheinen w\u00e4hrend der Reise in der Heute-Ansicht, das Tages-Journal tr\u00e4gt eine Stimmung \u2013 und die Merkorte lassen sich nach Name und Notiz durchsuchen.",
+        "Plus personnel en route\u00a0: les anniversaires de la famille apparaissent dans la vue Aujourd\u2019hui pendant le voyage, le journal du jour porte une humeur \u2013 et les lieux retenus se cherchent par nom et note.",
+        "Pi\u00f9 personale in viaggio: i compleanni della famiglia appaiono nella vista Oggi durante il viaggio, il diario del giorno porta un umore \u2013 e i luoghi salvati si cercano per nome e nota.",
+        "More personal on the road: family birthdays appear in the Today view during the trip, the daily journal carries a mood \u2013 and saved places can be searched by name and note."
+      ),
+      l4(
+        "Zwei neue Mitteilungen: Freitags ein Blick aufs Wochenend-Wetter daheim (nur, wenn es sich lohnt) \u2013 und die Reisekasse meldet sich bei 80 % und beim Erreichen der Limite.",
+        "Deux nouvelles notifications\u00a0: le vendredi, un aper\u00e7u de la m\u00e9t\u00e9o du week-end \u00e0 la maison (seulement si \u00e7a en vaut la peine) \u2013 et la caisse de voyage se manifeste \u00e0 80\u00a0% et \u00e0 la limite.",
+        "Due nuove notifiche: il venerd\u00ec uno sguardo al meteo del weekend a casa (solo se ne vale la pena) \u2013 e la cassa di viaggio si fa sentire all\u201980\u00a0% e al raggiungimento del limite.",
+        "Two new notifications: on Fridays a look at the weekend weather at home (only when it\u2019s worth it) \u2013 and the travel fund speaks up at 80% and when the limit is reached."
+      ),
+    ],
+  },
+  {
     id: "2026-08-09.8",
     date: "2026-08-09",
     entries: [
@@ -108,60 +150,6 @@ export const changelog: ChangelogBlock[] = [
         "Finement réglé : ta taille de police vaut maintenant sur tous les appareils, la liste de bagages affiche une barre de progression par personne, six nouvelles recettes en une casserole t'attendent dans le livre de recettes – et si « réduire les animations » est activé dans le système, l'app reste calme, sans animations.",
         "Messo a punto: la tua dimensione dei caratteri ora vale su tutti i dispositivi, la lista bagagli mostra una barra di avanzamento per persona, sei nuove ricette in pentola unica ti aspettano nel ricettario – e chi ha attivato «riduci animazioni» nel sistema ha un'app tranquilla, senza animazioni.",
         'Fine-tuned: your font size now applies on all devices, the packing list shows a progress bar per person, six new one-pot recipes await in the recipe book – and if "reduce motion" is on in your system, the app stays calm without animations.'
-      ),
-    ],
-  },
-  {
-    id: "2026-08-09.6",
-    date: "2026-08-09",
-    entries: [
-      l4(
-        "Kilometer heissen jetzt Strassen-Kilometer: Rundreise-Statistik, Merkorte-Liste, Zeltplatz-Favoriten und Platz-Vergleich rechnen über die Strasse (OpenStreetMap-Routing) statt Luftlinie – ohne Netz bleibt die Luftlinie, und wo geschätzt wird, steht es dabei.",
-        "Les kilomètres sont désormais des kilomètres par la route : statistiques d’itinérance, liste des lieux repérés, emplacements favoris et comparaison d’emplacements calculent par la route (routage OpenStreetMap) au lieu du vol d’oiseau – hors ligne, le vol d’oiseau reste, et quand c’est estimé, c’est indiqué.",
-        "I chilometri ora sono chilometri su strada: statistiche degli itinerari, lista dei luoghi salvati, piazzole preferite e confronto piazzole calcolano su strada (routing OpenStreetMap) invece che in linea d’aria – offline resta la linea d’aria, e dove si stima, è indicato.",
-        "Kilometres are now road kilometres: round-trip statistics, saved places list, favourite spots and the spot comparison calculate by road (OpenStreetMap routing) instead of as the crow flies – offline the straight line remains, and where estimated, it says so."
-      ),
-      l4(
-        "Neue Reiseart «Freies Campen»: Zelten ohne Campingplatz. Die Heute-Ansicht stellt Landesregeln, Trinkwasser-Rechner und Feuer-Ratgeber nach vorn, und die neue Packvorlage denkt an Wasserfilter, Schäufelchen und Abfallsäcke – alles wieder mitnehmen.",
-        "Nouveau type de voyage « Camping sauvage » : camper sans terrain. La vue Aujourd’hui met en avant les règles des pays, le calculateur d’eau potable et le guide du feu, et le nouveau modèle de liste pense au filtre à eau, à la petite pelle et aux sacs poubelle – tout remporter.",
-        "Nuovo tipo di viaggio «Campeggio libero»: in tenda senza campeggio. La vista Oggi mette in primo piano regole dei paesi, calcolatore dell’acqua potabile e guida al fuoco, e il nuovo modello di lista pensa a filtro dell’acqua, paletta e sacchi per i rifiuti – riportare tutto.",
-        "New trip type “Wild camping”: tenting without a campsite. The Today view brings country rules, the drinking water calculator and the fire guide to the front, and the new packing template thinks of a water filter, trowel and rubbish bags – pack everything out."
-      ),
-      l4(
-        "Vergangene Aufenthalte lassen sich jetzt archivieren: Sie verschwinden aus der Liste in einen eigenen Archiv-Abschnitt, bleiben aber in Statistik, Reisepass und Suche erhalten – und kommen per Klick zurück.",
-        "Les séjours passés peuvent désormais être archivés : ils quittent la liste pour une section d’archives dédiée, mais restent dans les statistiques, le passeport et la recherche – et reviennent d’un clic.",
-        "I soggiorni passati ora si possono archiviare: spariscono dalla lista in una sezione archivio dedicata, ma restano in statistiche, passaporto e ricerca – e tornano con un clic.",
-        "Past stays can now be archived: they leave the list for a dedicated archive section but remain in statistics, passport and search – and come back with one click."
-      ),
-      l4(
-        "Ein Bild sagt mehr: Jeder Merkort und jeder Tag im Reise-Journal kann jetzt EIN Foto tragen – die Bucht aus dem Prospekt am Stern auf der Karte, das Gipfelfoto am Tageseintrag.",
-        "Une image en dit plus : chaque lieu repéré et chaque jour du journal de voyage peut désormais porter UNE photo – la crique du prospectus sur l’étoile de la carte, la photo du sommet sur l’entrée du jour.",
-        "Un’immagine dice di più: ogni luogo salvato e ogni giorno del diario di viaggio ora può portare UNA foto – la baia del dépliant sulla stella della mappa, la foto della vetta sulla voce del giorno.",
-        "A picture says more: every saved place and every day in the trip journal can now carry ONE photo – the cove from the brochure on the map star, the summit photo on the day entry."
-      ),
-      l4(
-        "Orte aus anderen Karten-Apps landen per Teilen-Menü direkt als Merkort: Die App liest Koordinaten aus geo:-Links, Google Maps und OpenStreetMap und speichert den Punkt mit einem Klick.",
-        "Les lieux d’autres apps de cartes arrivent via le menu Partager directement comme lieu repéré : l’app lit les coordonnées des liens geo:, de Google Maps et d’OpenStreetMap et enregistre le point d’un clic.",
-        "I luoghi di altre app di mappe arrivano dal menu Condividi direttamente come luogo salvato: l’app legge le coordinate dai link geo:, da Google Maps e da OpenStreetMap e salva il punto con un clic.",
-        "Places from other map apps arrive via the share menu directly as a saved place: the app reads coordinates from geo: links, Google Maps and OpenStreetMap and saves the point with one click."
-      ),
-      l4(
-        "Die Etappen sind überall angekommen: Beim Erfassen schlagen Favoriten und Merkorte den Ort vor, verschobene Etappen nehmen auf Wunsch die folgenden mit, der Vorabend-Hinweis kennt den Weiterzug, die Suche findet Etappen, und die Statistik zählt Etappen-Kilometer und Länder-Nächte.",
-        "Les étapes sont partout : à la saisie, favoris et lieux repérés proposent le lieu, les étapes déplacées emmènent sur demande les suivantes, l’avis de la veille connaît le départ, la recherche trouve les étapes, et les statistiques comptent kilomètres d’étapes et nuits par pays.",
-        "Le tappe sono arrivate ovunque: nell’inserimento preferiti e luoghi salvati propongono il posto, le tappe spostate portano con sé su richiesta le successive, l’avviso serale conosce la partenza, la ricerca trova le tappe, e le statistiche contano chilometri di tappa e notti per paese.",
-        "Stages have arrived everywhere: when entering, favourites and saved places suggest the location, moved stages take the following ones along on request, the evening notice knows about moving on, search finds stages, and statistics count stage kilometres and country nights."
-      ),
-      l4(
-        "Drei neue Länder im Regel-Katalog – Tschechien, Polen und Ungarn mit E-Vignetten-Fallen und Camping-Hinweisen – plus eine neue Karte «Motorrad & Velo» für alle 18 Länder. Und die SOS-Seite kennt jetzt die Pannenhilfe.",
-        "Trois nouveaux pays dans le catalogue des règles – Tchéquie, Pologne et Hongrie avec pièges de la vignette électronique et conseils camping – plus une nouvelle carte « Moto & vélo » pour les 18 pays. Et la page SOS connaît désormais le dépannage.",
-        "Tre nuovi paesi nel catalogo delle regole – Cechia, Polonia e Ungheria con trappole della vignetta elettronica e consigli campeggio – più una nuova scheda «Moto e bici» per tutti i 18 paesi. E la pagina SOS ora conosce il soccorso stradale.",
-        "Three new countries in the rules catalogue – Czechia, Poland and Hungary with e-vignette traps and camping notes – plus a new “Motorbike & bike” card for all 18 countries. And the SOS page now knows roadside assistance."
-      ),
-      l4(
-        "Rund ums Wetter: Das Reise-Cockpit zeigt eine Wetterampel über deine Reisetage, die Heute-Ansicht nennt Schneefallgrenze und dicke Luft, die Schnell-Ausgabe rechnet das Tagesbudget vor – und auf dem iPhone sind die zu breiten Datumsfelder repariert.",
-        "Autour de la météo : le cockpit du voyage montre un feu météo sur tes jours de voyage, la vue Aujourd’hui indique la limite pluie-neige et l’air pollué, la saisie rapide calcule le budget du jour – et sur iPhone, les champs de date trop larges sont réparés.",
-        "Intorno al meteo: il cockpit del viaggio mostra un semaforo meteo sui tuoi giorni di viaggio, la vista Oggi indica il limite delle nevicate e l’aria pesante, la spesa rapida calcola il budget del giorno – e su iPhone i campi data troppo larghi sono riparati.",
-        "Around the weather: the trip cockpit shows a weather light across your trip days, the Today view names the snow line and heavy air, the quick expense shows the day budget – and on iPhone the too-wide date fields are fixed."
       ),
     ],
   },

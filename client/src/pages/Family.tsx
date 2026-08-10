@@ -5,6 +5,7 @@ import { ShareExpiryNote, ShareExpirySelect } from "@/components/ShareExpiry";
 import type { ShareExpiryDays } from "@shared/sharing";
 import { Link } from "wouter";
 import {
+  Cake,
   Award,
   BadgeCheck,
   Check,
@@ -1511,7 +1512,7 @@ function ChildBadgeGallery({ childId }: { childId: number }) {
 function ChildrenSection({
   children: kids,
 }: {
-  children: { id: number; name: string }[];
+  children: { id: number; name: string; birthday: string | null }[];
 }) {
   const ask = useConfirm();
   const t = useT();
@@ -1539,6 +1540,10 @@ function ChildrenSection({
   const removeMutation = trpc.family.children.remove.useMutation({
     onSuccess: () => utils.family.children.list.invalidate(),
     onError: () => toast.error(t.common.deleteFailed),
+  });
+  const birthdayMutation = trpc.family.children.setBirthday.useMutation({
+    onSuccess: () => utils.family.children.list.invalidate(),
+    onError: () => toast.error(t.common.saveFailed),
   });
 
   return (
@@ -1625,6 +1630,27 @@ function ChildrenSection({
                 </>
               )}
             </div>
+            {/* Geburtstag (#656): fällt er in eine Reise, sagt es die
+                Heute-Ansicht – Kuchen einplanen. */}
+            <label className="mb-3 flex items-center gap-2 text-xs text-muted-foreground">
+              <Cake
+                className="h-3.5 w-3.5 shrink-0 text-chart-1"
+                aria-hidden="true"
+              />
+              {t.family.birthdayLabel}
+              <Input
+                type="date"
+                className="h-8 w-40"
+                value={child.birthday ?? ""}
+                aria-label={t.family.birthdayAria(child.name)}
+                onChange={e =>
+                  birthdayMutation.mutate({
+                    id: child.id,
+                    birthday: e.target.value || null,
+                  })
+                }
+              />
+            </label>
             <ChildBadgeGallery childId={child.id} />
           </div>
         ))}

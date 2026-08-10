@@ -522,6 +522,32 @@ export const familyRouters = {
        * `false` steht, verhindert den Familien-Stempel nicht, wenn er
        * bei einer Reise fehlt (z. B. das Göttikind).
        */
+      /** Geburtstag (#656): fällt er in eine Reise, sagt es die Heute-Ansicht. */
+      setBirthday: protectedProcedure
+        .input(
+          z.object({
+            id: z.number().int().positive(),
+            birthday: z
+              .string()
+              .regex(/^\d{4}-\d{2}-\d{2}$/)
+              .nullable(),
+          })
+        )
+        .mutation(async ({ ctx, input }) => {
+          const child = await db.getFamilyChild(input.id, ctx.user.id);
+          if (!child) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Person nicht gefunden.",
+            });
+          }
+          await db.setFamilyChildBirthday(
+            input.id,
+            ctx.user.id,
+            input.birthday
+          );
+          return { success: true } as const;
+        }),
       setFamilyMember: protectedProcedure
         .input(
           z.object({

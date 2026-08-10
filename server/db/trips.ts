@@ -798,13 +798,16 @@ export async function upsertTripJournalEntry(
   tripId: number,
   day: string,
   text: string,
-  createdByUserId: number | null
+  createdByUserId: number | null,
+  /** Stimmungs-Emoji (#661); undefined = Feld nicht anfassen. */
+  mood?: string | null
 ) {
   const db = requireDb(await getDb());
+  const moodSet = mood === undefined ? {} : { mood };
   await db
     .insert(tripJournal)
-    .values({ tripId, day, text, createdByUserId })
-    .onDuplicateKeyUpdate({ set: { text, createdByUserId } });
+    .values({ tripId, day, text, createdByUserId, ...moodSet })
+    .onDuplicateKeyUpdate({ set: { text, createdByUserId, ...moodSet } });
 }
 /** Journal-Eintrag löschen – nur NACH einer canAccessTrip-Prüfung im Router. */
 export async function deleteTripJournalEntry(tripId: number, day: string) {

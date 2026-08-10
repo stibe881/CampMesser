@@ -9,6 +9,7 @@ import {
   passportRank,
   passportSummary,
   stampLook,
+  startedTrips,
   tripCountForTraveller,
   tripsForFamily,
   tripsForTraveller,
@@ -49,6 +50,26 @@ describe("Kinder-Reisepass", () => {
     expect(stamps[0].nights).toBe(2 + 3 + 1);
     expect(stamps[0].firstVisit).toBe("2024-07-01");
     expect(stamps[0].lastVisit).toBe("2026-07-01");
+  });
+
+  it("stempelt keine GEPLANTEN Reisen (Nutzermeldung 09.08.2026)", () => {
+    // Eine laufende Reise zählt (wer dort ist, war dort) – eine, die
+    // erst morgen beginnt, nicht.
+    const reisen = [
+      trip("Camping Sarnen", "2026-07-01", "2026-07-05"),
+      trip("Camping Thun", "2026-08-08", "2026-08-12"),
+      trip("Camping Elba", "2026-08-10", "2026-08-20"),
+      trip("Camping Umag", "2026-09-01", "2026-09-08"),
+    ];
+    const begonnen = startedTrips(reisen, "2026-08-09");
+    expect(begonnen.map(t => t.placeName)).toEqual([
+      "Camping Sarnen",
+      "Camping Thun",
+    ]);
+    // Am Anreisetag selbst gilt die Reise als begonnen
+    expect(startedTrips(reisen, "2026-08-10").map(t => t.placeName)).toContain(
+      "Camping Elba"
+    );
   });
 
   it("merkt sich den ersten Besuch, auch wenn er später eingetragen wurde", () => {

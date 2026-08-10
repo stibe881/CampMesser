@@ -222,6 +222,20 @@ export function tripsForTraveller(
   return trips.filter(trip => wasAlong(lookup, childId, trip.id));
 }
 
+/**
+ * Nur Reisen, die am Stichtag schon BEGONNEN haben – geplante Reisen
+ * stempeln nicht (Nutzermeldung 09.08.2026: «Es sind bereits Stempel
+ * drauf von Reisen, die noch nicht gemacht wurden»). Ein Stempel steht
+ * für einen Besuch, nicht für einen Vorsatz; eine laufende Reise zählt,
+ * denn wer dort ist, war dort.
+ */
+export function startedTrips<T extends TripLike>(
+  trips: readonly T[],
+  today: string
+): T[] {
+  return trips.filter(trip => trip.startDate <= today);
+}
+
 /** Auf wie vielen Reisen war die Person dabei? Für die Personen-Auswahl. */
 export function tripCountForTraveller(
   trips: readonly PassportTrip[],

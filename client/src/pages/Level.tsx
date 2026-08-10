@@ -14,7 +14,12 @@ import {
   type LevelProfile,
   type Tilt,
 } from "@shared/level";
-import { findVehicle, kgToInput, type VehicleProfile } from "@shared/vehicles";
+import {
+  findVehicle,
+  kgToInput,
+  wedgeHeightCm,
+  type VehicleProfile,
+} from "@shared/vehicles";
 import { fmtMedium } from "@/lib/dateFormat";
 import { type Language } from "@shared/i18n";
 import { useI18n } from "@/i18n";
@@ -388,6 +393,34 @@ export default function LevelPage() {
                   </p>
                 </div>
               </div>
+
+              {/* Keil-Rechner (#651): tan(Winkel) × Radstand/Spurweite des
+                  Profils = Keil-Höhe unter der tiefen Seite. Erst ab einem
+                  halben cm – darunter ist es Zittern, kein Gefälle. */}
+              {tilt &&
+                vehicle &&
+                (() => {
+                  const pitchCm = wedgeHeightCm(
+                    tilt.pitch,
+                    vehicle.wheelbaseCm
+                  );
+                  const rollCm = wedgeHeightCm(tilt.roll, vehicle.trackCm);
+                  const parts = [
+                    pitchCm !== null && pitchCm >= 0.5
+                      ? t.level.wedgePitch(kgToInput(pitchCm, lang))
+                      : null,
+                    rollCm !== null && rollCm >= 0.5
+                      ? t.level.wedgeRoll(kgToInput(rollCm, lang))
+                      : null,
+                  ].filter(Boolean);
+                  if (parts.length === 0) return null;
+                  return (
+                    <p className="mt-3 w-full rounded-lg bg-accent/50 px-4 py-2.5 text-center text-sm">
+                      <span className="font-medium">{t.level.wedgeTitle}</span>{" "}
+                      {parts.join(" · ")}
+                    </p>
+                  );
+                })()}
 
               {/* Status und Tipps */}
               {advice && (

@@ -22,9 +22,10 @@
  *
  * Der Pass ist zum Herzeigen gedacht, deshalb ist er auch druckbar.
  */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { fmtPlain } from "@/lib/dateFormat";
-import { Check, Plus, Stamp, Users } from "lucide-react";
+import { Check, ImageDown, Plus, Sparkles, Stamp, Users } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import LoginPrompt from "@/components/LoginPrompt";
 import { Button } from "@/components/ui/button";
@@ -39,11 +40,35 @@ import { cn } from "@/lib/utils";
 import { LOCALE_TAGS, pick } from "@shared/i18n";
 import {
   passportSummary,
+  startedTrips,
   tripsForFamily,
   tripsForTraveller,
   type PassportStamp,
   type PassportTrip,
 } from "@shared/passport";
+import { localDay } from "@shared/localDate";
+import { visitedCountryRows } from "@/lib/tripCountries";
+
+/**
+ * Merker der Stufen-Feier (#648): höchste bereits gefeierte Stufe
+ * (PASSPORT_RANKS.places) je Pass – «0» = Familienpass, sonst Personen-Id.
+ * Bewusst NUR im localStorage: Die Feier ist ein Moment am Bildschirm,
+ * kein Kontostand.
+ */
+const RANK_SEEN_KEY = "campmesser.passRankSeen";
+
+function loadRankSeen(): Record<string, number> {
+  try {
+    const parsed: unknown = JSON.parse(
+      localStorage.getItem(RANK_SEEN_KEY) ?? "{}"
+    );
+    return parsed && typeof parsed === "object"
+      ? (parsed as Record<string, number>)
+      : {};
+  } catch {
+    return {};
+  }
+}
 
 /** Ein Stempel als SVG – Form und Farbe kommen aus dem Platznamen. */
 function StampMark({ stamp, label }: { stamp: PassportStamp; label: string }) {
@@ -172,12 +197,16 @@ export default function PassportPage() {
    */
   const trips: PassportTrip[] = useMemo(
     () =>
-      (tripsQuery.data ?? []).map(trip => ({
-        id: trip.id,
-        placeName: trip.spotName || trip.location || trip.title || null,
-        startDate: trip.startDate,
-        endDate: trip.endDate,
-      })),
+      // Geplante Reisen stempeln nicht – nur, was schon begonnen hat.
+      startedTrips(
+        (tripsQuery.data ?? []).map(trip => ({
+          id: trip.id,
+          placeName: trip.spotName || trip.location || trip.title || null,
+          startDate: trip.startDate,
+          endDate: trip.endDate,
+        })),
+        localDay()
+      ),
     [tripsQuery.data]
   );
 
@@ -198,8 +227,108 @@ export default function PassportPage() {
     [travellerTrips]
   );
 
+  /**
+   * Länder-Stempel (#647): dieselbe Länder-Raterei wie in der Statistik
+   * (#510) – der Platzname nennt das Land («Camping Elba») oder eben
+   * nicht («Thun»); Unzuordenbares bleibt ehrlich weg.
+   */
+  const countries = useMemo(
+    () =>
+      visitedCountryRows(
+        travellerTrips.map(trip => ({
+          title: null,
+          location: trip.placeName ?? null,
+          startDate: trip.startDate,
+          endDate: trip.endDate,
+        }))
+      ).rows,
+    [travellerTrips]
+  );
+
   const person = people.find(p => p.id === personId) ?? null;
   const personName = person ? person.name : pp.family;
+
+  /**
+   * Stufen-Feier (#648): Beim ersten Besuch NACH einer neuen Stufe gibt
+   * es einen kleinen Feier-Kasten. Der Merker wird sofort nachgezogen –
+   * die Feier bleibt für diesen Besuch stehen (State) und kommt beim
+   * nächsten Öffnen nicht wieder. Beim allerersten Besuch (kein Merker)
+   * wird still gemerkt statt gefeiert – ein alter Pass ist keine Neuigkeit.
+   */
+  const [celebratedRank, setCelebratedRank] = useState<string | null>(null);
+  const rankPlaces = summary.rank?.places ?? 0;
+  useEffect(() => {
+    if (tripsQuery.isLoading) return;
+    const key = String(personId ?? 0);
+    const seen = loadRankSeen();
+    const previous = seen[key];
+    if (previous !== undefined && rankPlaces > previous && summary.rank) {
+      setCelebratedRank(pick(summary.rank.title, lang));
+    } else {
+      setCelebratedRank(null);
+    }
+    if (previous === undefined || rankPlaces > previous) {
+      try {
+        localStorage.setItem(
+          RANK_SEEN_KEY,
+          JSON.stringify({ ...seen, [key]: rankPlaces })
+        );
+      } catch {
+        // Voller Speicher: dann feiert der Pass beim nächsten Mal eben noch einmal.
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [personId, rankPlaces, tripsQuery.isLoading]);
+
+  /**
+   * Pass als Bild (#646): Canvas-Zeichnung wie beim Jahresrückblick (#91),
+   * dann Web Share API mit Datei – ohne sie ein a[download]-Link. In der
+   * nativen App ist das der Weg zum Ausdruck, der OHNE App-Update geht.
+   */
+  const shareImage = async () => {
+    try {
+      const { drawPassport } = await import("@/lib/passportImage");
+      const canvas = document.createElement("canvas");
+      drawPassport(
+        canvas,
+        summary.stamps,
+        {
+          subtitle: `${pp.title} · ${personName}`,
+          rankTitle: summary.rank ? pick(summary.rank.title, lang) : pp.noRank,
+          summary: pp.summary(summary.places, summary.nights),
+          nights: pp.nights,
+        },
+        lang
+      );
+      const blob = await new Promise<Blob | null>(resolve =>
+        canvas.toBlob(resolve, "image/png")
+      );
+      if (!blob) throw new Error("Canvas lieferte kein Bild");
+      const file = new File([blob], "reisekompass-pass.png", {
+        type: "image/png",
+      });
+      if (
+        typeof navigator.canShare === "function" &&
+        navigator.canShare({ files: [file] })
+      ) {
+        await navigator.share({
+          files: [file],
+          title: `ReiseKompass · ${pp.title}`,
+        });
+      } else {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = file.name;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast.success(pp.imageSaved);
+      }
+    } catch (error) {
+      if ((error as DOMException)?.name === "AbortError") return;
+      toast.error(pp.imageFailed);
+    }
+  };
 
   if (loading) {
     return (
@@ -322,6 +451,20 @@ export default function PassportPage() {
         )}
       </div>
 
+      {/* Stufen-Feier (#648): einmal pro neuer Stufe und Gerät */}
+      {celebratedRank && (
+        <p
+          role="status"
+          className="mt-3 flex items-center gap-2 rounded-lg border border-chart-1/50 bg-chart-1/10 px-3 py-2 text-sm font-medium print:hidden"
+        >
+          <Sparkles
+            className="h-4 w-4 shrink-0 text-chart-1"
+            aria-hidden="true"
+          />
+          {pp.rankReached(celebratedRank)}
+        </p>
+      )}
+
       {tripsQuery.isLoading ? (
         <Skeleton className="mt-6 h-40 w-full rounded-lg" />
       ) : summary.stamps.length === 0 ? (
@@ -362,6 +505,33 @@ export default function PassportPage() {
         </ul>
       )}
 
+      {/* Länder-Stempel (#647): ein Stempel pro besuchtem Land */}
+      {countries.length > 0 && (
+        <section className="mt-6" aria-label={pp.countriesTitle}>
+          <p className="text-xs font-medium text-muted-foreground">
+            {pp.countriesTitle}
+          </p>
+          <ul className="mt-1.5 flex flex-wrap gap-2">
+            {countries.map(row => (
+              <li
+                key={row.code}
+                className="flex items-center gap-1.5 rounded-full border-2 border-dashed border-primary/40 px-3 py-1 text-sm"
+                aria-label={pp.countryStampAria(
+                  pick(row.name, lang),
+                  row.trips
+                )}
+              >
+                <span aria-hidden="true">{row.flag}</span>
+                <span className="font-medium">{pick(row.name, lang)}</span>
+                <span className="text-xs text-muted-foreground">
+                  {row.trips}× · {pp.nights(row.nights)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       {summary.stamps.length > 0 && (
         <>
           <PrintButton
@@ -370,6 +540,15 @@ export default function PassportPage() {
             variant="outline"
             className="mt-6 w-full print:hidden"
           />
+          <Button
+            variant="outline"
+            size="default"
+            className="mt-2 w-full print:hidden"
+            onClick={() => void shareImage()}
+          >
+            <ImageDown className="mr-1.5 h-4 w-4" aria-hidden="true" />
+            {pp.shareImage}
+          </Button>
           {printNeedsBrowserTab() && (
             <p className="mt-1.5 text-xs text-muted-foreground print:hidden">
               {t.packListPrint.printBrowserHint}

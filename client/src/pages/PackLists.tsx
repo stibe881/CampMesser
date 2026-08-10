@@ -29,6 +29,7 @@ import {
   Umbrella,
   Users,
   X,
+  PawPrint,
 } from "lucide-react";
 import QRCode from "qrcode";
 import { toast } from "sonner";
@@ -69,6 +70,7 @@ const scenarioIcons: Record<
   staedtereise: Building2,
   strand: Umbrella,
   wintersport: Snowflake,
+  hund: PawPrint,
   custom: ListPlus,
 };
 
